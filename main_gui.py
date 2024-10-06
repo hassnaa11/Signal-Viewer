@@ -9,43 +9,18 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QTimer  # For QTimer
-from PyQt5.QtWidgets import QGridLayout  # For QGridLayout
-
 import matplotlib
 import matplotlib.pyplot as plt
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QGridLayout
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT as Navi
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-#import pyedflib
+import pyedflib 
+from PyQt5.QtCore import QTimer
 import pyqtgraph as pg
-import sys  # For system-level functions
-import csv
+import numpy as np
 
 
-'''class MatplotlibCanvas(FigureCanvas):
-    def __init__(self, parent=None, dpi=120):
-        fig = Figure(dpi=dpi)
-        self.axes = fig.add_subplot(111)
-        super(MatplotlibCanvas, self).__init__(fig)
-        fig.tight_layout()
-
-    def plot(self, signal_data):
-        # Clear the previous plot
-        self.axes.clear()
-        
-        # Plot each signal on the same axes
-        for signal in signal_data:
-            self.axes.plot(signal)  # Plot the signal data
-        
-        # Set plot labels and title
-        self.axes.set_title('Signal Plot')
-        self.axes.set_xlabel('Time')
-        self.axes.set_ylabel('Amplitude')
-        
-        # Redraw the canvas to update the figure
-        self.draw()'''
        
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -78,16 +53,14 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         spacerItem = QtWidgets.QSpacerItem(5, 5, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem)
-        #self.canv = MatplotlibCanvas(self)
+      
        
    
-        self.splitter = QtWidgets.QSplitter(self.centralwidget)
-        self.splitter.setOrientation(QtCore.Qt.Horizontal)
-        self.splitter.setObjectName("splitter")
-        self.graph1Widget = QtWidgets.QWidget(self.splitter)
-        self.graph1Widget.setEnabled(True)  # Enable the widget
         
+        self.graph1Widget = QtWidgets.QWidget(self.centralwidget)
+        self.graph1Widget.setEnabled(False)  # Enable the widget
 
+        self.horizontalLayout_2.addWidget(self.graph1Widget)
 
         self.graph1Widget.num = 0
         self.graph1Widget.graph = pg.PlotWidget(self.graph1Widget)
@@ -98,12 +71,9 @@ class Ui_MainWindow(object):
         #self.graph1Widget.timer.timeout.connect(self.update_plot)
         self.graph1Widget.timer.start(100)
         self.graph1Widget.show()
-
         
-        ''' self.graph1Layout = QtWidgets.QVBoxLayout(self.graph1Widget)
-        self.canv = MatplotlibCanvas(self.graph1Widget)
-        self.graph1Layout.addWidget(self.canv)'''
-    
+        #self.canv = MatplotlibCanvas(self.graph1Widget)
+        #self.graph1Layout.addWidget(self.canv)
 
 
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
@@ -121,8 +91,23 @@ class Ui_MainWindow(object):
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
 "widget-shadow: 2px 2px 5px rgb(0, 0, 0);")
         self.graph1Widget.setObjectName("graph1Widget")
+
+
+        
+
     
-        self.horizontalLayout_2.addWidget(self.splitter)
+
+        
+
+
+
+        
+
+
+
+
+
+        
         self.frame = QtWidgets.QFrame(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
@@ -190,11 +175,11 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 15px;")
+"border-radius: 10px;")
         self.play_button_graph_2.setText("")
-        self.icon = QtGui.QIcon()
-        self.icon.addPixmap(QtGui.QPixmap(".\images\icons8-play-32.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
-        self.play_button_graph_2.setIcon(self.icon)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("../../icons/icons8-play-90.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        self.play_button_graph_2.setIcon(icon)
         self.play_button_graph_2.setObjectName("play_button_graph_2")
         self.horizontalLayout_3.addWidget(self.play_button_graph_2)
         self.stop_button_graph_2 = QtWidgets.QPushButton(self.centralwidget)
@@ -204,11 +189,11 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 15px;")
+"border-radius: 10px;")
         self.stop_button_graph_2.setText("")
-        self.icon1 = QtGui.QIcon()
-        self.icon1.addPixmap(QtGui.QPixmap(".\images\icons8-pause-button-32.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
-        self.stop_button_graph_2.setIcon(self.icon1)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap("../../icons/icons8-stop-90.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        self.stop_button_graph_2.setIcon(icon1)
         self.stop_button_graph_2.setObjectName("stop_button_graph_2")
         self.horizontalLayout_3.addWidget(self.stop_button_graph_2)
         self.pause_button_graph_2 = QtWidgets.QPushButton(self.centralwidget)
@@ -218,7 +203,7 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 15px;")
+"border-radius: 10px;")
         self.pause_button_graph_2.setText("")
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap("../../icons/icons8-pause-90.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
@@ -232,7 +217,7 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 15px;")
+"border-radius: 10px;")
         self.zoom_in_button_graph_2.setText("")
         icon3 = QtGui.QIcon()
         icon3.addPixmap(QtGui.QPixmap("../../icons/icons8-zoom-in-64 (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
@@ -246,8 +231,8 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 15px;")
-        self.connect_online_button_graph_2.setText("Connect Online")
+"border-radius: 10px;")
+        self.connect_online_button_graph_2.setText("")
         icon4 = QtGui.QIcon()
         icon4.addPixmap(QtGui.QPixmap("../../icons/icons8-zoom-out-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.connect_online_button_graph_2.setIcon(icon4)
@@ -288,6 +273,24 @@ class Ui_MainWindow(object):
 "widget-shadow: 2px 2px 5px rgb(0, 0, 0);")
         self.graph1Widget_3.setObjectName("graph1Widget_3")
         self.horizontalLayout_6.addWidget(self.graph1Widget_3)
+
+
+
+        self.graph1Widget_3.num = 0
+        self.graph1Widget_3.graph = pg.PlotWidget(self.graph1Widget_3)
+        self.graph1Widget_3.grid_graph_3 = QGridLayout()
+        self.graph1Widget_3.timer = QTimer()
+        self.graph1Widget_3.setLayout(self.graph1Widget_3.grid_graph_3)
+        self.graph1Widget_3.grid_graph_3.addWidget(self.graph1Widget_3.graph, 0, 0, 1, 1)
+        #self.graph1Widget_3.timer.timeout.connect(self.update)
+        self.graph1Widget_3.timer.start(1000)
+        self.graph1Widget_3.show()
+
+
+
+
+
+
         self.frame_3 = QtWidgets.QFrame(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
@@ -355,9 +358,9 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 15px;")
+"border-radius: 10px;")
         self.play_button_graph_3.setText("")
-        self.play_button_graph_3.setIcon(self.icon)
+        self.play_button_graph_3.setIcon(icon)
         self.play_button_graph_3.setObjectName("play_button_graph_3")
         self.horizontalLayout_5.addWidget(self.play_button_graph_3)
         self.stop_button_graph_3 = QtWidgets.QPushButton(self.centralwidget)
@@ -367,9 +370,9 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 15px;")
+"border-radius: 10px;")
         self.stop_button_graph_3.setText("")
-        self.stop_button_graph_3.setIcon(self.icon1)
+        self.stop_button_graph_3.setIcon(icon1)
         self.stop_button_graph_3.setObjectName("stop_button_graph_3")
         self.horizontalLayout_5.addWidget(self.stop_button_graph_3)
         self.pause_button_graph_3 = QtWidgets.QPushButton(self.centralwidget)
@@ -379,7 +382,7 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 15px;")
+"border-radius: 10px;")
         self.pause_button_graph_3.setText("")
         self.pause_button_graph_3.setIcon(icon2)
         self.pause_button_graph_3.setObjectName("pause_button_graph_3")
@@ -391,7 +394,7 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 15px;")
+"border-radius: 10px;")
         self.zoom_in_button_graph_3.setText("")
         self.zoom_in_button_graph_3.setIcon(icon3)
         self.zoom_in_button_graph_3.setObjectName("zoom_in_button_graph_3")
@@ -403,7 +406,7 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 15px;")
+"border-radius: 10px;")
         self.zoo_out_button_graph_3.setText("")
         self.zoo_out_button_graph_3.setIcon(icon4)
         self.zoo_out_button_graph_3.setObjectName("zoo_out_button_graph_3")
@@ -426,8 +429,7 @@ class Ui_MainWindow(object):
         spacerItem4 = QtWidgets.QSpacerItem(5, 5, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem4)
         self.graph2Widget = QtWidgets.QWidget(self.centralwidget)
-        self.graph2Widget.setEnabled(True)
-        
+        self.graph2Widget.setEnabled(False)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -444,6 +446,25 @@ class Ui_MainWindow(object):
 "widget-shadow: 2px 2px 5px rgb(0, 0, 0);")
         self.graph2Widget.setObjectName("graph2Widget")
         self.horizontalLayout_4.addWidget(self.graph2Widget)
+
+
+
+
+        self.graph2Widget.num = 0
+        self.graph2Widget.graph_2 = pg.PlotWidget(self.graph2Widget)
+        self.graph2Widget.grid_graph_2 = QGridLayout()
+        self.graph2Widget.timer = QTimer()
+        self.graph2Widget.setLayout(self.graph2Widget.grid_graph_2)
+        self.graph2Widget.grid_graph_2.addWidget(self.graph2Widget.graph_2, 0, 0, 1, 1)
+        #self.graph2Widget.timer.timeout.connect(self.update)
+        self.graph2Widget.timer.start(1000)
+        self.graph2Widget.show()
+
+
+
+
+
+
         self.frame_2 = QtWidgets.QFrame(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
@@ -511,9 +532,9 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 15px;")
+"border-radius: 10px;")
         self.play_button_graph_1.setText("")
-        self.play_button_graph_1.setIcon(self.icon)
+        self.play_button_graph_1.setIcon(icon)
         self.play_button_graph_1.setObjectName("play_button_graph_1")
         self.horizontalLayout.addWidget(self.play_button_graph_1)
         self.stop_button_graph_1 = QtWidgets.QPushButton(self.centralwidget)
@@ -523,9 +544,9 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 15px;")
+"border-radius: 10px;")
         self.stop_button_graph_1.setText("")
-        self.stop_button_graph_1.setIcon(self.icon1)
+        self.stop_button_graph_1.setIcon(icon1)
         self.stop_button_graph_1.setObjectName("stop_button_graph_1")
         self.horizontalLayout.addWidget(self.stop_button_graph_1)
         self.pause_button_graph_1 = QtWidgets.QPushButton(self.centralwidget)
@@ -535,7 +556,7 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 15px;")
+"border-radius: 10px;")
         self.pause_button_graph_1.setText("")
         self.pause_button_graph_1.setIcon(icon2)
         self.pause_button_graph_1.setObjectName("pause_button_graph_1")
@@ -547,7 +568,7 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 15px;")
+"border-radius: 10px;")
         self.zoom_in_button_graph_1.setText("")
         self.zoom_in_button_graph_1.setIcon(icon3)
         self.zoom_in_button_graph_1.setObjectName("zoom_in_button_graph_1")
@@ -559,9 +580,9 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 15px;")
-        self.connect_online_button_graph_1.setText("Connect Online")
-        #self.connect_online_button_graph_1.setIcon(icon4)
+"border-radius: 10px;")
+        self.connect_online_button_graph_1.setText("")
+        self.connect_online_button_graph_1.setIcon(icon4)
         self.connect_online_button_graph_1.setObjectName("connect_online_button_graph_1")
         self.horizontalLayout.addWidget(self.connect_online_button_graph_1)
         self.open_button_graph_1 = QtWidgets.QPushButton(self.centralwidget)
@@ -605,54 +626,12 @@ class Ui_MainWindow(object):
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
-
         self.retranslateUi(MainWindow)
+
+        #self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
         #self.open_button_graph_1.clicked.connect(self.open_file)
-
-    '''def plot_signal(self, signal_data):
-
-        if signal_data is not None:
-            # Clear previous plots
-            self.graph1Widget.clear()
-            
-            # Plot each channel in the signal data
-            for i, signal in enumerate(signal_data):
-                self.graph1Widget.plot(signal, pen=pg.mkPen(color=(i * 50, 100, 200), width=2), label=f'Signal {i+1}')  # Use different colors for each signal
-            self.graph1Widget.addLegend()  # Add a legend to the graph
-
-    def load_edf_file(self, file_path):
-        """Load the signal data from an EDF file."""
-        try:
-            with pyedflib.EdfReader(file_path) as edf_reader:
-                signal_data = [edf_reader.readSignal(i) for i in range(edf_reader.signals_in_file)]
-            return signal_data  # Return the loaded signal data
-        except Exception as e:
-            print(f"Error loading EDF file: {e}")
-            return None  # Return None if there's an error
-
-    def open_file(self):
-        """Open a file dialog to select an EDF file and plot its signals."""
-        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open EDF File", "", "EDF Files (*.edf);;All Files (*)")
-        if file_path:
-            self.signal_data = self.load_edf_file(file_path)
-            if self.signal_data is not None:
-                self.plot_signal(self.signal_data)  # Plot the loaded signal data
-                self.timer.start(1000)  # Start the timer for real-time updates
-
-    def update_plot(self):
-        """Update the plot (this can be expanded for real-time behavior)."""
-        if self.signal_data is not None:
-            # You can add real-time update logic here if needed
-            # For now, we will just refresh the plot
-            self.plot_signal(self.signal_data)'''
-
-    
-
-
-
-
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -716,73 +695,6 @@ class Ui_MainWindow(object):
         self.open_button_graph_1.setText(_translate("MainWindow", "Open"))
         self.signalViewerLabel.setText(_translate("MainWindow", "Live Signal Viewer"))
 
-"""
-class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)  # Set up the UI
-        self.timer = QTimer()  # Create a timer
-        self.ui.open_button_graph_1.clicked.connect(self.open_file)  # Connect button
-        self.timer.timeout.connect(self.update_plot)
 
-    def load_csv_file(self, file_path):
-        try:
-            with open(file_path, newline='') as csvfile:
-                reader = csv.reader(csvfile)
-                self.signal_data = []
-                for row in reader:
-                    self.signal_data.append([float(val) for val in row])  # Convert string to float
 
-                # Transpose the data to get columns as signals
-                self.signal_data = list(map(list, zip(*self.signal_data)))
 
-                self.current_signal_index = 0  # Reset index to start from the beginning
-                self.timer.start(1)  # Start the timer for real-time plotting (adjust time as needed)
-        except Exception as e:
-            print(f"Error loading CSV file: {e}")
-            return None
-
-    def plot_signal(self, signal_data):
-        # Implement your plotting logic here
-        if signal_data is not None:
-            # Plot each channel in the signal data
-            for i, signal in enumerate(signal_data):
-                self.ui.graph1Widget.graph.plotItem.plot(signal, 
-                                                         pen=pg.mkPen(color=(i * 50, 100, 200), width=2), 
-                                                         label=f'Signal {i+1}')  # Use different colors for each signal
-
-    def update_plot(self):
-        # This function will be called by the timer
-        if self.signal_data is not None:
-            x_values = []
-            y_values = []
-            
-            for i, signal in enumerate(self.signal_data):
-                if self.current_signal_index < len(signal):
-                    x_values.append(self.current_signal_index)  # X-coordinate
-                    y_values.append(signal[self.current_signal_index])  # Y-coordinate
-
-            if x_values:  # Check if there are values to plot
-                self.ui.graph1Widget.graph.plotItem.plot(x_values, y_values, 
-                                          pen=pg.mkPen(color=(i * 50, 100, 200), width=2), 
-                                          symbol='o', 
-                                          symbolSize=5)  # Optional: Use symbol to indicate points
-
-            self.current_signal_index += 1  # Move to the next data point
-
-            if self.current_signal_index >= len(self.signal_data[0]):  # Check if we've plotted all points
-                self.timer.stop()   # Stop the timer when all data is plotted
-
-    def open_file(self):
-        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open CSV File", "", "CSV Files (*.csv);;All Files (*)")
-        if file_path:
-            self.load_csv_file(file_path)
-            
-
-if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
-    main_window = MainWindow()
-    main_window.show()
-    sys.exit(app.exec_())
-"""
