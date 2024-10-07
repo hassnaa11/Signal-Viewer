@@ -64,6 +64,7 @@ class Ui_MainWindow(object):
 
         self.graph1Widget.num = 0
         self.graph1Widget.graph = pg.PlotWidget(self.graph1Widget)
+        self.graph1Widget.graph.setBackground('#2D324D')
         self.graph1Widget.grid_graph_3 = QGridLayout()
         self.graph1Widget.timer = QTimer()
         self.graph1Widget.setLayout(self.graph1Widget.grid_graph_3)
@@ -71,7 +72,9 @@ class Ui_MainWindow(object):
         #self.graph1Widget.timer.timeout.connect(self.update_plot)
         self.graph1Widget.timer.start(100)
         self.graph1Widget.show()
-        
+        #self.graph1Widget.graph = pg.PlotWidget(self.graph1Widget)
+        #self.graph1Widget.graph.setBackground('#2D324D')  # Replace with your desired color
+
         #self.canv = MatplotlibCanvas(self.graph1Widget)
         #self.graph1Layout.addWidget(self.canv)
 
@@ -175,7 +178,7 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 10px;")
+"border-radius: 15px;")
         self.play_button_graph_2.setText("")
         self.icon = QtGui.QIcon()
         self.icon.addPixmap(QtGui.QPixmap(".\images\icons8-play-32.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
@@ -189,7 +192,7 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 10px;")
+"border-radius: 15px;")
         self.stop_button_graph_2.setText("")
         self.icon1 = QtGui.QIcon()
         self.icon1.addPixmap(QtGui.QPixmap(".\images\icons8-pause-button-32.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
@@ -203,10 +206,10 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 10px;")
+"border-radius: 15px;")
         self.pause_button_graph_2.setText("")
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("../../icons/icons8-pause-90.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        icon2.addPixmap(QtGui.QPixmap("./images/icons8-pause-90.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.pause_button_graph_2.setIcon(icon2)
         self.pause_button_graph_2.setObjectName("pause_button_graph_2")
         self.horizontalLayout_3.addWidget(self.pause_button_graph_2)
@@ -217,10 +220,10 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 10px;")
+"border-radius: 15px;")
         self.zoom_in_button_graph_2.setText("")
         icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap("../../icons/icons8-zoom-in-64 (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        icon3.addPixmap(QtGui.QPixmap("./images/icons8-zoom-in-64 (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.zoom_in_button_graph_2.setIcon(icon3)
         self.zoom_in_button_graph_2.setObjectName("zoom_in_button_graph_2")
         self.horizontalLayout_3.addWidget(self.zoom_in_button_graph_2)
@@ -234,9 +237,10 @@ class Ui_MainWindow(object):
 "border-radius: 10px;")
         self.connect_online_button_graph_2.setText("Connect Online")
         icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap("../../icons/icons8-zoom-out-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
-        self.connect_online_button_graph_2.setIcon(icon4)
+        icon4.addPixmap(QtGui.QPixmap("./images/icons8-zoom-out-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.connect_online_button_graph_2.setObjectName("connect_online_button_graph_2")
+       
+        
         self.horizontalLayout_3.addWidget(self.connect_online_button_graph_2)
         self.open_button_graph_2 = QtWidgets.QPushButton(self.centralwidget)
         self.open_button_graph_2.setCursor(QtGui.QCursor(QtCore.Qt.SplitVCursor))
@@ -278,6 +282,7 @@ class Ui_MainWindow(object):
 
         self.graph1Widget_3.num = 0
         self.graph1Widget_3.graph = pg.PlotWidget(self.graph1Widget_3)
+        self.graph1Widget_3.graph.setBackground('#2D324D') 
         self.graph1Widget_3.grid_graph_3 = QGridLayout()
         self.graph1Widget_3.timer = QTimer()
         self.graph1Widget_3.setLayout(self.graph1Widget_3.grid_graph_3)
@@ -358,7 +363,7 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 10px;")
+"border-radius: 15px;")
         self.play_button_graph_3.setText("")
         self.play_button_graph_3.setIcon(self.icon)
         self.play_button_graph_3.setObjectName("play_button_graph_3")
@@ -370,7 +375,7 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 10px;")
+"border-radius: 15px;")
         self.stop_button_graph_3.setText("")
         self.stop_button_graph_3.setIcon(self.icon1)
         self.stop_button_graph_3.setObjectName("stop_button_graph_3")
@@ -382,7 +387,7 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 10px;")
+"border-radius: 15px;")
         self.pause_button_graph_3.setText("")
         self.pause_button_graph_3.setIcon(icon2)
         self.pause_button_graph_3.setObjectName("pause_button_graph_3")
@@ -394,7 +399,7 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 10px;")
+"border-radius: 15px;")
         self.zoom_in_button_graph_3.setText("")
         self.zoom_in_button_graph_3.setIcon(icon3)
         self.zoom_in_button_graph_3.setObjectName("zoom_in_button_graph_3")
@@ -406,7 +411,7 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 10px;")
+"border-radius: 15px;")
         self.zoo_out_button_graph_3.setText("")
         self.zoo_out_button_graph_3.setIcon(icon4)
         self.zoo_out_button_graph_3.setObjectName("zoo_out_button_graph_3")
@@ -452,6 +457,7 @@ class Ui_MainWindow(object):
 
         self.graph2Widget.num = 0
         self.graph2Widget.graph_2 = pg.PlotWidget(self.graph2Widget)
+        self.graph2Widget.graph_2.setBackground('#2D324D') 
         self.graph2Widget.grid_graph_2 = QGridLayout()
         self.graph2Widget.timer = QTimer()
         self.graph2Widget.setLayout(self.graph2Widget.grid_graph_2)
@@ -532,10 +538,31 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 10px;")
+"border-radius: 15px;")
         self.play_button_graph_1.setText("")
         self.play_button_graph_1.setIcon(self.icon)
         self.play_button_graph_1.setObjectName("play_button_graph_1")
+
+        self.play_button_graph_1.setCursor(QtCore.Qt.PointingHandCursor)
+        self.play_button_graph_2.setCursor(QtCore.Qt.PointingHandCursor)
+        self.play_button_graph_3.setCursor(QtCore.Qt.PointingHandCursor)
+        self.pause_button_graph_2.setCursor(QtCore.Qt.PointingHandCursor)
+        self.pause_button_graph_3.setCursor(QtCore.Qt.PointingHandCursor)
+        self.stop_button_graph_2.setCursor(QtCore.Qt.PointingHandCursor)
+        self.stop_button_graph_3.setCursor(QtCore.Qt.PointingHandCursor)
+        self.open_button_graph_2.setCursor(QtCore.Qt.PointingHandCursor)
+        self.open_button_graph_3.setCursor(QtCore.Qt.PointingHandCursor)
+        
+
+        self.connect_online_button_graph_2.setCursor(QtCore.Qt.PointingHandCursor)
+        # self.zoom_in_button_graph_1.setCursor(QtCore.Qt.PointingHandCursor)
+        self.zoom_in_button_graph_2.setCursor(QtCore.Qt.PointingHandCursor)
+        self.zoom_in_button_graph_3.setCursor(QtCore.Qt.PointingHandCursor)
+        self.zoo_out_button_graph_3.setCursor(QtCore.Qt.PointingHandCursor)
+        self.play_button_graph_2.setCursor(QtCore.Qt.PointingHandCursor)
+        self.play_button_graph_3.setCursor(QtCore.Qt.PointingHandCursor)
+
+
         self.horizontalLayout.addWidget(self.play_button_graph_1)
         self.stop_button_graph_1 = QtWidgets.QPushButton(self.centralwidget)
         self.stop_button_graph_1.setCursor(QtGui.QCursor(QtCore.Qt.SplitVCursor))
@@ -544,7 +571,7 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 10px;")
+"border-radius: 15px;")
         self.stop_button_graph_1.setText("")
         self.stop_button_graph_1.setIcon(self.icon1)
         self.stop_button_graph_1.setObjectName("stop_button_graph_1")
@@ -556,7 +583,7 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 10px;")
+"border-radius: 15px;")
         self.pause_button_graph_1.setText("")
         self.pause_button_graph_1.setIcon(icon2)
         self.pause_button_graph_1.setObjectName("pause_button_graph_1")
@@ -568,7 +595,7 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 10px;")
+"border-radius: 15px;")
         self.zoom_in_button_graph_1.setText("")
         self.zoom_in_button_graph_1.setIcon(icon3)
         self.zoom_in_button_graph_1.setObjectName("zoom_in_button_graph_1")
@@ -582,7 +609,6 @@ class Ui_MainWindow(object):
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
 "border-radius: 10px;")
         self.connect_online_button_graph_1.setText("Connect Online")
-        self.connect_online_button_graph_1.setIcon(icon4)
         self.connect_online_button_graph_1.setObjectName("connect_online_button_graph_1")
         self.horizontalLayout.addWidget(self.connect_online_button_graph_1)
         self.open_button_graph_1 = QtWidgets.QPushButton(self.centralwidget)
@@ -596,6 +622,64 @@ class Ui_MainWindow(object):
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
 "border-radius: 10px;")
         self.open_button_graph_1.setObjectName("open_button_graph_1")
+        sizePolicy_button = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy_button.setHorizontalStretch(0)
+        sizePolicy_button.setVerticalStretch(0)
+        self.open_button_graph_1.setMinimumSize(80, 30)
+        self.open_button_graph_1.setSizePolicy(sizePolicy_button)
+        self.open_button_graph_2.setMinimumSize(80, 30)
+        self.open_button_graph_2.setSizePolicy(sizePolicy_button)
+        self.open_button_graph_3.setMinimumSize(80, 30)
+        self.open_button_graph_3.setSizePolicy(sizePolicy_button)
+        self.connect_online_button_graph_1.setMinimumSize(130, 30)
+        self.connect_online_button_graph_2.setMinimumSize(130, 30)
+        self.connect_online_button_graph_1.setSizePolicy(sizePolicy_button)
+        self.connect_online_button_graph_2.setSizePolicy(sizePolicy_button)
+
+        self.play_button_graph_1.setSizePolicy(sizePolicy_button)
+        self.play_button_graph_1.setMinimumSize(30, 30)
+        self.play_button_graph_2.setSizePolicy(sizePolicy_button)
+        self.play_button_graph_2.setMinimumSize(30, 30)
+        self.play_button_graph_3.setSizePolicy(sizePolicy_button)
+        self.play_button_graph_3.setMinimumSize(30, 30)
+
+        self.pause_button_graph_1.setSizePolicy(sizePolicy_button)
+        self.pause_button_graph_1.setMinimumSize(30, 30)
+        self.pause_button_graph_2.setSizePolicy(sizePolicy_button)
+        self.pause_button_graph_2.setMinimumSize(30, 30)
+        self.pause_button_graph_3.setSizePolicy(sizePolicy_button)
+        self.pause_button_graph_3.setMinimumSize(30, 30)
+
+        self.zoom_in_button_graph_1.setSizePolicy(sizePolicy_button)
+        self.zoom_in_button_graph_1.setMinimumSize(30, 30)
+        self.zoom_in_button_graph_2.setSizePolicy(sizePolicy_button)
+        self.zoom_in_button_graph_2.setMinimumSize(30, 30)
+        self.zoom_in_button_graph_3.setSizePolicy(sizePolicy_button)
+        self.zoom_in_button_graph_3.setMinimumSize(30, 30)
+
+        self.stop_button_graph_1.setSizePolicy(sizePolicy_button)
+        self.stop_button_graph_1.setMinimumSize(30, 30)
+        self.stop_button_graph_2.setSizePolicy(sizePolicy_button)
+        self.stop_button_graph_2.setMinimumSize(30, 30)
+        self.stop_button_graph_3.setSizePolicy(sizePolicy_button)
+        self.stop_button_graph_3.setMinimumSize(30, 30)
+
+        self.zoo_out_button_graph_3.setSizePolicy(sizePolicy_button)
+        self.zoo_out_button_graph_3.setMinimumSize(30, 30)
+
+        self.connect_online_button_graph_1.setCursor(QtCore.Qt.PointingHandCursor)
+        self.pause_button_graph_1.setCursor(QtCore.Qt.PointingHandCursor)
+        self.open_button_graph_1.setCursor(QtCore.Qt.PointingHandCursor)
+        self.stop_button_graph_1.setCursor(QtCore.Qt.PointingHandCursor)
+        self.zoom_in_button_graph_1.setCursor(QtCore.Qt.PointingHandCursor)
+
+        self.signal_color_button_graph_1.setCursor(QtCore.Qt.PointingHandCursor)
+        self.signal_color_button_graph_2.setCursor(QtCore.Qt.PointingHandCursor)
+        self.signal_color_button_graph_3.setCursor(QtCore.Qt.PointingHandCursor)
+        self.signal_color_button_graph_1.setMinimumSize(150, 30)
+        self.signal_color_button_graph_2.setMinimumSize(150, 30)
+        self.signal_color_button_graph_3.setMinimumSize(150, 30)
+
         self.horizontalLayout.addWidget(self.open_button_graph_1)
         self.gridLayout_4.addLayout(self.horizontalLayout, 2, 0, 1, 1)
         self.verticalLayout = QtWidgets.QVBoxLayout()

@@ -8,7 +8,7 @@ class Graph:
         
         # Configure plot background and axis colors
         for plot_widget in [self.plot_widget_1, self.plot_widget_2]:
-            plot_widget.setBackground('k')  # Black background
+            #plot_widget.setBackground('k')  # Black background
             plot_widget.getAxis('left').setPen('w')  # White y-axis
             plot_widget.getAxis('bottom').setPen('w')  # White x-axis
         

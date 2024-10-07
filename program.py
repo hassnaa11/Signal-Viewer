@@ -38,8 +38,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.open_button_graph_1.clicked.connect(self.open_file)
         self.ui.open_button_graph_2.clicked.connect(self.open_file)
         
+        
         # Set up the timer for updating the graph
-        #self.timer.timeout.connect(self.update_graph)
+        self.timer.timeout.connect(self.update_graph)
         
         self.window_width = 100 
         self.plot_curve = self.ui.graph1Widget.graph.plotItem.plot(
