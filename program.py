@@ -29,6 +29,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.timer = QtCore.QTimer()
         self.ui.graph1Widget.graph.setLimits(xMin=0)
+        self.ui.graph2Widget.graph_2.setLimits(xMin=0)
+        self.ui.graph1Widget_3.graph.setLimits(xMin=0)
         self.signal_processor = SignalProcessor()
         self.graph_1 = Graph(self.ui.graph1Widget, self.ui.graph2Widget)
         self.graph_2 = Graph(self.ui.graph1Widget, self.ui.graph2Widget)
@@ -44,6 +46,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.window_width = 100 
         self.graph1_on = True
         self.graph2_on = True
+        self.first_graph_online_connected = False
+        self.second_graph_online_connected = False
         self.plot_online_curve_graph1 = self.ui.graph1Widget.graph.plotItem.plot(
             pen=pg.mkPen(color="orange", width=2), symbol="o")
         self.plot_online_curve_graph2 = self.ui.graph2Widget.graph_2.plotItem.plot(
@@ -66,14 +70,13 @@ class MainWindow(QtWidgets.QMainWindow):
     def update_online_plot(self):
         sender_button = self.sender()
         print(sender_button)
-        
         if sender_button != self.ui.connect_online_button_graph_1 and  sender_button != self.ui.connect_online_button_graph_2: # No new click
             sender_button = self.last_sender
         elif (sender_button == self.ui.connect_online_button_graph_1) and self.graph1_on: # clicked on connect_online_button_graph_1
             self.timer.timeout.connect(self.update_online_plot)
             self.last_sender = sender_button
             self.first_graph_online_connected = True
-        elif (sender_button == self.ui.connect_online_button_graph_2) and self.graph1_on: # clicked on connect_online_button_graph_2
+        elif (sender_button == self.ui.connect_online_button_graph_2) and self.graph2_on: # clicked on connect_online_button_graph_2
             self.timer.timeout.connect(self.update_online_plot)
             self.last_sender = sender_button 
             self.second_graph_online_connected = True      
