@@ -52,7 +52,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.connect_online_button_graph_1.clicked.connect(self.update_online_plot)
         self.ui.connect_online_button_graph_2.clicked.connect(self.update_online_plot)
         self.ui.play_button_graph_1.clicked.connect(self.stop_run_graph_1)
-        self.timer.start(500)
+        #self.timer.start(500)
 
 
     def format_time_string(self, time_str):
