@@ -8,7 +8,10 @@ from main_gui import Ui_MainWindow
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QTimer  # For QTimer
-from PyQt5.QtWidgets import QGridLayout  # For QGridLayout
+from PyQt5.QtWidgets import QGridLayout, QColorDialog  # For QGridLayout
+from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtGui import QPainter, QColor
+from PyQt5.QtWidgets import QLabel, QGraphicsDropShadowEffect
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -33,11 +36,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.signal_processor = SignalProcessor()
         self.graph_1 = Graph(self.ui.graph1Widget, self.ui.graph2Widget)
         self.graph_2 = Graph(self.ui.graph1Widget, self.ui.graph2Widget)
-        
+        self.graph1_color='w'
+        self.graph2_color='w'
+       
+
+
         # Connect the button to open_file function
         self.ui.open_button_graph_1.clicked.connect(self.open_file)
         self.ui.open_button_graph_2.clicked.connect(self.open_file)
-        
+        self.ui.signal_color_button_graph_1.clicked.connect(lambda: self.open_color_dialog('1'))
+        self.ui.signal_color_button_graph_2.clicked.connect(lambda: self.open_color_dialog('2'))
+        self.ui.signal_name_lineEdit_graph_1.returnPressed.connect(self.update_graph_name_1)
+
         
         # Set up the timer for updating the graph
         self.timer.timeout.connect(self.update_graph)
@@ -59,6 +69,7 @@ class MainWindow(QtWidgets.QMainWindow):
             return f"{hour.zfill(2)}:{minute.zfill(2)}:{second.zfill(2)}"
         return time_str
 
+    
 
     def update_online_plot(self):
         if(self.online_connected == False):
@@ -120,11 +131,38 @@ class MainWindow(QtWidgets.QMainWindow):
         data = self.signal_processor.get_next_data(self.window_width)
         if data is not None:
             # Update graph 1 with scrolling x-axis
-            self.graph_1.update_graph(data, self.signal_processor.current_index, self.window_width)
+            self.graph_1.update_graph(data, self.signal_processor.current_index, self.window_width,self.graph1_color)
             # Update graph 2 with scrolling x-axis
-            self.graph_2.update_graph(data, self.signal_processor.current_index, self.window_width)
+            self.graph_2.update_graph(data, self.signal_processor.current_index, self.window_width,self.graph1_color)
         else:
-            self.timer.stop()        
+            self.timer.stop() 
+    
+        
+    def open_color_dialog(self, graph_number):
+    # Open a color dialog and get the selected color
+        color = QColorDialog.getColor()
+        
+        if color.isValid():
+            # Update the signal color based on the chosen color
+            hex_color = color.name()  # Get color in hex format
+            print(hex_color)
+            self.update_signal_color(hex_color, graph_number)
+
+    def update_signal_color(self, color, graph_number):
+        # Update the color of the plotted signal for the selected graph
+        print(graph_number)
+        if graph_number :
+            self.graph1_color=color
+
+    def update_graph_name_1(self):  
+        new_name = self.ui.signal_name_lineEdit_graph_1.text()
+        print(new_name)
+        self.ui.nameegraph1.setText(new_name)
+
+
+
+        
+            
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])

@@ -12,6 +12,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import matplotlib
 import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import QFileDialog, QGridLayout
+from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtGui import QPainter, QColor
+from PyQt5.QtWidgets import QLabel, QGraphicsDropShadowEffect
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT as Navi
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -94,12 +97,27 @@ class Ui_MainWindow(object):
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
 "widget-shadow: 2px 2px 5px rgb(0, 0, 0);")
         self.graph1Widget.setObjectName("graph1Widget")
-
-
         
-
-    
-
+        self.nameegraph1 = QtWidgets.QLabel(self.graph1Widget)
+        self.nameegraph1.setGeometry(QtCore.QRect(700, 10, 71, 31))
+        self.nameegraph1.setMouseTracking(False)
+        self.nameegraph1.setStyleSheet("color: rgb(255, 255, 255);\n"
+"font: 9pt \"MS Shell Dlg 2\";\n"
+"font: 9pt \"MS Shell Dlg 2\";\n"
+"font: 9pt \"MS Shell Dlg 2\";\n"
+"\n"
+"")
+        self.nameegraph1.setLineWidth(9)
+        self.nameegraph1.setMidLineWidth(99)
+        self.nameegraph1.setTextFormat(QtCore.Qt.PlainText)
+        self.nameegraph1.setObjectName("nameegraph1")
+        self.line = QtWidgets.QFrame(self.graph1Widget)
+        self.line.setGeometry(QtCore.QRect(640, 20, 61, 20))
+        self.line.setStyleSheet("\n"
+"color: rgb(0, 0, 0);")
+        self.line.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line.setObjectName("line")
         
 
 
@@ -151,6 +169,9 @@ class Ui_MainWindow(object):
 "")
         self.visible_checkBox_graph_1.setObjectName("visible_checkBox_graph_1")
         self.gridLayout.addWidget(self.visible_checkBox_graph_1, 1, 0, 1, 1)
+
+
+
         self.signal_name_label_graph_1 = QtWidgets.QLabel(self.frame)
         self.signal_name_label_graph_1.setStyleSheet("color: rgb(255, 255, 255);\n"
 "font: italic 10pt \"Georgia\";\n"
@@ -166,6 +187,7 @@ class Ui_MainWindow(object):
         self.graph_Label_2.setStyleSheet("color: rgb(255, 255, 255);\n"
 "font: italic 11pt \"Georgia\";\n"
 "")
+        
         self.graph_Label_2.setTextFormat(QtCore.Qt.PlainText)
         self.graph_Label_2.setObjectName("graph_Label_2")
         self.horizontalLayout_3.addWidget(self.graph_Label_2)
@@ -733,6 +755,7 @@ class Ui_MainWindow(object):
         self.pause_button_graph_2.setToolTip(_translate("MainWindow", "<html><head/><body><p><br/></p></body></html>"))
         self.pause_button_graph_2.setWhatsThis(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#ffffff;\">)pen</span></p></body></html>"))
         self.zoom_in_button_graph_2.setToolTip(_translate("MainWindow", "<html><head/><body><p><br/></p></body></html>"))
+        self.nameegraph1.setText(_translate("MainWindow", "Signal 1"))
         self.zoom_in_button_graph_2.setWhatsThis(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#ffffff;\">)pen</span></p></body></html>"))
         self.connect_online_button_graph_2.setToolTip(_translate("MainWindow", "<html><head/><body><p><br/></p></body></html>"))
         self.connect_online_button_graph_2.setWhatsThis(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#ffffff;\">)pen</span></p></body></html>"))
