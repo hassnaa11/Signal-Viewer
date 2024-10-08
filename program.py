@@ -30,17 +30,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.timer = QtCore.QTimer()
         self.ui.graph1Widget.graph.setLimits(xMin=0)
-        self.signal_processor = SignalProcessor()
-        self.graph_1 = Graph(self.ui.graph1Widget, self.ui.graph2Widget)
-        self.graph_2 = Graph(self.ui.graph1Widget, self.ui.graph2Widget)
-        
-        # Connect the button to open_file function
-        self.ui.open_button_graph_1.clicked.connect(self.open_file)
-        self.ui.open_button_graph_2.clicked.connect(self.open_file)
-        
+
+
+        self.signal_processor_1 = SignalProcessor(self.ui.graph1Widget.graph)
+        self.signal_processor_2 = SignalProcessor(self.ui.graph1Widget.graph)
+
+        self.graph_1 = Graph(self.ui.graph1Widget.graph)
+        self.graph_2 = Graph(self.ui.graph2Widget.graph_2)
+
+        # Connect buttons to their respective functions
+        self.ui.open_button_graph_1.clicked.connect(self.open_file_graph_1)
+        self.ui.open_button_graph_2.clicked.connect(self.open_file_graph_2)
         
         # Set up the timer for updating the graph
-        self.timer.timeout.connect(self.update_graph)
+        self.timer.timeout.connect(self.update_graphs)
         
         self.window_width = 100 
         self.plot_curve = self.ui.graph1Widget.graph.plotItem.plot(
@@ -49,7 +52,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.connect_online_button_graph_1.clicked.connect(self.update_online_plot)
         self.ui.connect_online_button_graph_2.clicked.connect(self.update_online_plot)
         self.ui.play_button_graph_1.clicked.connect(self.stop_run_graph_1)
-        self.timer.start(1000)
+        self.timer.start(500)
 
 
     def format_time_string(self, time_str):
@@ -60,7 +63,7 @@ class MainWindow(QtWidgets.QMainWindow):
         return time_str
 
 
-    def update_online_plot(self):
+    def update_online_plot(self): 
         if(self.online_connected == False):
             self.timer.timeout.connect(self.update_online_plot)
             self.online_connected = True
@@ -111,21 +114,23 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timer.timeout.connect(self.update_online_plot)
             self.online_connected = True
             self.ui.play_button_graph_1.setIcon(self.ui.icon)
-    def open_file(self):
-        self.signal_processor.open_file(self)
-        if self.signal_processor.data is not None:
-            self.timer.start(500)  # Start timer with interval in ms
 
-    def update_graph(self):  # Ensure this method is indented correctly within the class
-        data = self.signal_processor.get_next_data(self.window_width)
-        if data is not None:
-            # Update graph 1 with scrolling x-axis
-            self.graph_1.update_graph(data, self.signal_processor.current_index, self.window_width)
-            # Update graph 2 with scrolling x-axis
-            self.graph_2.update_graph(data, self.signal_processor.current_index, self.window_width)
-        else:
-            self.timer.stop()        
+    def open_file_graph_1(self):
+        self.signal_processor_1.open_file(self)
+        #self.timer.start(500)
 
+    def open_file_graph_2(self):
+        self.signal_processor_2.open_file(self)
+        #self.timer.start(500)
+
+    def update_graphs(self):
+        data_1 = self.signal_processor_1.get_next_data(self.window_width)
+        data_2 = self.signal_processor_2.get_next_data(self.window_width)
+
+        if data_1 is not None:
+            self.graph_1.update_graph(data_1, self.signal_processor_1.current_index, self.window_width)
+        if data_2 is not None:
+            self.graph_2.update_graph(data_2, self.signal_processor_2.current_index, self.window_width)
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
     app.setApplicationDisplayName("PyQt5 Tutorial with pyqtgraph")
