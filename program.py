@@ -31,17 +31,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.graph1Widget.graph.setLimits(xMin=0)
         self.ui.graph2Widget.graph_2.setLimits(xMin=0)
         self.ui.graph1Widget_3.graph.setLimits(xMin=0)
-        self.signal_processor = SignalProcessor()
-        self.graph_1 = Graph(self.ui.graph1Widget, self.ui.graph2Widget)
-        self.graph_2 = Graph(self.ui.graph1Widget, self.ui.graph2Widget)
-        
-        # Connect the button to open_file function
-        self.ui.open_button_graph_1.clicked.connect(self.open_file)
-        self.ui.open_button_graph_2.clicked.connect(self.open_file)
-        
+
+
+        self.signal_processor_1 = SignalProcessor(self.ui.graph1Widget.graph)
+        self.signal_processor_2 = SignalProcessor(self.ui.graph2Widget.graph_2)
+
+        self.graph_1 = Graph(self.ui.graph1Widget.graph)
+        self.graph_2 = Graph(self.ui.graph2Widget.graph_2)
+
+        # Connect buttons to their respective functions
+        self.ui.open_button_graph_1.clicked.connect(self.open_file_graph_1)
+        self.ui.open_button_graph_2.clicked.connect(self.open_file_graph_2)
         
         # Set up the timer for updating the graph
-        # self.timer.timeout.connect(self.update_graph)
+        # self.timer.timeout.connect(self.update_graphs)
         
         self.window_width = 100 
         self.graph1_on = True
@@ -134,21 +137,24 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 self.ui.play_button_graph_2.setIcon(self.ui.icon1)  
 
-    def open_file(self):
-        self.signal_processor.open_file(self)
-        if self.signal_processor.data is not None:
-            self.timer.start(500)  # Start timer with interval in ms
+    
 
-    def update_graph(self):  # Ensure this method is indented correctly within the class
-        data = self.signal_processor.get_next_data(self.window_width)
-        if data is not None:
-            # Update graph 1 with scrolling x-axis
-            self.graph_1.update_graph(data, self.signal_processor.current_index, self.window_width)
-            # Update graph 2 with scrolling x-axis
-            self.graph_2.update_graph(data, self.signal_processor.current_index, self.window_width)
-        else:
-            self.timer.stop()        
+    def open_file_graph_1(self):
+        self.signal_processor_1.open_file(self)
+        #self.timer.start(500)
 
+    def open_file_graph_2(self):
+        self.signal_processor_2.open_file(self)
+        #self.timer.start(500)
+
+    def update_graphs(self):
+        data_1 = self.signal_processor_1.get_next_data(self.window_width)
+        data_2 = self.signal_processor_2.get_next_data(self.window_width)
+
+        if data_1 is not None:
+            self.graph_1.update_graph(data_1, self.signal_processor_1.current_index, self.window_width)
+        if data_2 is not None:
+            self.graph_2.update_graph(data_2, self.signal_processor_2.current_index, self.window_width)
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
     app.setApplicationDisplayName("PyQt5 Tutorial with pyqtgraph")
