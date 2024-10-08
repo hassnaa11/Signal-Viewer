@@ -1,49 +1,47 @@
 import sys
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import QTimer
-import pyqtgraph as pg
 import numpy as np
+import pyqtgraph as pg
+from PyQt5 import QtWidgets, QtCore
 
-class MyApp(QtWidgets.QMainWindow):
+class CineModeApp(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Zoomable Graph with Timer")
+        self.setWindowTitle("Signal Viewer with Cine Mode")
 
         # Central widget and layout
         self.centralwidget = QtWidgets.QWidget(self)
         self.setCentralWidget(self.centralwidget)
-        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.centralwidget)
+        layout = QtWidgets.QVBoxLayout(self.centralwidget)
 
-        # Create graph widget and layout
-        self.graph1Widget = QtWidgets.QWidget(self.centralwidget)
-        self.graph1Widget.grid_graph_3 = QtWidgets.QGridLayout(self.graph1Widget)
-        self.horizontalLayout_2.addWidget(self.graph1Widget)
+        # Create a PlotWidget for the graph
+        self.graphWidget = pg.PlotWidget()
+        layout.addWidget(self.graphWidget)
 
-        # Initialize PlotWidget from pyqtgraph
-        self.graph1Widget.graph = pg.PlotWidget(self.graph1Widget)
-        self.graph1Widget.graph.setBackground('#2D324D')
-        self.graph1Widget.graph.setMouseEnabled(x=True, y=True)
-        self.graph1Widget.grid_graph_3.addWidget(self.graph1Widget.graph, 0, 0, 1, 1)
+        # Initial plot data (Example: sine wave signal)
+        self.x = np.linspace(0, 10, 1000)  # Time values
+        self.signal = np.sin(self.x)  # Example signal (sine wave)
+        self.plot_data = self.graphWidget.plot(self.x, self.signal[:1])  # Start with the first point only
 
-        # Data for the plot (example)
-        self.x = np.linspace(0, 10, 100)
-        self.y = np.sin(self.x)
+        # Timer for updating the graph (simulates "cine mode")
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.update_cine_mode)
+        self.timer.start(50)  # Update every 50 ms (~20 fps)
 
-        # Plot the initial data
-        self.plot_data = self.graph1Widget.graph.plot(self.x, self.y)
+        # Cine mode variables
+        self.current_index = 0  # Start from 0
+        self.frame_length = 1   # Start with 1 data point
 
-        # Setup a QTimer to update the plot periodically
-        self.graph1Widget.timer = QTimer()
-        self.graph1Widget.timer.timeout.connect(self.update_plot)
-        self.graph1Widget.timer.start(1000)  # Update every second
+    def update_cine_mode(self):
+        # Update the visible frame of the signal (starting from 0 and increasing)
+        self.frame_length += 1  # Gradually increase the number of points to display
+        self.plot_data.setData(self.x[:self.frame_length], self.signal[:self.frame_length])
 
-    def update_plot(self):
-        # Update the y-data for example (simulating a signal update)
-        self.y = np.sin(self.x + np.random.rand())
-        self.plot_data.setData(self.x, self.y)  # Update the plot with new data
+        # Stop when the entire signal is displayed
+        if self.frame_length >= len(self.x):
+            self.timer.stop()  # Stop the timer when the full signal is displayed
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
-    window = MyApp()
+    window = CineModeApp()
     window.show()
     sys.exit(app.exec_())

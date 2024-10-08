@@ -127,34 +127,53 @@ class MainWindow(QtWidgets.QMainWindow):
         if sender_button == self.ui.play_button_graph_1:
             self.graph1_on = not self.graph1_on
             if self.graph1_on:
+                self.timer.timeout.connect(self.update_graph1)
                 self.ui.play_button_graph_1.setIcon(self.ui.icon)
             else:
+                self.timer.timeout.disconnect(self.update_graph1)
                 self.ui.play_button_graph_1.setIcon(self.ui.icon1)   
         elif sender_button == self.ui.play_button_graph_2:
             self.graph2_on = not self.graph2_on
             if self.graph2_on:
+                self.timer.timeout.connect(self.update_graph2)
                 self.ui.play_button_graph_2.setIcon(self.ui.icon)
             else:
+                self.timer.timeout.disconnect(self.update_graph2)
                 self.ui.play_button_graph_2.setIcon(self.ui.icon1)  
 
     
-
     def open_file_graph_1(self):
         self.signal_processor_1.open_file(self)
-        #self.timer.start(500)
+        self.timer.timeout.connect(self.update_graph1)
 
     def open_file_graph_2(self):
         self.signal_processor_2.open_file(self)
-        #self.timer.start(500)
-
-    def update_graphs(self):
+        self.timer.timeout.connect(self.update_graph2)
+        
+    def update_graph1(self):
         data_1 = self.signal_processor_1.get_next_data(self.window_width)
-        data_2 = self.signal_processor_2.get_next_data(self.window_width)
-
-        if data_1 is not None:
+        if (data_1 is not None) and (self.graph1_on):
             self.graph_1.update_graph(data_1, self.signal_processor_1.current_index, self.window_width)
-        if data_2 is not None:
+        
+    def update_graph2(self): 
+        data_2 = self.signal_processor_2.get_next_data(self.window_width)  
+        if (data_2 is not None) and (self.graph2_on):
             self.graph_2.update_graph(data_2, self.signal_processor_2.current_index, self.window_width)
+        
+
+    # def update_graphs(self):
+    #     data_1 = self.signal_processor_1.get_next_data(self.window_width)
+    #     data_2 = self.signal_processor_2.get_next_data(self.window_width)
+
+    #     if (data_1 is not None) and (self.graph1_on):
+    #         self.graph_1.update_graph(data_1, self.signal_processor_1.current_index, self.window_width)
+    #     else:
+    #         self.timer.timeout.disconnect(self.update_graphs)   
+    #     if (data_2 is not None) and (self.graph2_on):
+    #         self.graph_2.update_graph(data_2, self.signal_processor_2.current_index, self.window_width)
+    #     else:
+    #         self.timer.timeout.disconnect(self.update_graphs)      
+            
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
     app.setApplicationDisplayName("PyQt5 Tutorial with pyqtgraph")
