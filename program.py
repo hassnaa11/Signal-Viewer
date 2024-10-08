@@ -25,7 +25,6 @@ import pyqtgraph as pg
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
-        self.online_connected = False
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.timer = QtCore.QTimer()
@@ -33,7 +32,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
         self.signal_processor_1 = SignalProcessor(self.ui.graph1Widget.graph)
-        self.signal_processor_2 = SignalProcessor(self.ui.graph1Widget.graph)
+        self.signal_processor_2 = SignalProcessor(self.ui.graph2Widget.graph_2)
 
         self.graph_1 = Graph(self.ui.graph1Widget.graph)
         self.graph_2 = Graph(self.ui.graph2Widget.graph_2)
@@ -43,16 +42,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.open_button_graph_2.clicked.connect(self.open_file_graph_2)
         
         # Set up the timer for updating the graph
-        self.timer.timeout.connect(self.update_graphs)
+        # self.timer.timeout.connect(self.update_graphs)
         
         self.window_width = 100 
-        self.plot_curve = self.ui.graph1Widget.graph.plotItem.plot(
-            pen=pg.mkPen(color="orange", width=2), symbol="o"
-        )
+        self.graph1_on = True
+        self.graph2_on = True
+        self.plot_online_curve_graph1 = self.ui.graph1Widget.graph.plotItem.plot(
+            pen=pg.mkPen(color="orange", width=2), symbol="o")
+        self.plot_online_curve_graph2 = self.ui.graph2Widget.graph_2.plotItem.plot(
+            pen=pg.mkPen(color="orange", width=2), symbol="o")
         self.ui.connect_online_button_graph_1.clicked.connect(self.update_online_plot)
         self.ui.connect_online_button_graph_2.clicked.connect(self.update_online_plot)
-        self.ui.play_button_graph_1.clicked.connect(self.stop_run_graph_1)
-        #self.timer.start(500)
+        self.ui.play_button_graph_1.clicked.connect(self.stop_run_graph)
+        self.ui.play_button_graph_2.clicked.connect(self.stop_run_graph)
+        self.timer.start(1000)
 
 
     def format_time_string(self, time_str):
@@ -63,10 +66,20 @@ class MainWindow(QtWidgets.QMainWindow):
         return time_str
 
 
-    def update_online_plot(self): 
-        if(self.online_connected == False):
+    def update_online_plot(self):
+        sender_button = self.sender()
+        print(sender_button)
+        
+        if sender_button != self.ui.connect_online_button_graph_1 and  sender_button != self.ui.connect_online_button_graph_2: # No new click
+            sender_button = self.last_sender
+        elif (sender_button == self.ui.connect_online_button_graph_1) and self.graph1_on: # clicked on connect_online_button_graph_1
             self.timer.timeout.connect(self.update_online_plot)
-            self.online_connected = True
+            self.last_sender = sender_button
+            self.first_graph_online_connected = True
+        elif (sender_button == self.ui.connect_online_button_graph_2) and self.graph1_on: # clicked on connect_online_button_graph_2
+            self.timer.timeout.connect(self.update_online_plot)
+            self.last_sender = sender_button 
+            self.second_graph_online_connected = True      
             
         try:
             # Read and process the JSON data
@@ -99,21 +112,29 @@ class MainWindow(QtWidgets.QMainWindow):
             x_axis = x_axis[valid_indices]
             y_axis = y_axis[valid_indices]
 
-            if len(x_axis) > 0 and len(y_axis) > 0:
-                self.plot_curve.setData(x_axis, y_axis)
+            if len(x_axis) > 0 and len(y_axis) > 0:           
+                if self.graph1_on and self.first_graph_online_connected: self.plot_online_curve_graph1.setData(x_axis, y_axis)
+                if self.graph2_on and self.second_graph_online_connected: self.plot_online_curve_graph2.setData(x_axis, y_axis) 
+                else: print("hahaha no sender")       
         except Exception as e:
             print(f"Error loading or plotting data: {e}")
     
-    def stop_run_graph_1(self):
-        if(self.online_connected == True):
-            self.timer.timeout.disconnect(self.update_online_plot)
-            self.online_connected = False
-            self.ui.play_button_graph_1.setIcon(self.ui.icon1)
-            
-        else:    
-            self.timer.timeout.connect(self.update_online_plot)
-            self.online_connected = True
-            self.ui.play_button_graph_1.setIcon(self.ui.icon)
+    def stop_run_graph(self):
+        sender_button = self.sender()
+        if sender_button == self.ui.play_button_graph_1:
+            self.graph1_on = not self.graph1_on
+            if self.graph1_on:
+                self.ui.play_button_graph_1.setIcon(self.ui.icon)
+            else:
+                self.ui.play_button_graph_1.setIcon(self.ui.icon1)   
+        elif sender_button == self.ui.play_button_graph_2:
+            self.graph2_on = not self.graph2_on
+            if self.graph2_on:
+                self.ui.play_button_graph_2.setIcon(self.ui.icon)
+            else:
+                self.ui.play_button_graph_2.setIcon(self.ui.icon1)  
+
+    
 
     def open_file_graph_1(self):
         self.signal_processor_1.open_file(self)
