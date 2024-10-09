@@ -45,6 +45,15 @@ class MainWindow(QtWidgets.QMainWindow):
         
         # Set up the timer for updating the graph
         # self.timer.timeout.connect(self.update_graphs)
+        # Speed control variables for each graph
+        self.timer_graph_1 = QtCore.QTimer()
+        self.timer_graph_2 = QtCore.QTimer()
+        self.speed_graph_1 = 500  # Default speed in ms
+        self.speed_graph_2 = 500  # Default speed in ms
+        
+        # Initialize speed sliders and connect them
+        self.ui.speed_slider_graph_1.valueChanged.connect(self.set_speed_graph_1)
+        self.ui.speed_slider_graph_2.valueChanged.connect(self.set_speed_graph_2)
         
         self.window_width = 100 
         self.graph1_on = True
@@ -127,28 +136,43 @@ class MainWindow(QtWidgets.QMainWindow):
         if sender_button == self.ui.play_button_graph_1:
             self.graph1_on = not self.graph1_on
             if self.graph1_on:
-                self.timer.timeout.connect(self.update_graph1)
+                # Resume from the stored index
+                self.signal_processor_1.current_index = self.graph1_pause_index
+                self.timer_graph_1.timeout.connect(self.update_graph1)
                 self.ui.play_button_graph_1.setIcon(self.ui.icon)
             else:
-                self.timer.timeout.disconnect(self.update_graph1)
-                self.ui.play_button_graph_1.setIcon(self.ui.icon1)   
+                # Save the current index and stop
+                self.graph1_pause_index = self.signal_processor_1.current_index
+                self.timer_graph_1.timeout.disconnect(self.update_graph1)
+                self.ui.play_button_graph_1.setIcon(self.ui.icon1)
         elif sender_button == self.ui.play_button_graph_2:
             self.graph2_on = not self.graph2_on
             if self.graph2_on:
-                self.timer.timeout.connect(self.update_graph2)
+                # Resume from the stored index
+                self.signal_processor_2.current_index = self.graph2_pause_index
+                self.timer_graph_2.timeout.connect(self.update_graph2)
                 self.ui.play_button_graph_2.setIcon(self.ui.icon)
             else:
-                self.timer.timeout.disconnect(self.update_graph2)
-                self.ui.play_button_graph_2.setIcon(self.ui.icon1)  
-
+                # Save the current index and stop
+                self.graph2_pause_index = self.signal_processor_2.current_index
+                self.timer_graph_2.timeout.disconnect(self.update_graph2)
+                self.ui.play_button_graph_2.setIcon(self.ui.icon1)
     
     def open_file_graph_1(self):
         self.signal_processor_1.open_file(self)
-        self.timer.timeout.connect(self.update_graph1)
+        # self.timer.timeout.connect(self.update_graph1)
+        self.timer_graph_1.timeout.connect(self.update_graph1)
+        self.timer_graph_1.setInterval(self.speed_graph_1)
+        if not self.timer_graph_1.isActive():
+            self.timer_graph_1.start()
 
     def open_file_graph_2(self):
         self.signal_processor_2.open_file(self)
-        self.timer.timeout.connect(self.update_graph2)
+        # self.timer.timeout.connect(self.update_graph2)
+        self.timer_graph_2.timeout.connect(self.update_graph2)
+        self.timer_graph_2.setInterval(self.speed_graph_2)
+        if not self.timer_graph_2.isActive():
+            self.timer_graph_2.start()
         
     def update_graph1(self):
         data_1 = self.signal_processor_1.get_next_data(self.window_width)
@@ -159,7 +183,19 @@ class MainWindow(QtWidgets.QMainWindow):
         data_2 = self.signal_processor_2.get_next_data(self.window_width)  
         if (data_2 is not None) and (self.graph2_on):
             self.graph_2.update_graph(data_2, self.signal_processor_2.current_index, self.window_width)
-        
+
+    def set_speed_graph_1(self, value):
+        self.speed_graph_1 = value
+        self.timer_graph_1.setInterval(self.speed_graph_1)
+        if not self.timer_graph_1.isActive():
+            self.timer_graph_1.start()
+
+    def set_speed_graph_2(self, value):
+        self.speed_graph_2 = value
+        self.timer_graph_2.setInterval(self.speed_graph_2)
+        if not self.timer_graph_2.isActive():
+            self.timer_graph_2.start()
+
 
     # def update_graphs(self):
     #     data_1 = self.signal_processor_1.get_next_data(self.window_width)
