@@ -34,6 +34,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.timer = QtCore.QTimer()
         self.ui.graph1Widget.graph.setLimits(xMin=0)
+        self.ui.graph2Widget.graph_2.setLimits(xMin=0)
+        self.ui.graph1Widget_3.graph.setLimits(xMin=0)
 
 
         self.signal_processor_1 = SignalProcessor(self.ui.graph1Widget.graph)
@@ -60,12 +62,14 @@ class MainWindow(QtWidgets.QMainWindow):
         
         
         # Set up the timer for updating the graph
-        self.timer.timeout.connect(self.update_graphs)
+        self.timer.timeout.connect(self.update_graph1)
         self.timer.timeout.connect(self.graph_3.update_graph)
         
         self.window_width = 50
         self.graph1_on = True
         self.graph2_on = True
+        self.first_graph_online_connected = False
+        self.second_graph_online_connected = False
         self.plot_online_curve_graph1 = self.ui.graph1Widget.graph.plotItem.plot(
             pen=pg.mkPen(color="orange", width=2), symbol="o")
         self.plot_online_curve_graph2 = self.ui.graph2Widget.graph_2.plotItem.plot(
@@ -91,14 +95,13 @@ class MainWindow(QtWidgets.QMainWindow):
     def update_online_plot(self):
         sender_button = self.sender()
         print(sender_button)
-        
         if sender_button != self.ui.connect_online_button_graph_1 and  sender_button != self.ui.connect_online_button_graph_2: # No new click
             sender_button = self.last_sender
         elif (sender_button == self.ui.connect_online_button_graph_1) and self.graph1_on: # clicked on connect_online_button_graph_1
             self.timer.timeout.connect(self.update_online_plot)
             self.last_sender = sender_button
             self.first_graph_online_connected = True
-        elif (sender_button == self.ui.connect_online_button_graph_2) and self.graph1_on: # clicked on connect_online_button_graph_2
+        elif (sender_button == self.ui.connect_online_button_graph_2) and self.graph2_on: # clicked on connect_online_button_graph_2
             self.timer.timeout.connect(self.update_online_plot)
             self.last_sender = sender_button 
             self.second_graph_online_connected = True      
@@ -146,21 +149,24 @@ class MainWindow(QtWidgets.QMainWindow):
         if sender_button == self.ui.play_button_graph_1:
             self.graph1_on = not self.graph1_on
             if self.graph1_on:
+                self.timer.timeout.connect(self.update_graph1)
                 self.ui.play_button_graph_1.setIcon(self.ui.icon)
             else:
+                self.timer.timeout.disconnect(self.update_graph1)
                 self.ui.play_button_graph_1.setIcon(self.ui.icon1)   
         elif sender_button == self.ui.play_button_graph_2:
             self.graph2_on = not self.graph2_on
             if self.graph2_on:
+                self.timer.timeout.connect(self.update_graph2)
                 self.ui.play_button_graph_2.setIcon(self.ui.icon)
             else:
+                self.timer.timeout.disconnect(self.update_graph2)
                 self.ui.play_button_graph_2.setIcon(self.ui.icon1)  
 
     
-
     def open_file_graph_1(self):
         #self.timer.start(500)
-        signal_processor = SignalProcessor(self.ui.graph1Widget.graph)
+        signal_processor= SignalProcessor(self.ui.graph1Widget.graph)
         self.signal_processor_1.append(signal_processor)  # Add to the list
 
         # Load the file and start plotting
@@ -169,7 +175,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Associate each signal processor with its graph widget
         graph = Graph(signal_processor.plot_widget)
         self.graphs_1.append(graph)
-
+        self.timer.timeout.connect(self.update_graph1)
 
     def open_file_graph_2(self):
         signal_processor = SignalProcessor(self.ui.graph2Widget.graph_2)
@@ -181,31 +187,30 @@ class MainWindow(QtWidgets.QMainWindow):
         # Associate each signal processor with its graph widget
         graph = Graph(signal_processor.plot_widget)
         self.graphs_2.append(graph)
+        self.timer.timeout.connect(self.update_graph2)
     def open_file_graph_3(self):
-        self.graph_3.open_file(self)
-        #self.timer.start(500)
+        graph_3=BubbleChartApp(self.ui.graph1Widget_3)
+        # Add to the list
 
-    def update_graphs(self):
-       
-        ''' data_1 = self.signal_processor_1.get_next_data(self.window_width)
-        data_2 = self.signal_processor_2.get_next_data(self.window_width)'''
-
-        window_width = 500 # Adjust the window width as needed
-        for signal_processor_2, graph in zip(self.signal_processor_2, self.graphs_2):
-            data = signal_processor_2.get_next_data(self.window_width)
-            if data is not None:
-                graph.update_graph(data, signal_processor_2.current_index, window_width,self.graph2_color)
+        # Load the file and start plotting
+        graph_3.open_file(self)
 
 
-        for signal_processor_1, graph in zip(self.signal_processor_1, self.graphs_1):
+    def update_graph1(self):
+         window_width = 500 # Adjust the window width as needed
+         for signal_processor_1, graph in zip(self.signal_processor_1, self.graphs_1):
             data = signal_processor_1.get_next_data(self.window_width)
             if data is not None:
                 graph.update_graph(data, signal_processor_1.current_index, window_width,self.graph1_color)
 
-        ''''  if data_1 is not None:
-            self.graph_1.update_graph(data_1, self.signal_processor_1.current_index, self.window_width,self.graph1_color)
-        if data_2 is not None:
-            self.graph_2.update_graph(data_2, self.signal_processor_2.current_index, self.window_width,self.graph2_color)'''
+        
+    def update_graph2(self): 
+       window_width = 500 # Adjust the window width as needed
+       for signal_processor_2, graph in zip(self.signal_processor_2, self.graphs_2):
+            data = signal_processor_2.get_next_data(self.window_width)
+            if data is not None:
+                graph.update_graph(data, signal_processor_2.current_index, window_width,self.graph2_color)
+
     def open_color_dialog(self, graph_number):
     # Open a color dialog and get the selected color
         color = QColorDialog.getColor()

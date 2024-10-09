@@ -1144,11 +1144,23 @@ border-radius: 15px;</string>
       </item>
       <item>
        <widget class="QPushButton" name="open_button_graph_1">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>80</width>
+          <height>30</height>
+         </size>
+        </property>
         <property name="cursor">
-         <cursorShape>SplitVCursor</cursorShape>
+         <cursorShape>OpenHandCursor</cursorShape>
         </property>
         <property name="mouseTracking">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="toolTip">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
