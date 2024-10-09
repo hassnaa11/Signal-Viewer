@@ -1,38 +1,37 @@
 import pyqtgraph as pg
+import numpy as np
 from PyQt5 import QtCore
-
 class Graph:
-    def __init__(self, graph1Widget, graph2Widget):
-        # Set up the plot widget for graph 1 and graph 2
-        self.plot_widget_1 = graph1Widget.graph
-        self.plot_widget_2 = graph2Widget.graph_2
-        self.color_1 = 'w'  # Default color for graph 1
-        self.color_2 = 'w'  # Default color for graph 2
-        self.last_data = None  # Store last data for redraw
-
-        # Configure plot background and axis colors
-        for plot_widget in [self.plot_widget_1, self.plot_widget_2]:
-            plot_widget.getAxis('left').setPen('w')  # White y-axis
-            plot_widget.getAxis('bottom').setPen('w')  # White x-axis
+    def __init__(self, graph_widget):
+        self.plot_widget = graph_widget
+        self.plot_widget.setBackground('#2D324D')
+        self.plot_widget.getAxis('left').setPen('w')
+        self.plot_widget.getAxis('bottom').setPen('w')
+        self.zero_line = pg.InfiniteLine(angle=0, pos=0, pen=pg.mkPen('r', width=1, style=pg.QtCore.Qt.DashLine))
+        self.plot_widget.addItem(self.zero_line)
 
     def update_graph(self, data, current_index, window_width,graph1_color):
-        """Update the graphs with new data."""
-        self.last_data = data  # Store the current data for potential redraw
-        # Clear previous plot for both plot widgets
-        self.plot_widget_1.clear()  # Clear previous items for graph 1
-        self.plot_widget_2.clear()  # Clear previous items for graph 2
+        self.plot_widget.clear()
+        self.plot_widget.addItem(self.zero_line)
 
         if data is not None:
-            # Generate x-axis data
-            x_data = range(current_index, current_index + window_width)
-
-            # Plot data on both plot widgets using the current colors
-            self.plot_widget_1.plot(x_data, data, pen=pg.mkPen(graph1_color))
-            self.plot_widget_2.plot(x_data, data, pen=None,symbolBrush=pg.mkBrush(self.color_1), width=2,symbol='o', 
-                                          symbolSize=5)
+            x_data = np.arange(current_index, current_index + len(data)) * 0.001
+            self.plot_widget.plot(x_data, data, pen=pg.mkPen(graph1_color))
+            self.plot_widget.setXRange(current_index * 0.001, (current_index + window_width) * 0.001)
 
 
 
-           
+    # def update_graph(self, data, current_index, window_width):
+    #     self.plot_widget.clear()  # Clear previous plot
+    #     self.plot_widget.addItem(self.zero_line)  # Re-add the zero line to the updated graph
 
-    
+    #     if data is not None:
+    #         # Generate x-axis data
+    #         x_data = np.arange(0, window_width) * 0.001
+    #         self.plot_widget.plot(x_data, data, pen=pg.mkPen('w'))
+            # self.plot_widget.setXRange(current_index * 0.001, ( current_index + window_width) * 0.001, padding = 0)
+            # x_data = range(current_index  - window_width, current_index )
+            # self.plot_widget.plot(x_data, data, pen=pg.mkPen('w'))  # Plot data
+            
+
+>>>>>>> 9aea7bf3d5b723442d19f9d12ab752ec94e3fcda

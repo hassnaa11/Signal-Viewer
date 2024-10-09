@@ -78,7 +78,7 @@ class Ui_MainWindow(object):
         #self.graph1Widget.graph = pg.PlotWidget(self.graph1Widget)
         #self.graph1Widget.graph.setBackground('#2D324D')  # Replace with your desired color
 
-        #self.canv = MatplotlibCanvas(self.graph1Widget)
+        #self.canv = MatplotlibCanvas(self.graph1Widget)+++6
         #self.graph1Layout.addWidget(self.canv)
 
 

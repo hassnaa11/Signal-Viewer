@@ -28,11 +28,11 @@ import pyqtgraph as pg
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
-        self.online_connected = False
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.timer = QtCore.QTimer()
         self.ui.graph1Widget.graph.setLimits(xMin=0)
+<<<<<<< HEAD
         self.signal_processor = SignalProcessor()
         self.graph_1 = Graph(self.ui.graph1Widget, self.ui.graph2Widget)
         self.graph_2 = Graph(self.ui.graph1Widget, self.ui.graph2Widget)
@@ -48,21 +48,41 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.signal_color_button_graph_2.clicked.connect(lambda: self.open_color_dialog('2'))
         self.ui.signal_name_lineEdit_graph_1.returnPressed.connect(self.update_graph_name_1)
 
+=======
+
+
+        self.signal_processor_1 = SignalProcessor(self.ui.graph1Widget.graph)
+        self.signal_processor_2 = SignalProcessor(self.ui.graph2Widget.graph_2)
+
+        self.graph_1 = Graph(self.ui.graph1Widget.graph)
+        self.graph_2 = Graph(self.ui.graph2Widget.graph_2)
+
+        # Connect buttons to their respective functions
+        self.ui.open_button_graph_1.clicked.connect(self.open_file_graph_1)
+        self.ui.open_button_graph_2.clicked.connect(self.open_file_graph_2)
+        self.ui.signal_color_button_graph_1.clicked.connect(lambda: self.open_color_dialog('1'))
+        self.ui.signal_color_button_graph_2.clicked.connect(lambda: self.open_color_dialog('2'))
+        self.ui.signal_name_lineEdit_graph_1.returnPressed.connect(self.update_graph_name_1)
+>>>>>>> 9aea7bf3d5b723442d19f9d12ab752ec94e3fcda
         
         # Set up the timer for updating the graph
-        self.timer.timeout.connect(self.update_graph)
+        # self.timer.timeout.connect(self.update_graphs)
         
         self.window_width = 100 
-        self.plot_curve = self.ui.graph1Widget.graph.plotItem.plot(
-            pen=pg.mkPen(color="orange", width=2), symbol="o"
-        )
+        self.graph1_on = True
+        self.graph2_on = True
+        self.plot_online_curve_graph1 = self.ui.graph1Widget.graph.plotItem.plot(
+            pen=pg.mkPen(color="orange", width=2), symbol="o")
+        self.plot_online_curve_graph2 = self.ui.graph2Widget.graph_2.plotItem.plot(
+            pen=pg.mkPen(color="orange", width=2), symbol="o")
         self.ui.connect_online_button_graph_1.clicked.connect(self.update_online_plot)
         self.ui.connect_online_button_graph_2.clicked.connect(self.update_online_plot)
-        self.ui.play_button_graph_1.clicked.connect(self.stop_run_graph_1)
+        self.ui.play_button_graph_1.clicked.connect(self.stop_run_graph)
+        self.ui.play_button_graph_2.clicked.connect(self.stop_run_graph)
         self.timer.start(1000)
 
 
-    def format_time_string(self, time_str):
+     def format_time_string(self, time_str):
         parts = time_str.split(":")
         if len(parts) == 3:
             hour, minute, second = parts
@@ -72,9 +92,19 @@ class MainWindow(QtWidgets.QMainWindow):
     
 
     def update_online_plot(self):
-        if(self.online_connected == False):
+        sender_button = self.sender()
+        print(sender_button)
+        
+        if sender_button != self.ui.connect_online_button_graph_1 and  sender_button != self.ui.connect_online_button_graph_2: # No new click
+            sender_button = self.last_sender
+        elif (sender_button == self.ui.connect_online_button_graph_1) and self.graph1_on: # clicked on connect_online_button_graph_1
             self.timer.timeout.connect(self.update_online_plot)
-            self.online_connected = True
+            self.last_sender = sender_button
+            self.first_graph_online_connected = True
+        elif (sender_button == self.ui.connect_online_button_graph_2) and self.graph1_on: # clicked on connect_online_button_graph_2
+            self.timer.timeout.connect(self.update_online_plot)
+            self.last_sender = sender_button 
+            self.second_graph_online_connected = True      
             
         try:
             # Read and process the JSON data
@@ -107,26 +137,29 @@ class MainWindow(QtWidgets.QMainWindow):
             x_axis = x_axis[valid_indices]
             y_axis = y_axis[valid_indices]
 
-            if len(x_axis) > 0 and len(y_axis) > 0:
-                self.plot_curve.setData(x_axis, y_axis)
+            if len(x_axis) > 0 and len(y_axis) > 0:           
+                if self.graph1_on and self.first_graph_online_connected: self.plot_online_curve_graph1.setData(x_axis, y_axis)
+                if self.graph2_on and self.second_graph_online_connected: self.plot_online_curve_graph2.setData(x_axis, y_axis) 
+                else: print("hahaha no sender")       
         except Exception as e:
             print(f"Error loading or plotting data: {e}")
     
-    def stop_run_graph_1(self):
-        if(self.online_connected == True):
-            self.timer.timeout.disconnect(self.update_online_plot)
-            self.online_connected = False
-            self.ui.play_button_graph_1.setIcon(self.ui.icon1)
-            
-        else:    
-            self.timer.timeout.connect(self.update_online_plot)
-            self.online_connected = True
-            self.ui.play_button_graph_1.setIcon(self.ui.icon)
-    def open_file(self):
-        self.signal_processor.open_file(self)
-        if self.signal_processor.data is not None:
-            self.timer.start(500)  # Start timer with interval in ms
+    def stop_run_graph(self):
+        sender_button = self.sender()
+        if sender_button == self.ui.play_button_graph_1:
+            self.graph1_on = not self.graph1_on
+            if self.graph1_on:
+                self.ui.play_button_graph_1.setIcon(self.ui.icon)
+            else:
+                self.ui.play_button_graph_1.setIcon(self.ui.icon1)   
+        elif sender_button == self.ui.play_button_graph_2:
+            self.graph2_on = not self.graph2_on
+            if self.graph2_on:
+                self.ui.play_button_graph_2.setIcon(self.ui.icon)
+            else:
+                self.ui.play_button_graph_2.setIcon(self.ui.icon1)  
 
+<<<<<<< HEAD
     def update_graph(self):  # Ensure this method is indented correctly within the class
         data = self.signal_processor.get_next_data(self.window_width)
         if data is not None:
@@ -163,7 +196,26 @@ class MainWindow(QtWidgets.QMainWindow):
 
         
             
+=======
+    
+>>>>>>> 9aea7bf3d5b723442d19f9d12ab752ec94e3fcda
 
+    def open_file_graph_1(self):
+        self.signal_processor_1.open_file(self)
+        #self.timer.start(500)
+
+    def open_file_graph_2(self):
+        self.signal_processor_2.open_file(self)
+        #self.timer.start(500)
+
+    def update_graphs(self):
+        data_1 = self.signal_processor_1.get_next_data(self.window_width)
+        data_2 = self.signal_processor_2.get_next_data(self.window_width)
+
+        if data_1 is not None:
+            self.graph_1.update_graph(data_1, self.signal_processor_1.current_index, self.window_width)
+        if data_2 is not None:
+            self.graph_2.update_graph(data_2, self.signal_processor_2.current_index, self.window_width)
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
     app.setApplicationDisplayName("PyQt5 Tutorial with pyqtgraph")
