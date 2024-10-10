@@ -46,9 +46,15 @@ class MainWindow(QtWidgets.QMainWindow):
         # Set up the timer for updating the graph
         # self.timer.timeout.connect(self.update_graphs)
         
+        self.ui.link_button.clicked.connect(self.link_graphs)
+        self.isLinked = False
+        
         self.window_width = 100 
         self.graph1_on = True
         self.graph2_on = True
+        self.play_both = False
+        self.is_file1_opened = False
+        self.is_file2_opened = False
         self.first_graph_online_connected = False
         self.second_graph_online_connected = False
         self.plot_online_curve_graph1 = self.ui.graph1Widget.graph.plotItem.plot(
@@ -57,17 +63,12 @@ class MainWindow(QtWidgets.QMainWindow):
             pen=pg.mkPen(color="orange", width=2), symbol="o")
         self.ui.connect_online_button_graph_1.clicked.connect(self.update_online_plot)
         self.ui.connect_online_button_graph_2.clicked.connect(self.update_online_plot)
+        
         self.ui.play_button_graph_1.clicked.connect(self.stop_run_graph)
         self.ui.play_button_graph_2.clicked.connect(self.stop_run_graph)
+        
+        
         self.timer.start(1000)
-
-
-    def format_time_string(self, time_str):
-        parts = time_str.split(":")
-        if len(parts) == 3:
-            hour, minute, second = parts
-            return f"{hour.zfill(2)}:{minute.zfill(2)}:{second.zfill(2)}"
-        return time_str
 
 
     def update_online_plot(self):
@@ -121,6 +122,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 else: print("hahaha no sender")       
         except Exception as e:
             print(f"Error loading or plotting data: {e}")
+            
+    def format_time_string(self, time_str):
+        parts = time_str.split(":")
+        if len(parts) == 3:
+            hour, minute, second = parts
+            return f"{hour.zfill(2)}:{minute.zfill(2)}:{second.zfill(2)}"
+        return time_str
     
     def stop_run_graph(self):
         sender_button = self.sender()
@@ -132,6 +140,7 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 self.timer.timeout.disconnect(self.update_graph1)
                 self.ui.play_button_graph_1.setIcon(self.ui.icon1)   
+        
         elif sender_button == self.ui.play_button_graph_2:
             self.graph2_on = not self.graph2_on
             if self.graph2_on:
@@ -140,39 +149,104 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 self.timer.timeout.disconnect(self.update_graph2)
                 self.ui.play_button_graph_2.setIcon(self.ui.icon1)  
+        
+        elif sender_button == self.ui.link_play_button:
+            print("heyyyy link_play_button")
+            self.play_both = not self.play_both
+            if self.play_both :
+                self.timer.timeout.connect(self.update_graph1)
+                self.timer.timeout.connect(self.update_graph2) 
+                self.ui.link_play_button.setIcon(self.ui.icon)
+            elif not self.play_both :
+                self.timer.timeout.disconnect(self.update_graph1)
+                self.timer.timeout.disconnect(self.update_graph2)
+                self.ui.link_play_button.setIcon(self.ui.icon1)
+                        
 
     
     def open_file_graph_1(self):
+        self.is_file1_opened = True
         self.signal_processor_1.open_file(self)
         self.timer.timeout.connect(self.update_graph1)
 
     def open_file_graph_2(self):
+        self.is_file2_opened = True
         self.signal_processor_2.open_file(self)
         self.timer.timeout.connect(self.update_graph2)
         
     def update_graph1(self):
         data_1 = self.signal_processor_1.get_next_data(self.window_width)
-        if (data_1 is not None) and (self.graph1_on):
+        if (data_1 is not None) and self.play_both:
+            self.graph_1.update_graph(data_1, self.signal_processor_1.current_index, self.window_width)
+        elif (data_1 is not None) and self.graph1_on:
             self.graph_1.update_graph(data_1, self.signal_processor_1.current_index, self.window_width)
         
     def update_graph2(self): 
-        data_2 = self.signal_processor_2.get_next_data(self.window_width)  
-        if (data_2 is not None) and (self.graph2_on):
+        data_2 = self.signal_processor_2.get_next_data(self.window_width)
+        if (data_2 is not None) and self.play_both:
+            self.graph_2.update_graph(data_2, self.signal_processor_2.current_index, self.window_width)  
+        elif (data_2 is not None) and self.graph2_on:
             self.graph_2.update_graph(data_2, self.signal_processor_2.current_index, self.window_width)
-        
 
-    # def update_graphs(self):
-    #     data_1 = self.signal_processor_1.get_next_data(self.window_width)
-    #     data_2 = self.signal_processor_2.get_next_data(self.window_width)
-
-    #     if (data_1 is not None) and (self.graph1_on):
-    #         self.graph_1.update_graph(data_1, self.signal_processor_1.current_index, self.window_width)
-    #     else:
-    #         self.timer.timeout.disconnect(self.update_graphs)   
-    #     if (data_2 is not None) and (self.graph2_on):
-    #         self.graph_2.update_graph(data_2, self.signal_processor_2.current_index, self.window_width)
-    #     else:
-    #         self.timer.timeout.disconnect(self.update_graphs)      
+    
+    def link_graphs(self):
+        self.play_both = True  
+        self.isLinked = not self.isLinked
+        if self.isLinked :
+            print("ooooooooooooo")
+            if self.is_file1_opened and self.is_file2_opened:
+                print("hhhhhhhho")
+                # initially play
+                self.timer.timeout.connect(self.update_graph1)
+                self.timer.timeout.connect(self.update_graph2)
+                # Clear both graphs
+                self.graph_2.plot_widget.clear()
+                self.graph_1.plot_widget.clear()
+                # start from first
+                self.signal_processor_1.current_index = 0
+                self.signal_processor_2.current_index = 0
+                
+                
+                self.ui.link_button.setText("Un Link")
+                self.ui.link_play_button.show()
+                self.ui.link_play_button.clicked.connect(self.stop_run_graph)
+                self.ui.link_rewind_button.show()
+                self.ui.play_button_graph_1.hide()  
+                self.ui.play_button_graph_2.hide() 
+                self.ui.pause_button_graph_1.hide() 
+                self.ui.pause_button_graph_2.hide() 
+                self.ui.stop_button_graph_1.hide()
+                self.ui.stop_button_graph_2.hide()
+                self.ui.zoom_in_button_graph_1.hide()
+                self.ui.zoom_in_button_graph_2.hide()
+            else:
+                self.isLinked = False    
+        else:
+            self.un_link_graphs()
+            self.ui.link_button.setText("Link")
+            self.ui.link_play_button.hide()
+            self.ui.link_rewind_button.hide()
+            self.ui.play_button_graph_1.show()  
+            self.ui.play_button_graph_2.show() 
+            self.ui.pause_button_graph_1.show() 
+            self.ui.pause_button_graph_2.show() 
+            self.ui.stop_button_graph_1.show()
+            self.ui.stop_button_graph_2.show()
+            self.ui.zoom_in_button_graph_1.show()
+            self.ui.zoom_in_button_graph_2.show() 
+            
+    def un_link_graphs(self):
+        print("un linkk")
+        self.play_both = False 
+        self.isLinked = False   
+        if self.graph1_on:
+            self.timer.timeout.connect(self.update_graph1)
+        else:
+            self.timer.timeout.disconnect(self.update_graph1)
+        if self.graph2_on:
+            self.timer.timeout.connect(self.update_graph2)
+        else:
+            self.timer.timeout.disconnect(self.update_graph2)    
             
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])

@@ -207,17 +207,42 @@ font: italic 10pt &quot;Georgia&quot;;
        <number>275</number>
       </property>
       <item>
-       <widget class="QLabel" name="graph_Label_2">
+       <widget class="QPushButton" name="link_button">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>80</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Georgia</family>
+          <pointsize>12</pointsize>
+          <weight>50</weight>
+          <italic>false</italic>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>OpenHandCursor</cursorShape>
+        </property>
         <property name="styleSheet">
-         <string notr="true">color: rgb(255, 255, 255);
-font: italic 11pt &quot;Georgia&quot;;
-</string>
+         <string notr="true">font: italic 10pt &quot;Georgia&quot;;
+font: 12pt &quot;Georgia&quot;;
+
+color: rgb(255, 255, 255);
+background-color: rgb(120, 207, 233);
+buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);
+border-radius: 10px;</string>
         </property>
         <property name="text">
-         <string>Graph 2</string>
-        </property>
-        <property name="textFormat">
-         <enum>Qt::PlainText</enum>
+         <string>Link</string>
         </property>
        </widget>
       </item>
@@ -1083,7 +1108,7 @@ border-radius: 15px;</string>
       <item>
        <widget class="QPushButton" name="zoo_out_button_graph_1">
         <property name="cursor">
-         <cursorShape>SplitVCursor</cursorShape>
+         <cursorShape>ArrowCursor</cursorShape>
         </property>
         <property name="mouseTracking">
          <bool>true</bool>
@@ -1126,7 +1151,7 @@ border-radius: 15px;</string>
          </size>
         </property>
         <property name="cursor">
-         <cursorShape>OpenHandCursor</cursorShape>
+         <cursorShape>ArrowCursor</cursorShape>
         </property>
         <property name="mouseTracking">
          <bool>false</bool>
