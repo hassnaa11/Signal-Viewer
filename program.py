@@ -54,6 +54,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # Initialize speed sliders and connect them
         self.ui.speed_slider_graph_1.valueChanged.connect(self.set_speed_graph_1)
         self.ui.speed_slider_graph_2.valueChanged.connect(self.set_speed_graph_2)
+
+        self.ui.move_to_graph_1_button.clicked.connect(self.move_signal_to_graph1)
+        self.ui.move_to_graph_2_button.clicked.connect(self.move_signal_to_graph2)
         
         self.window_width = 100 
         self.graph1_on = True
@@ -195,6 +198,22 @@ class MainWindow(QtWidgets.QMainWindow):
         self.timer_graph_2.setInterval(self.speed_graph_2)
         if not self.timer_graph_2.isActive():
             self.timer_graph_2.start()
+
+    def move_signal_to_graph1(self):
+        # Transfer data and index from graph2 to graph1
+        if self.signal_processor_2.data is not None:
+            self.signal_processor_1.data = self.signal_processor_2.data
+            self.signal_processor_1.current_index = self.signal_processor_2.current_index
+            # Update graph1 with the new data
+            self.update_graph1()
+
+    def move_signal_to_graph2(self):
+        # Transfer data and index from graph1 to graph2
+        if self.signal_processor_1.data is not None:
+            self.signal_processor_2.data = self.signal_processor_1.data
+            self.signal_processor_2.current_index = self.signal_processor_1.current_index
+            # Update graph2 with the new data
+            self.update_graph2()
 
 
     # def update_graphs(self):
