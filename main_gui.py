@@ -11,7 +11,10 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import matplotlib
 import matplotlib.pyplot as plt
-from PyQt5.QtWidgets import QFileDialog, QGridLayout
+from PyQt5.QtWidgets import QFileDialog, QGridLayout, QSlider, QLabel, QVBoxLayout, QHBoxLayout
+from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtGui import QPainter, QColor
+from PyQt5.QtWidgets import QLabel, QGraphicsDropShadowEffect
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT as Navi
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -81,12 +84,27 @@ class Ui_MainWindow(object):
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
 "widget-shadow: 2px 2px 5px rgb(0, 0, 0);")
         self.graph1Widget.setObjectName("graph1Widget")
-
-
         
-
-    
-
+        self.nameegraph1 = QtWidgets.QLabel(self.graph1Widget)
+        self.nameegraph1.setGeometry(QtCore.QRect(700, 10, 71, 31))
+        self.nameegraph1.setMouseTracking(False)
+        self.nameegraph1.setStyleSheet("color: rgb(255, 255, 255);\n"
+"font: 9pt \"MS Shell Dlg 2\";\n"
+"font: 9pt \"MS Shell Dlg 2\";\n"
+"font: 9pt \"MS Shell Dlg 2\";\n"
+"\n"
+"")
+        self.nameegraph1.setLineWidth(9)
+        self.nameegraph1.setMidLineWidth(99)
+        self.nameegraph1.setTextFormat(QtCore.Qt.PlainText)
+        self.nameegraph1.setObjectName("nameegraph1")
+        self.line = QtWidgets.QFrame(self.graph1Widget)
+        self.line.setGeometry(QtCore.QRect(640, 20, 61, 20))
+        self.line.setStyleSheet("\n"
+"color: rgb(0, 0, 0);")
+        self.line.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line.setObjectName("line")
         
 
 
@@ -138,12 +156,54 @@ class Ui_MainWindow(object):
 "")
         self.visible_checkBox_graph_1.setObjectName("visible_checkBox_graph_1")
         self.gridLayout.addWidget(self.visible_checkBox_graph_1, 1, 0, 1, 1)
+
+
+
         self.signal_name_label_graph_1 = QtWidgets.QLabel(self.frame)
         self.signal_name_label_graph_1.setStyleSheet("color: rgb(255, 255, 255);\n"
 "font: italic 10pt \"Georgia\";\n"
 "")
         self.signal_name_label_graph_1.setObjectName("signal_name_label_graph_1")
         self.gridLayout.addWidget(self.signal_name_label_graph_1, 0, 0, 1, 1)
+
+       
+        self.speed_label_graph_1 = QtWidgets.QLabel(self.frame)
+        self.speed_label_graph_1.setObjectName("speed_label_graph_1")
+        self.speed_label_graph_1.setStyleSheet("color: rgb(255, 255, 255);\n"
+"font: italic 10pt \"Georgia\";\n"
+"")
+        self.speed_slider_graph_1 = QtWidgets.QSlider(QtCore.Qt.Horizontal, self.frame)
+        self.speed_slider_graph_1.setObjectName("speed_slider_graph_1 ")
+        self.speed_slider_graph_1.setStyleSheet("""
+    QSlider::groove:horizontal {
+        height: 8px;
+        background: #C1EFFE;
+        border-radius: 4px;
+    }
+    QSlider::handle:horizontal {
+        background: #78CEE8;
+        border: 2px solid #C1EFFE;
+        width: 20px;
+        height: 20px;
+        margin: -6px 0;
+        border-radius: 10px;
+    }
+    QSlider::sub-page:horizontal {
+        background: #78CEE8;
+        border-radius: 4px;
+    }
+    QSlider::add-page:horizontal {
+        background: #C1EFFE;
+        border-radius: 4px;
+    }
+""")
+        self.speed_slider_graph_1.setMinimum(50)  # Minimum speed interval (in ms)
+        self.speed_slider_graph_1.setMaximum(1000)  # Maximum speed interval (in ms)
+        self.speed_slider_graph_1.setValue(500)  # Default speed interval (in ms)
+        
+        self.gridLayout.addWidget(self.speed_slider_graph_1, 2, 1, 1, 1)
+        self.gridLayout.addWidget(self.speed_label_graph_1, 2, 0, 1, 1)
+
         self.horizontalLayout_2.addWidget(self.frame)
         self.gridLayout_4.addLayout(self.horizontalLayout_2, 3, 0, 1, 1)
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
@@ -558,6 +618,46 @@ class Ui_MainWindow(object):
 "border-radius: 10px;")
         self.signal_color_button_graph_2.setObjectName("signal_color_button_graph_2")
         self.gridLayout_2.addWidget(self.signal_color_button_graph_2, 1, 1, 1, 1)
+
+ 
+        self.speed_label_graph_2 = QtWidgets.QLabel(self.frame_2)
+        self.speed_label_graph_2.setObjectName("speed_label_graph_2")
+        self.speed_label_graph_2.setStyleSheet("color: rgb(255, 255, 255);\n"
+"font: italic 10pt \"Georgia\";\n"
+"")
+        self.speed_slider_graph_2 = QtWidgets.QSlider(QtCore.Qt.Horizontal, self.frame_2)
+        self.speed_slider_graph_2.setObjectName("speed_slider_graph_2 ")
+        self.speed_slider_graph_2.setStyleSheet("""
+    QSlider::groove:horizontal {
+        height: 8px;
+        background: #C1EFFE;
+        border-radius: 4px;
+    }
+    QSlider::handle:horizontal {
+        background: #78CEE8;
+        border: 2px solid #C1EFFE;
+        width: 20px;
+        height: 20px;
+        margin: -6px 0;
+        border-radius: 10px;
+    }
+    QSlider::sub-page:horizontal {
+        background: #78CEE8;
+        border-radius: 4px;
+    }
+    QSlider::add-page:horizontal {
+        background: #C1EFFE;
+        border-radius: 4px;
+    }
+""")
+        self.speed_slider_graph_2.setMinimum(50)  # Minimum speed interval (in ms)
+        self.speed_slider_graph_2.setMaximum(1000)  # Maximum speed interval (in ms)
+        self.speed_slider_graph_2.setValue(500)  # Default speed interval (in ms)
+        
+        self.gridLayout_2.addWidget(self.speed_slider_graph_2, 2, 1, 1, 1)
+        self.gridLayout_2.addWidget(self.speed_label_graph_2, 2, 0, 1, 1)
+
+
         self.horizontalLayout_4.addWidget(self.frame_2)
         self.gridLayout_4.addLayout(self.horizontalLayout_4, 5, 0, 1, 1)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
@@ -758,6 +858,37 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
         self.retranslateUi(MainWindow)
 
+
+
+        # Layout for speed control of graph 1
+        #self.speedControlLayoutGraph1 = QHBoxLayout()
+        # self.speedControlLayoutGraph1.addWidget(self.speedLabelGraph1)
+        # self.speedControlLayoutGraph1.addWidget(self.speedSliderGraph1)
+
+        # Layout for speed control of graph 2
+        # self.speedControlLayoutGraph2 = QHBoxLayout()
+        # self.speedLabelGraph2 = QLabel("Speed Graph 2:")
+        # self.speedSliderGraph2 = QSlider(QtCore.Qt.Horizontal)
+        # self.speedSliderGraph2.setMinimum(50)  # Minimum speed interval (in ms)
+        # self.speedSliderGraph2.setMaximum(1000)  # Maximum speed interval (in ms)
+        # self.speedSliderGraph2.setValue(500)  # Default speed interval (in ms)
+
+        # self.speedControlLayoutGraph2.addWidget(self.speedLabelGraph2)
+        # self.speedControlLayoutGraph2.addWidget(self.speedSliderGraph2)
+
+        # # Adding speed control layouts to the main layout
+        # self.mainLayout = QVBoxLayout(self.centralwidget)  # Assuming you have a central widget
+        # self.mainLayout.addLayout(self.speedControlLayoutGraph1)
+        # self.mainLayout.addLayout(self.speedControlLayoutGraph2)
+
+        # # Additional layouts and widgets...
+        # # self.mainLayout.addWidget(self.otherWidget)
+        
+        # MainWindow.setCentralWidget(self.centralwidget)
+
+
+
+
         #self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -770,6 +901,8 @@ class Ui_MainWindow(object):
         self.signal_color_button_graph_1.setWhatsThis(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#ffffff;\">)pen</span></p></body></html>"))
         self.signal_color_button_graph_1.setText(_translate("MainWindow", "Signal\'s Color"))
         self.visible_checkBox_graph_1.setText(_translate("MainWindow", "Visible"))
+        self.speed_label_graph_1.setText(_translate("MainWindow", "Cine Speed"))
+        self.speed_label_graph_2.setText(_translate("MainWindow", "Cine Speed"))
         self.signal_name_label_graph_1.setText(_translate("MainWindow", "Signal\'s Name"))
         # self.graph_Label_2.setText(_translate("MainWindow", "Graph 2"))
         self.link_button.setText(_translate("MainWindow", "Link"))
@@ -783,7 +916,9 @@ class Ui_MainWindow(object):
         self.stop_button_graph_2.setWhatsThis(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#ffffff;\">)pen</span></p></body></html>"))
         self.pause_button_graph_2.setToolTip("")
         self.pause_button_graph_2.setWhatsThis(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#ffffff;\">)pen</span></p></body></html>"))
-        self.zoom_in_button_graph_2.setToolTip("")
+        self.zoom_in_button_graph_2.setToolTip(_translate("MainWindow", "<html><head/><body><p><br/></p></body></html>"))
+        self.nameegraph1.setText(_translate("MainWindow", "Signal 1"))
+       
         self.zoom_in_button_graph_2.setWhatsThis(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#ffffff;\">)pen</span></p></body></html>"))
         self.connect_online_button_graph_2.setToolTip("")
         self.connect_online_button_graph_2.setWhatsThis(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#ffffff;\">)pen</span></p></body></html>"))
