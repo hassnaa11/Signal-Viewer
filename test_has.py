@@ -1,47 +1,58 @@
-import sys
-import numpy as np
 import pyqtgraph as pg
-from PyQt5 import QtWidgets, QtCore
+from pyqtgraph.Qt import QtCore, QtWidgets
 
-class CineModeApp(QtWidgets.QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Signal Viewer with Cine Mode")
+app = QtWidgets.QApplication([])
 
-        # Central widget and layout
-        self.centralwidget = QtWidgets.QWidget(self)
-        self.setCentralWidget(self.centralwidget)
-        layout = QtWidgets.QVBoxLayout(self.centralwidget)
+# Create a main window and a layout
+win = pg.GraphicsLayoutWidget(show=True, title="Zoom/Scroll Sync Example")
+layout = QtWidgets.QVBoxLayout()
 
-        # Create a PlotWidget for the graph
-        self.graphWidget = pg.PlotWidget()
-        layout.addWidget(self.graphWidget)
+# Create two plots
+plot1 = pg.PlotWidget()
+plot2 = pg.PlotWidget()
 
-        # Initial plot data (Example: sine wave signal)
-        self.x = np.linspace(0, 10, 1000)  # Time values
-        self.signal = np.sin(self.x)  # Example signal (sine wave)
-        self.plot_data = self.graphWidget.plot(self.x, self.signal[:1])  # Start with the first point only
+# Add some data to the plots
+curve1 = plot1.plot([1, 2, 3, 4, 5], [10, 1, 3, 7, 4])
+curve2 = plot2.plot([1, 2, 3, 4, 5], [4, 9, 2, 5, 8])
 
-        # Timer for updating the graph (simulates "cine mode")
-        self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self.update_cine_mode)
-        self.timer.start(50)  # Update every 50 ms (~20 fps)
+# Function to sync the zoom and scroll between two plots
+def link_views(source_plot, target_plot):
+    def update_view():
+        # Get the view range of the source plot and apply it to the target plot
+        target_plot.setXRange(*source_plot.getViewBox().viewRange()[0], padding=0)
+        target_plot.setYRange(*source_plot.getViewBox().viewRange()[1], padding=0)
 
-        # Cine mode variables
-        self.current_index = 0  # Start from 0
-        self.frame_length = 1   # Start with 1 data point
+    # Connect the view range change signal to update the other plot
+    source_plot.sigRangeChanged.connect(update_view)
+    
+    # Store the connection function for later disconnection
+    return update_view
 
-    def update_cine_mode(self):
-        # Update the visible frame of the signal (starting from 0 and increasing)
-        self.frame_length += 1  # Gradually increase the number of points to display
-        self.plot_data.setData(self.x[:self.frame_length], self.signal[:self.frame_length])
+# Link the views between the two plots and store the connection functions
+link1 = link_views(plot1, plot2)
+link2 = link_views(plot2, plot1)  # Make the linking bidirectional
 
-        # Stop when the entire signal is displayed
-        if self.frame_length >= len(self.x):
-            self.timer.stop()  # Stop the timer when the full signal is displayed
+# Function to unlink the views
+def unlink_views():
+    # Disconnect the signals for both plots
+    plot1.sigRangeChanged.disconnect(link1)
+    plot2.sigRangeChanged.disconnect(link2)
 
-if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
-    window = CineModeApp()
-    window.show()
-    sys.exit(app.exec_())
+# Create a button to unlink the views
+button = QtWidgets.QPushButton('Unlink Views')
+button.clicked.connect(unlink_views)
+
+# Add the plots and button to the layout
+layout.addWidget(plot1)
+layout.addWidget(plot2)
+layout.addWidget(button)
+
+# Create a QWidget to hold the layout
+container = QtWidgets.QWidget()
+container.setLayout(layout)
+
+# Show the main window
+container.show()
+
+# Start the Qt event loop
+QtWidgets.QApplication.instance().exec_()
