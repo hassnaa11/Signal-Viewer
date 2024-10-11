@@ -209,14 +209,68 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_3.setContentsMargins(15, -1, 275, -1)
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
-        self.graph_Label_2 = QtWidgets.QLabel(self.centralwidget)
-        self.graph_Label_2.setStyleSheet("color: rgb(255, 255, 255);\n"
-"font: italic 11pt \"Georgia\";\n"
-"")
         
-        self.graph_Label_2.setTextFormat(QtCore.Qt.PlainText)
-        self.graph_Label_2.setObjectName("graph_Label_2")
-        self.horizontalLayout_3.addWidget(self.graph_Label_2)
+        self.link_button = QtWidgets.QPushButton(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.link_button.sizePolicy().hasHeightForWidth())
+        self.link_button.setSizePolicy(sizePolicy)
+        self.link_button.setMinimumSize(QtCore.QSize(100, 30))
+        font = QtGui.QFont()
+        font.setFamily("Georgia")
+        font.setPointSize(12)
+        font.setBold(False)
+        font.setItalic(False)
+        font.setWeight(50)
+        self.link_button.setFont(font)
+        self.link_button.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.link_button.setStyleSheet("font: italic 10pt \"Georgia\";\n"
+"font: 12pt \"Georgia\";\n"
+"\n"
+"color: rgb(255, 255, 255);\n"
+"background-color: rgb(120, 207, 233);\n"
+"buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
+"border-radius: 10px;")
+        self.link_button.setObjectName("link_button")
+        self.horizontalLayout_3.addWidget(self.link_button)
+        
+        self.link_play_button = QtWidgets.QPushButton(self.centralwidget)
+        self.link_play_button.setCursor(QtGui.QCursor(QtCore.Qt.SplitVCursor))
+        self.link_play_button.setMouseTracking(True)
+        self.link_play_button.setStyleSheet("font: italic 10pt \"Georgia\";\n"
+"color: rgb(255, 255, 255);\n"
+"background-color: rgb(120, 207, 233);\n"
+"buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
+"border-radius: 15px;")
+        self.link_play_button.setText("")
+        self.icon = QtGui.QIcon()
+        self.icon.addPixmap(QtGui.QPixmap(".\images\icons8-play-32.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        self.link_play_button.setIcon(self.icon)
+        self.link_play_button.setObjectName("link_play_button")
+        self.horizontalLayout_3.addWidget(self.link_play_button)
+        self.link_play_button.setCursor(QtCore.Qt.PointingHandCursor)
+        self.link_play_button.hide()
+        
+        self.link_rewind_button = QtWidgets.QPushButton(self.centralwidget)
+        self.link_rewind_button.setCursor(QtGui.QCursor(QtCore.Qt.SplitVCursor))
+        self.link_rewind_button.setMouseTracking(True)
+        self.link_rewind_button.setStyleSheet("font: italic 10pt \"Georgia\";\n"
+"color: rgb(255, 255, 255);\n"
+"background-color: rgb(120, 207, 233);\n"
+"buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
+"border-radius: 15px;")
+        self.link_rewind_button.setText("")
+        self.icon_rewind = QtGui.QIcon()
+        self.icon_rewind.addPixmap(QtGui.QPixmap(".\images\icons8-rewind-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        self.link_rewind_button.setIcon(self.icon_rewind)
+        self.link_rewind_button.setObjectName("link_rewind_button")
+        self.horizontalLayout_3.addWidget(self.link_rewind_button)
+        self.link_rewind_button.setCursor(QtCore.Qt.PointingHandCursor)
+        self.link_rewind_button.hide()
+        
+        
+        
         spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem1)
         self.play_button_graph_2 = QtWidgets.QPushButton(self.centralwidget)
@@ -753,6 +807,11 @@ class Ui_MainWindow(object):
 
         self.zoo_out_button_graph_3.setSizePolicy(sizePolicy_button)
         self.zoo_out_button_graph_3.setMinimumSize(30, 30)
+        
+        self.link_play_button.setSizePolicy(sizePolicy_button)
+        self.link_play_button.setMinimumSize(30, 30)
+        self.link_rewind_button.setSizePolicy(sizePolicy_button)
+        self.link_rewind_button.setMinimumSize(30, 30)
 
         self.connect_online_button_graph_1.setCursor(QtCore.Qt.PointingHandCursor)
         self.pause_button_graph_1.setCursor(QtCore.Qt.PointingHandCursor)
@@ -857,7 +916,12 @@ class Ui_MainWindow(object):
         self.speed_label_graph_1.setText(_translate("MainWindow", "Cine Speed"))
         self.speed_label_graph_2.setText(_translate("MainWindow", "Cine Speed"))
         self.signal_name_label_graph_1.setText(_translate("MainWindow", "Signal\'s Name"))
-        self.graph_Label_2.setText(_translate("MainWindow", "Graph 2"))
+        # self.graph_Label_2.setText(_translate("MainWindow", "Graph 2"))
+        self.link_button.setText(_translate("MainWindow", "Link"))
+        self.link_play_button.setToolTip("")
+        self.link_play_button.setWhatsThis(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#ffffff;\">)pen</span></p></body></html>"))
+        self.link_rewind_button.setToolTip("")
+        self.link_rewind_button.setWhatsThis(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#ffffff;\">)pen</span></p></body></html>"))
         self.play_button_graph_2.setToolTip("")
         self.play_button_graph_2.setWhatsThis(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#ffffff;\">)pen</span></p></body></html>"))
         self.stop_button_graph_2.setToolTip("")

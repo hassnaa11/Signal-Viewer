@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1118</width>
+    <width>1127</width>
     <height>787</height>
    </rect>
   </property>
@@ -238,17 +238,42 @@ border-radius: 10px;</string>
        <number>275</number>
       </property>
       <item>
-       <widget class="QLabel" name="graph_Label_2">
+       <widget class="QPushButton" name="link_button">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>80</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Georgia</family>
+          <pointsize>12</pointsize>
+          <weight>50</weight>
+          <italic>false</italic>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>OpenHandCursor</cursorShape>
+        </property>
         <property name="styleSheet">
-         <string notr="true">color: rgb(255, 255, 255);
-font: italic 11pt &quot;Georgia&quot;;
-</string>
+         <string notr="true">font: italic 10pt &quot;Georgia&quot;;
+font: 12pt &quot;Georgia&quot;;
+
+color: rgb(255, 255, 255);
+background-color: rgb(120, 207, 233);
+buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);
+border-radius: 10px;</string>
         </property>
         <property name="text">
-         <string>Graph 2</string>
-        </property>
-        <property name="textFormat">
-         <enum>Qt::PlainText</enum>
+         <string>Link</string>
         </property>
        </widget>
       </item>
@@ -954,10 +979,10 @@ border-radius: 10px;</string>
     <item row="2" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="leftMargin">
-       <number>15</number>
+       <number>10</number>
       </property>
       <property name="rightMargin">
-       <number>275</number>
+       <number>15</number>
       </property>
       <item>
        <widget class="QLabel" name="graph_Label_1">
@@ -1114,7 +1139,7 @@ border-radius: 15px;</string>
       <item>
        <widget class="QPushButton" name="zoo_out_button_graph_1">
         <property name="cursor">
-         <cursorShape>SplitVCursor</cursorShape>
+         <cursorShape>ArrowCursor</cursorShape>
         </property>
         <property name="mouseTracking">
          <bool>true</bool>
@@ -1157,13 +1182,10 @@ border-radius: 15px;</string>
          </size>
         </property>
         <property name="cursor">
-         <cursorShape>OpenHandCursor</cursorShape>
+         <cursorShape>ArrowCursor</cursorShape>
         </property>
         <property name="mouseTracking">
          <bool>false</bool>
-        </property>
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="whatsThis">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ffffff;&quot;&gt;)pen&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1179,6 +1201,47 @@ border-radius: 10px;</string>
         </property>
         <property name="text">
          <string>Open</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_7">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>110</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="export_button">
+        <property name="minimumSize">
+         <size>
+          <width>140</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="cursor">
+         <cursorShape>OpenHandCursor</cursorShape>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">font: italic 10pt &quot;Georgia&quot;;
+font: 12pt &quot;Georgia&quot;;
+
+color: rgb(255, 255, 255);
+background-color: rgb(120, 207, 233);
+buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);
+border-radius: 10px;</string>
+        </property>
+        <property name="text">
+         <string>Export Report</string>
         </property>
        </widget>
       </item>
