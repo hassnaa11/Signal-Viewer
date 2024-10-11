@@ -78,6 +78,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.link_play_button.clicked.connect(self.stop_run_graph)
         self.isLinked = False
         
+        self.is_timer_graph1_connected = False
+        self.is_timer_graph2_connected = False
+        
         
         self.window_width = 100
         self.graph1_on = True
@@ -217,8 +220,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # Associate each signal processor with its graph widget
         graph = Graph(signal_processor.plot_widget)
         self.graphs_1.append(graph)
-             
-        self.timer_graph_1.timeout.connect(self.update_graph1)
+        if not self.is_timer_graph1_connected:
+            self.timer_graph_1.timeout.connect(self.update_graph1)
+            self.is_timer_graph1_connected = True
         self.timer_graph_1.setInterval(self.speed_graph_1)
         if not self.timer_graph_1.isActive():
             self.timer_graph_1.start()
@@ -234,7 +238,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # Associate each signal processor with its graph widget
         graph = Graph(signal_processor.plot_widget)
         self.graphs_2.append(graph)
-        self.timer_graph_2.timeout.connect(self.update_graph2)
+        if not self.is_timer_graph2_connected:
+            self.timer_graph_2.timeout.connect(self.update_graph2)
+            self.is_timer_graph2_connected = True
         self.timer_graph_2.setInterval(self.speed_graph_2)
         if not self.timer_graph_2.isActive():
             self.timer_graph_2.start()
