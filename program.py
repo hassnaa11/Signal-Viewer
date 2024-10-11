@@ -292,16 +292,28 @@ class MainWindow(QtWidgets.QMainWindow):
         else :self.graph2_color=color
     
     def set_speed_graph_1(self, value):
+        print("set speed graph 1")
         self.speed_graph_1 = value
         self.timer_graph_1.setInterval(self.speed_graph_1)
         if not self.timer_graph_1.isActive():
             self.timer_graph_1.start()
+            
+        if self.isLinked:   
+            self.timer_graph_2.setInterval(self.speed_graph_1) 
+            if not self.timer_graph_2.isActive():
+                self.timer_graph_2.start()
 
     def set_speed_graph_2(self, value):
+        print("set speed graph 2")
         self.speed_graph_2 = value
         self.timer_graph_2.setInterval(self.speed_graph_2)
         if not self.timer_graph_2.isActive():
             self.timer_graph_2.start()
+            
+        if self.isLinked:   
+            self.timer_graph_1.setInterval(self.speed_graph_2) 
+            if not self.timer_graph_1.isActive():
+                self.timer_graph_1.start()
 
 
      
