@@ -19,7 +19,7 @@ class Graph:
             self.plot_widget.plot(x_data, data, pen=pg.mkPen(graph1_color))
             
             # Handle the x-axis range for scrolling
-            if current_index < 50:
+            if current_index < 500:
                 # Initially, plot and fix the x-axis range to show the data from 0 to window_width
                 # print("Less than window width, no scrolling", current_index)
                 self.plot_widget.setXRange(0, window_width * 0.001)  # window_width in ms

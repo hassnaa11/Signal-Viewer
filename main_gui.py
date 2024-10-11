@@ -832,6 +832,18 @@ class Ui_MainWindow(object):
         self.verticalLayout.setObjectName("verticalLayout")
         spacerItem6 = QtWidgets.QSpacerItem(5, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         self.verticalLayout.addItem(spacerItem6)
+        self.export_button = QtWidgets.QPushButton(self.centralwidget)
+        self.export_button.setMinimumSize(QtCore.QSize(140, 30))
+        self.export_button.setCursor(QtGui.QCursor(QtCore.Qt.OpenHandCursor))
+        self.export_button.setStyleSheet("font: italic 10pt \"Georgia\";\n"
+"font: 12pt \"Georgia\";\n"
+"\n"
+"color: rgb(255, 255, 255);\n"
+"background-color: rgb(120, 207, 233);\n"
+"buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
+"border-radius: 10px;")
+        self.export_button.setObjectName("export_button")
+        self.horizontalLayout.addWidget(self.export_button)
         self.signalViewerLabel = QtWidgets.QLabel(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -963,6 +975,7 @@ class Ui_MainWindow(object):
         self.open_button_graph_1.setToolTip("")
         self.open_button_graph_1.setWhatsThis(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#ffffff;\">)pen</span></p></body></html>"))
         self.open_button_graph_1.setText(_translate("MainWindow", "Open"))
+        self.export_button.setText(_translate("MainWindow", "Export Report"))
         self.signalViewerLabel.setText(_translate("MainWindow", "Live Signal Viewer"))
 
 

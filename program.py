@@ -1,13 +1,21 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import pyqtgraph as pg
 from PyQt5 import QtCore
+from PyQt5.QtGui import QPainter, QPixmap
+
 import json
+import os
 import numpy as np
 from datetime import datetime
 from main_gui import Ui_MainWindow
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QColorDialog
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QRubberBand, QFileDialog
+from PyQt5.QtCore import QRect, QPoint, QSize, Qt
+from PyQt5.QtCore import QRect, QPoint
+from PyQt5.QtGui import QPixmap, QMouseEvent
+from fpdf import FPDF
 
 
 from PyQt5.QtCore import QTimer  # For QTimer
@@ -37,6 +45,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.graph1Widget.graph.setLimits(xMin=0)
         self.ui.graph2Widget.graph_2.setLimits(xMin=0)
         self.ui.graph1Widget_3.graph.setLimits(xMin=0)
+        self.images=[]
 
 
         self.signal_processor_1 = SignalProcessor(self.ui.graph1Widget.graph)
@@ -56,6 +65,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.open_button_graph_1.clicked.connect(self.open_file_graph_1)
         self.ui.open_button_graph_2.clicked.connect(self.open_file_graph_2)
         self.ui.open_button_graph_3.clicked.connect(self.open_file_graph_3)
+        self.ui.stop_button_graph_1.clicked.connect(lambda:self.taking_snap_shot(1))
+        self.ui.stop_button_graph_2.clicked.connect(lambda:self.taking_snap_shot(2))
+        self.ui.export_button.clicked.connect(self.PDF_maker)
+
+
        
         self.ui.signal_color_button_graph_1.clicked.connect(lambda: self.open_color_dialog(1))
         self.ui.signal_color_button_graph_2.clicked.connect(lambda: self.open_color_dialog(2))
@@ -348,7 +362,6 @@ class MainWindow(QtWidgets.QMainWindow):
         
         # Position the label in absolute coordinates (fixed position in scene)
         text_item.setPos(700, 40)  # Adjust (x, y) for floating label position'''
-        
     def link_graphs(self):
         self.play_both = True  
         self.isLinked = not self.isLinked
@@ -419,6 +432,62 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timer_graph_2.timeout.disconnect(self.update_graph2)  
             
         self.play_both = False 
+    
+
+                
+    def taking_snap_shot(self, x):
+        if x == 1:
+            snapshot = QPixmap(self.ui.graph1Widget.graph.size()) 
+            painter = QPainter(snapshot)
+            self.ui.graph1Widget.graph.render(painter)
+        elif x == 3:
+            snapshot = QPixmap(self.ui.graph1Widget.graph.size()) 
+            painter = QPainter(snapshot)
+            self.ui.graph2Widget.graph_2.render(painter)
+
+        # End the painter session (flush the drawing)
+        painter.end()
+        print("hh")
+
+        # Save the snapshot to an image file (optional)
+        if len(self.images) == 0:
+            snapshot.save(f"graph_snapshot{0}.png")
+            self.images.append(f"graph_snapshot{0}.png")
+            print("img")
+        else:
+            snapshot.save(f"graph_snapshot{len(self.images)}.png")
+            self.images.append(f"graph_snapshot{len(self.images)}.png")
+            print(f"img{len(self.images) - 1}")
+
+    def PDF_maker(self):
+        # Create a PDF report using FPDF
+        pdf = FPDF()
+        pdf.add_page()
+
+        # Add title to the PDF
+        pdf.set_font("Arial", size=12)
+        pdf.cell(200, 10, txt="Signal Glue Report", ln=True, align="C")
+
+        # Add the snapshot image to the PDF
+        for x in range(len(self.images)):
+            pdf.image(f"graph_snapshot{x}.png", x=10, y=20+x*50, w=100)  # Adjust position and size as needed
+            print(f"graph_snapshot{x}.png")
+
+        # Add some data statistics (example)
+        pdf.set_xy(10, 120)  # Set position for the statistics text
+        pdf.set_font("Arial", size=10)
+        pdf.multi_cell(0, 10, "Statistics:\n- Max value: 1.23\n- Min value: -0.56\n- Mean: 0.12")
+
+        # Save the PDF to a file
+        pdf_path = "signal_glue_report.pdf"
+        pdf.output(pdf_path)
+
+        if os.path.exists(pdf_path):
+            print(f"Report generated and saved at: {pdf_path}")
+        else:
+            print(f"Error: PDF report was not saved at {pdf_path}")
+               
+
     
    
 if __name__ == "__main__":
