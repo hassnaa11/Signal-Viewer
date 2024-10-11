@@ -212,12 +212,12 @@ class MainWindow(QtWidgets.QMainWindow):
             print("heyyyy link_play_button")
             self.play_both = not self.play_both
             if self.play_both :
-                print("runnnnnnnnn")
+                print("runnnnnnnnn:   ", self.play_both)
                 self.timer_graph_1.timeout.connect(self.update_graph1)
                 self.timer_graph_2.timeout.connect(self.update_graph2) 
                 self.ui.link_play_button.setIcon(self.ui.icon)
             elif not self.play_both :
-                print("stoppppppppp")
+                print("stoppppppppp:   ",self.play_both)
                 self.timer_graph_1.timeout.disconnect(self.update_graph1)
                 self.timer_graph_2.timeout.disconnect(self.update_graph2)
                 print("Successfully disconnected from update_graph1.")
@@ -363,10 +363,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # Position the label in absolute coordinates (fixed position in scene)
         text_item.setPos(700, 40)  # Adjust (x, y) for floating label position'''
     def link_graphs(self):
-        self.play_both = True  
         self.isLinked = not self.isLinked
         if self.isLinked :
             if self.is_file1_opened and self.is_file2_opened:
+                self.play_both = True  
                 # initially play
                 if not self.graph1_on:
                     print("Connect 1111 after link ")
@@ -421,16 +421,19 @@ class MainWindow(QtWidgets.QMainWindow):
     def un_link_graphs(self):
         print("un linkk")  
         # Return graphs to play as after start linking
-        if self.graph1_on and not self.play_both:
-            self.timer_graph_1.timeout.connect(self.update_graph1)
-        elif not self.graph1_on and self.play_both:
-            self.timer_graph_1.timeout.disconnect(self.update_graph1)
-            
-        if self.graph2_on and not self.play_both:
-            self.timer_graph_2.timeout.connect(self.update_graph2)
-        elif not self.graph2_on and self.play_both:
-            self.timer_graph_2.timeout.disconnect(self.update_graph2)  
-            
+        print(self.play_both)
+        if self.play_both:
+            print("play both:  ",self.play_both)
+            if not self.graph1_on:
+                self.timer_graph_1.timeout.disconnect(self.update_graph1)
+            if not self.graph2_on:
+                self.timer_graph_2.timeout.disconnect(self.update_graph2) 
+        else:
+            print("not play both:  ",self.play_both)
+            if self.graph1_on:
+                self.timer_graph_1.timeout.connect(self.update_graph1)
+            if self.graph2_on:
+                self.timer_graph_2.timeout.connect(self.update_graph2)                                
         self.play_both = False 
     
 
