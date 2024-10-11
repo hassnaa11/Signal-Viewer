@@ -13,18 +13,17 @@ class Graph:
         if data is not None:
             # Create x-axis data for plotting based on current_index
             x_data = np.arange(current_index, current_index + len(data)) * 0.001  # 0.001 assumes 1 unit is 1 ms
-            
             # Clear the previous plot before replotting the entire signal with the new color
             
             # Replot the entire signal with the updated color
             self.plot_widget.plot(x_data, data, pen=pg.mkPen(graph1_color))
             
             # Handle the x-axis range for scrolling
-            if current_index < 50:
+            if current_index < 500:
                 # Initially, plot and fix the x-axis range to show the data from 0 to window_width
-                print("Less than window width, no scrolling", current_index)
+                # print("Less than window width, no scrolling", current_index)
                 self.plot_widget.setXRange(0, window_width * 0.001)  # window_width in ms
             else:
                 # After filling the initial window, make the graph scroll by updating the x-axis range
-                print("Window filled, scrolling", current_index)
+                # print("Window filled, scrolling", current_index)
                 self.plot_widget.setXRange((current_index - window_width) * 0.001, current_index * 0.001)
