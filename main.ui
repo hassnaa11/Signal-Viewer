@@ -107,6 +107,37 @@ border-radius: 25px;
 buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);
 widget-shadow: 2px 2px 5px rgb(0, 0, 0);</string>
          </property>
+         <widget class="QLabel" name="nameegraph1">
+          <property name="geometry">
+           <rect>
+            <x>710</x>
+            <y>-20</y>
+            <width>51</width>
+            <height>71</height>
+           </rect>
+          </property>
+          <property name="mouseTracking">
+           <bool>false</bool>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(255, 255, 255);
+font: italic 11pt &quot;Georgia&quot;;
+font: 6pt &quot;MS Shell Dlg 2&quot;;
+</string>
+          </property>
+          <property name="lineWidth">
+           <number>9</number>
+          </property>
+          <property name="midLineWidth">
+           <number>99</number>
+          </property>
+          <property name="text">
+           <string>Graph 1</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::PlainText</enum>
+          </property>
+         </widget>
         </widget>
        </widget>
       </item>
@@ -131,6 +162,40 @@ widget-shadow: 2px 2px 5px rgb(0, 0, 0);</string>
          <enum>QFrame::Raised</enum>
         </property>
         <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="signal_name_label_graph_1">
+           <property name="styleSheet">
+            <string notr="true">color: rgb(255, 255, 255);
+font: italic 10pt &quot;Georgia&quot;;
+</string>
+           </property>
+           <property name="text">
+            <string>Signal's Name</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="visible_checkBox_graph_1">
+           <property name="styleSheet">
+            <string notr="true">color: rgb(255, 255, 255);
+font: italic 10pt &quot;Georgia&quot;;
+
+</string>
+           </property>
+           <property name="text">
+            <string>Visible</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="signal_name_lineEdit_graph_1">
+           <property name="styleSheet">
+            <string notr="true">border-radius: 10px;
+border-shadow: 2px 2px 5px rgb(0, 0, 0);
+background-color: rgb(255, 255, 255);</string>
+           </property>
+          </widget>
+         </item>
          <item row="1" column="1">
           <widget class="QPushButton" name="signal_color_button_graph_1">
            <property name="cursor">
@@ -156,40 +221,6 @@ border-radius: 10px;</string>
            </property>
            <property name="text">
             <string>Signal's Color</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="signal_name_lineEdit_graph_1">
-           <property name="styleSheet">
-            <string notr="true">border-radius: 10px;
-border-shadow: 2px 2px 5px rgb(0, 0, 0);
-background-color: rgb(255, 255, 255);</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QCheckBox" name="visible_checkBox_graph_1">
-           <property name="styleSheet">
-            <string notr="true">color: rgb(255, 255, 255);
-font: italic 10pt &quot;Georgia&quot;;
-
-</string>
-           </property>
-           <property name="text">
-            <string>Visible</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="signal_name_label_graph_1">
-           <property name="styleSheet">
-            <string notr="true">color: rgb(255, 255, 255);
-font: italic 10pt &quot;Georgia&quot;;
-</string>
-           </property>
-           <property name="text">
-            <string>Signal's Name</string>
            </property>
           </widget>
          </item>
