@@ -8,6 +8,7 @@ import os
 import numpy as np
 from datetime import datetime
 from main_gui import Ui_MainWindow
+from non_rectangle_plot_window import nonRectanglePlotWindow
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QColorDialog
@@ -131,6 +132,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.play_button_graph_2.clicked.connect(self.stop_run_graph)
         self.timer2.start(1000)
         self.timer2.timeout.connect(self.graph_3.update_graph)
+        
+        self.ui.nonrectangle_graph_button.clicked.connect(self.show_non_rectangle_plot)
         self.timer.start(1000)
 
     def format_time_string(self, time_str):
@@ -166,10 +169,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.second_graph_online_connected = True
 
         try:
-            # Read and process the JSON data
             with open("online_data.json", "r") as file:
                 self.data = json.load(file)
-            # Convert y-axis data to floats
             y_axis = []
             for item in self.data["Data_Y"]:
                 try:
@@ -177,15 +178,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 except ValueError:
                     item = np.nan
                 y_axis.append(item)
-            # Convert time strings to elapsed seconds with standardized format
+            # format time 
             time_data = self.data["Time"]
             if len(time_data) > 0:
                 time_data = [self.format_time_string(t) for t in time_data]
-                base_time = datetime.strptime(
-                    time_data[0], "%H:%M:%S"
-                )  # First timestamp as the base
-                x_axis = [
-                    (
+                # first time as the base
+                base_time = datetime.strptime(time_data[0], "%H:%M:%S") 
+                x_axis = [(
                         datetime.strptime(self.format_time_string(t), "%H:%M:%S")
                         - base_time
                     ).total_seconds()
@@ -446,7 +445,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def un_link_graphs(self):
         print("un linkk")
-        # Return graphs to play as after start linking
+        # Return graphs to play same as before start linking
         print(self.play_both)
         if self.play_both:
             print("play both:  ", self.play_both)
@@ -481,16 +480,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def link_views(self, source_plot, target_plot):
         def update_view():
-            # Get the view range of the source plot and apply it to the target plot
             target_plot.setXRange(*source_plot.getViewBox().viewRange()[0], padding=0)
             target_plot.setYRange(*source_plot.getViewBox().viewRange()[1], padding=0)
             source_plot.enableAutoRange(axis=pg.ViewBox.XAxis, enable=False)
             target_plot.enableAutoRange(axis=pg.ViewBox.XAxis, enable=False)
 
-        # Connect the view range change signal to update the other plot
+        # Connect 3ashan ye3ml update lama ye7sal ta8yer
         connection = source_plot.sigRangeChanged.connect(lambda: update_view())
-        
-        # Store the connection function for later disconnection
+        # Store connection hanehtago wehna bn3ml un link
         return connection        
 
     def taking_snap_shot(self, x):
@@ -548,6 +545,10 @@ class MainWindow(QtWidgets.QMainWindow):
             print(f"Report generated and saved at: {pdf_path}")
         else:
             print(f"Error: PDF report was not saved at {pdf_path}")
+            
+    def show_non_rectangle_plot(self):
+        self.non_rectangle_plot= nonRectanglePlotWindow()
+        self.non_rectangle_plot.show()        
 
 
 if __name__ == "__main__":
