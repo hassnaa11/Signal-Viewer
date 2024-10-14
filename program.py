@@ -9,10 +9,19 @@ import os
 import numpy as np
 from datetime import datetime
 from main_gui import Ui_MainWindow
-# from non_rectangle_plot_window import nonRectanglePlotWindow
+from non_rectangle_plot_window import nonRectanglePlotWindow
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QColorDialog
+from PyQt5.QtWidgets import (
+    QApplication,
+    QWidget,
+    QVBoxLayout,
+    QPushButton,
+    QLabel,
+    QRubberBand,
+    QFileDialog,
+)
 from PyQt5.QtWidgets import (
     QApplication,
     QWidget,
@@ -38,13 +47,16 @@ from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg,
     NavigationToolbar2QT as Navi,
 )
+from matplotlib.backends.backend_qt5agg import (
+    FigureCanvasQTAgg,
+    NavigationToolbar2QT as Navi,
+)
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from signal_1 import SignalProcessor
 from graph import Graph
 from non_rectangular import BubbleChartApp
-
-# import pyedflib
+#import pyedflib
 import pyqtgraph as pg
 
 
@@ -52,7 +64,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.ui = Ui_MainWindow()
-
+        
         self.ui.setupUi(self)
         self.timer = QtCore.QTimer()
         self.timer2 = QtCore.QTimer()
@@ -78,8 +90,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.open_button_graph_1.clicked.connect(self.open_file_graph_1)
         self.ui.open_button_graph_2.clicked.connect(self.open_file_graph_2)
         self.ui.open_button_graph_3.clicked.connect(self.open_file_graph_3)
-        self.ui.stop_button_graph_1.clicked.connect(lambda: self.taking_snap_shot(1))
-        self.ui.stop_button_graph_2.clicked.connect(lambda: self.taking_snap_shot(2))
+        self.ui.stop_button_graph_1.clicked.connect(lambda:  self.taking_snap_shot(1))
+        self.ui.stop_button_graph_2.clicked.connect(lambda:  self.taking_snap_shot(2))
         self.ui.export_button.clicked.connect(self.PDF_maker)
 
         self.ui.signal_color_button_graph_1.clicked.connect(
@@ -115,7 +127,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         # Set up the timer for updating the graph
         # self.timer.timeout.connect(self.update_graphs)
-
+        
         self.ui.link_button.clicked.connect(self.link_graphs)
         self.ui.link_play_button.clicked.connect(self.stop_run_graph)
         self.isLinked = False
@@ -133,13 +145,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.second_graph_online_connected = False
         self.plot_online_curve_graph1 = self.ui.graph1Widget.graph.plotItem.plot(
             pen=pg.mkPen(color="orange", width=2), symbol="o"
+        
         )
         self.plot_online_curve_graph2 = self.ui.graph2Widget.graph_2.plotItem.plot(
             pen=pg.mkPen(color="orange", width=2), symbol="o"
+        
         )
         self.ui.connect_online_button_graph_1.clicked.connect(self.update_online_plot)
         self.ui.connect_online_button_graph_2.clicked.connect(self.update_online_plot)
-
+        
         self.ui.play_button_graph_1.clicked.connect(self.stop_run_graph)
         self.ui.play_button_graph_2.clicked.connect(self.stop_run_graph)
         self.timer2.start(1000)
@@ -154,7 +168,6 @@ class MainWindow(QtWidgets.QMainWindow):
             hour, minute, second = parts
             return f"{hour.zfill(2)}:{minute.zfill(2)}:{second.zfill(2)}"
         return time_str
-
     def closeEvent(self, event):
         """Handle window close event to stop the timer"""
         self.graph_3.closeEvent(event)
@@ -228,7 +241,7 @@ class MainWindow(QtWidgets.QMainWindow):
             hour, minute, second = parts
             return f"{hour.zfill(2)}:{minute.zfill(2)}:{second.zfill(2)}"
         return time_str
-
+    
     def stop_run_graph(self):
         sender_button = self.sender()
         if sender_button == self.ui.play_button_graph_1:
@@ -264,7 +277,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ui.link_play_button.setIcon(self.ui.icon1)
 
     def open_file_graph_1(self):
-        #self.timer.start(500)
+          #self.timer.start(500)
         signal_processor= SignalProcessor(self.ui.graph1Widget.graph)
         self.signal_processor1.append(signal_processor)  # Add to the list
 
@@ -337,9 +350,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.timer_graph_2.setInterval(self.speed_graph_2)
         if not self.timer_graph_2.isActive():
             self.timer_graph_2.start()
-    
 
-
+        
     def update_graph1(self):
         window_width = 500 # Adjust the window width as needed
         selected_name = self.ui.signals_name_combo_box_graph_1.currentText()
@@ -372,7 +384,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def open_file_graph_3(self):
         if self.graph_3 is None:
             self.graph_3 = BubbleChartApp(self.graph_widget_3)
-
+        
         # Call the open_file method to open a CSV file
         self.graph_3.open_file(self)
 
@@ -699,11 +711,3 @@ if __name__ == "__main__":
     ui = MainWindow()
     ui.show()
     app.exec_()
-        
-
-
-
-       
-    
-        
-    
