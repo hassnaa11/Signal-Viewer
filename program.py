@@ -2,7 +2,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import pyqtgraph as pg
 from PyQt5 import QtCore
 from PyQt5.QtGui import QPainter, QPixmap
-
+from matplotlib.widgets import RectangleSelector
+from scipy import interpolate 
 import json
 import os
 import numpy as np
@@ -53,21 +54,52 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.graph_1 = Graph(self.ui.graph1Widget.graph)
         self.graph_2 = Graph(self.ui.graph2Widget.graph_2)
-        self.graph_3=BubbleChartApp(self.ui.graph1Widget_3.graph)
+        #self.graph_3=BubbleChartApp(self.ui.graph1Widget_3.graph)
         self.graph1_color="w"
         self.graph2_color="w"
         self.signal_processor1 = [] 
         self.signal_processor2=[] # List to hold all signal processors
         self.graphs_1 = []  # List to hold corresponding graph widgets
         self.graphs_2=[]
+        self.graph2_filtered_x = []
+        self.graph2_filtered_y = []
+        self.graph1_filtered_x = []
+        self.graph1_filtered_y = []
+        self.x_shifted=[]
+        self.whole_x_data=[]
+        self.whole_y_data=[]
+        self.graph1_plot = None
+        self.graph2_plot = None
+        self.ui.slider_glue.setMinimum(-40)  # Set minimum value
+        self.ui.slider_glue.setMaximum(40)    # Set maximum value
+        self.ui.slider_glue.setValue(0)       # Initial slider value
+        self.ui.slider_glue.setSingleStep(1)  # Increment step when slider is moved
+        self.ui.slider_glue.valueChanged.connect(self.on_slider_change)
+        self.total_shifed_glue_slider = 0.0
+        self.graph1_end_x = None
+        self.graph1_start_x=None
+        self.graph1_end_y = None
+        self.graph1_start_y=None  
+        self.graph2_start_x = None
+        self.graph2_end_x=None
+        self.graph2_start_y =None
+        self.graph2_end_y=None
+        # Connect the slider value change to the function
+        
 
         # Connect buttons to their respective functions
         self.ui.open_button_graph_1.clicked.connect(self.open_file_graph_1)
         self.ui.open_button_graph_2.clicked.connect(self.open_file_graph_2)
         self.ui.open_button_graph_3.clicked.connect(self.open_file_graph_3)
-        self.ui.stop_button_graph_1.clicked.connect(lambda:self.taking_snap_shot(1))
-        self.ui.stop_button_graph_2.clicked.connect(lambda:self.taking_snap_shot(2))
+        
+        self.ui.stop_button_graph_3.clicked.connect(lambda:self.taking_snapshot(3))
+        self.ui.snapshot_button.clicked.connect(lambda:self.taking_snapshot(1))
+        self.ui.snapshot_button_graph2.clicked.connect(lambda:self.taking_snapshot(2))
         self.ui.export_button.clicked.connect(self.PDF_maker)
+        self.ui.select_button_graph1.clicked.connect(self.select_graph_to_cut)
+        self.ui.select_button_graph2.clicked.connect(self.select_graph_to_cut_2)
+        self.ui.pushButton.clicked.connect(self.on_glue_button_click)
+        
 
 
        
@@ -114,9 +146,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.play_button_graph_1.clicked.connect(self.stop_run_graph)
         self.ui.play_button_graph_2.clicked.connect(self.stop_run_graph)
         self.timer2.start(1000)
-        self.timer2.timeout.connect(self.graph_3.update_graph)
+        #self.timer2.timeout.connect(self.graph_3.update_graph)
         self.timer.start(1000)
+        self.rect_roi = pg.RectROI([0.1, 0], [0.2, 0.2], pen='r')
+        self.rect_roi.addScaleHandle([1, 0.5], [0.5, 0.5])  # Adding scale handles
         
+        
+
+        # Variable to store selected range
+        self.selected_range = None
 
 
     def format_time_string(self, time_str):
@@ -125,9 +163,7 @@ class MainWindow(QtWidgets.QMainWindow):
             hour, minute, second = parts
             return f"{hour.zfill(2)}:{minute.zfill(2)}:{second.zfill(2)}"
         return time_str
-    def closeEvent(self, event):
-        """Handle window close event to stop the timer"""
-        self.graph_3.closeEvent(event)
+   
 
 
     def update_online_plot(self):
@@ -240,7 +276,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.timer_graph_1.setInterval(self.speed_graph_1)
         if not self.timer_graph_1.isActive():
             self.timer_graph_1.start()
-
+      
     def open_file_graph_2(self):
         
         signal_processor= SignalProcessor(self.ui.graph2Widget.graph_2)
@@ -328,9 +364,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timer_graph_1.setInterval(self.speed_graph_2) 
             if not self.timer_graph_1.isActive():
                 self.timer_graph_1.start()
-
-
-     
     def update_graph_name_1(self):  
         new_name = self.ui.signal_name_lineEdit_graph_1.text()
         print(new_name)
@@ -438,29 +471,28 @@ class MainWindow(QtWidgets.QMainWindow):
     
 
                 
-    def taking_snap_shot(self, x):
-        if x == 1:
-            snapshot = QPixmap(self.ui.graph1Widget.graph.size()) 
-            painter = QPainter(snapshot)
+    def taking_snapshot(self, x):
+        snapshot = QPixmap(self.ui.graph1Widget_3.graph.size()) if x == 3 else QPixmap(self.ui.graph1Widget.graph.size()) if x == 1 else QPixmap(self.ui.graph2Widget.graph_2.size())
+        painter = QPainter(snapshot)
+
+        # Render the appropriate graph based on x
+        if x == 3:
+            self.ui.graph1Widget_3.graph.render(painter)
+        elif x == 1:
             self.ui.graph1Widget.graph.render(painter)
-        elif x == 3:
-            snapshot = QPixmap(self.ui.graph1Widget.graph.size()) 
-            painter = QPainter(snapshot)
+        elif x == 2:
             self.ui.graph2Widget.graph_2.render(painter)
 
-        # End the painter session (flush the drawing)
+        # End the painter session
         painter.end()
-        print("hh")
 
-        # Save the snapshot to an image file (optional)
-        if len(self.images) == 0:
-            snapshot.save(f"graph_snapshot{0}.png")
-            self.images.append(f"graph_snapshot{0}.png")
-            print("img")
-        else:
-            snapshot.save(f"graph_snapshot{len(self.images)}.png")
-            self.images.append(f"graph_snapshot{len(self.images)}.png")
-            print(f"img{len(self.images) - 1}")
+        # Save the snapshot to an image file
+        index = len(self.images)  # Get the current index for the snapshot
+        snapshot.save(f"graph{x}_snapshot{index}.png")
+        self.images.append((x, f"graph{x}_snapshot{index}.png"))  # Save a tuple of (graph_number, file_name)
+        print(f"Snapshot saved: graph{x}_snapshot{index}.png")
+
+
 
     def PDF_maker(self):
         # Create a PDF report using FPDF
@@ -468,18 +500,68 @@ class MainWindow(QtWidgets.QMainWindow):
         pdf.add_page()
 
         # Add title to the PDF
-        pdf.set_font("Arial", size=12)
+        pdf.set_font("Arial", "B", size=16)
         pdf.cell(200, 10, txt="Signal Glue Report", ln=True, align="C")
 
-        # Add the snapshot image to the PDF
-        for x in range(len(self.images)):
-            pdf.image(f"graph_snapshot{x}.png", x=10, y=20+x*50, w=100)  # Adjust position and size as needed
-            print(f"graph_snapshot{x}.png")
+        for i, (graph_index, snapshot_file) in enumerate(self.images):
+            # Set the initial y_offset with more space between sections
+            y_offset = 30 + (i * 100)  # Increase the space between sections to avoid overlap
 
-        # Add some data statistics (example)
-        pdf.set_xy(10, 120)  # Set position for the statistics text
-        pdf.set_font("Arial", size=10)
-        pdf.multi_cell(0, 10, "Statistics:\n- Max value: 1.23\n- Min value: -0.56\n- Mean: 0.12")
+            # Add snapshot image and center it
+            pdf.image(snapshot_file, x=pdf.get_x() + 55, y=y_offset, w=100)  # Adjust x position to center
+
+            # Define the data for the current graph based on its index
+            if graph_index == 1:
+                x_data, y_data = self.graph1_filtered_x, self.graph1_filtered_y
+                graph_name = "Graph 1"
+            elif graph_index == 2:
+                x_data, y_data = self.graph2_filtered_x, self.graph2_filtered_y
+                graph_name = "Graph 2"
+            elif graph_index == 3:
+                x_data, y_data = self.whole_x_data, self.whole_y_data  # Glued graph data
+                graph_name = "Glued Graph 3"
+
+            # Calculate statistics for the current graph data
+            mean_value = np.mean(y_data)
+            std_value = np.std(y_data)
+            min_value = np.min(y_data)
+            max_value = np.max(y_data)
+            duration = x_data[-1] - x_data[0]  # Duration of the signal
+
+            # Add table title for each graph and center it
+            pdf.set_xy(10, y_offset + 40)  # Adjust y position for table to be right after the image
+            pdf.set_font("Arial", "B", size=12)
+            pdf.cell(0, 10, txt=f"Statistics for {graph_name}", ln=True, align="C")  # Center align
+
+            # Set font for the table
+            pdf.set_font("Arial", size=10)
+
+            # Define the statistics data
+            data = [
+                ["Mean", f"{mean_value:.2f}"],
+                ["Standard Deviation", f"{std_value:.2f}"],
+                ["Min Value", f"{min_value:.2f}"],
+                ["Max Value", f"{max_value:.2f}"],
+                ["Duration", f"{duration:.2f}"]
+            ]
+
+            # Set column widths and center the table
+            col_width = 80  # Increase the column width to balance the table width
+            row_height = 8
+            pdf.set_x((210 - (col_width * 2)) / 2)  # Center the table
+
+            # Add table header without an extra empty cell
+            headers = ["Statistic", "Value"]
+            for header in headers:
+                pdf.cell(col_width, row_height, header, border=1, align='C')
+            pdf.ln(row_height)
+
+            # Add the data rows to the table without an extra empty cell
+            for row in data:
+                pdf.set_x((210 - (col_width * 2)) / 2)  # Center each row
+                for item in row:
+                    pdf.cell(col_width, row_height, item, border=1, align='C')
+                pdf.ln(row_height)
 
         # Save the PDF to a file
         pdf_path = "signal_glue_report.pdf"
@@ -489,10 +571,304 @@ class MainWindow(QtWidgets.QMainWindow):
             print(f"Report generated and saved at: {pdf_path}")
         else:
             print(f"Error: PDF report was not saved at {pdf_path}")
-               
 
-    
-   
+
+    def select_graph_to_cut_2(self):
+        if self.is_file2_opened == True:
+            self.ui.graph2Widget.graph_2.addItem(self.rect_roi)
+            # When the selection is made, you can access the ROI's position and size
+            self.ui.pause_button_graph_2.clicked.connect(self.on_select_2)
+
+    def select_graph_to_cut(self):
+        """Triggered when the 'Select Signal Portion' button is clicked"""
+        print("Rectangle selector activated. Select a portion of the signal.")
+        # You can now move or resize the rect_roi interactively to select a region
+        if self.is_file1_opened == True:
+            self.ui.graph1Widget.graph.addItem(self.rect_roi)
+            # When the selection is made, you can access the ROI's position and size
+            self.ui.pause_button_graph_1.clicked.connect(self.on_select)
+            
+
+     # Make sure NumPy is imported
+
+    def on_select(self):
+        """Handles the selection event"""
+        # Get the selected rectangle's coordinates and size
+        pos = self.rect_roi.pos()  # Position (top-left corner)
+        size = self.rect_roi.size()  # Size of the rectangle (width, height)
+
+        # Store the selected range (left, right, top, bottom)
+        left = pos.x()  # x-axis (time/sample) start
+        right = pos.x() + size[0]  # x-axis (time/sample) end
+        top = pos.y()  # y-axis (amplitude) start
+        bottom = pos.y() + size[1]  # y-axis (amplitude) end
+
+        # Debug: Print the selected rectangle bounds
+        print(f"Rectangle bounds - Left: {left}, Right: {right}, Top: {top}, Bottom: {bottom}")
+
+        # 1. Slice the x-data range
+        x_data = self.graph_1.previous_x_data  # Original x-data
+        y_data = self.graph_1.previous_signal_points  # Original y-data
+
+        # Find the nearest index for the 'left' and 'right' boundaries
+        left_idx = 0
+        right_idx = 0
+
+        # Find the nearest index to 'left'
+ 
+        for i, x in enumerate(x_data):
+            if x >= left:  # As soon as you hit or exceed the left boundary, take the index
+                left_idx = i
+                break  # Exit the loop as soon as the condition is met
+
+        # Find the nearest index to 'right'
+        for i, x in enumerate(x_data):
+            if x >= right:  # As soon as you hit or exceed the right boundary, take the index
+                right_idx = i
+                break  # Exit the loop as soon as the condition is met
+
+
+        # Ensure right_idx is greater than left_idx
+        right_idx = max(right_idx, left_idx + 1)
+
+        # Slice the x and y data based on the approximated x-axis selection
+        selected_x = x_data[left_idx:right_idx]
+        selected_y = y_data[left_idx:right_idx]
+
+        # Debug: Print the selected x and y data range
+        print(f"Selected x data: {selected_x[:5]}")  # Print the first 5 values for verification
+        print(f"Selected y data: {selected_y[:5]}")
+
+
+        left_value = selected_x[0]
+
+        filtered_selected_x = []
+        filtered_selected_y = []
+
+        for x, y in zip(selected_x, selected_y):
+            if x >= left_value:  # Keep only x values greater than or equal to left_value
+                filtered_selected_x.append(x)
+                filtered_selected_y.append(y)
+
+        # Debug: Print the filtered x and y data
+        print(f"Filtered x values: {filtered_selected_x[:5]}")
+        print(f"Filtered y values: {filtered_selected_y[:5]}")
+
+
+     
+        # 2. Filter y-data based on the selected y-range (top to bottom) and ensure one-to-one mapping with x
+        
+
+        # Use a dictionary to store only one y-value per x-value
+        unique_data = {}
+
+
+
+        # Iterate through both x and y data simultaneously
+        for i, (x, y) in enumerate(zip(filtered_selected_x, filtered_selected_y)):
+            if top <= y <= bottom:  # Filter y-values within the y-axis range
+                if x not in unique_data:  # Only keep the first occurrence of x
+                    unique_data[x] = y
+
+        # Convert the dictionary back to two lists
+        self.graph1_filtered_x = list(unique_data.keys())
+        self.graph1_filtered_y = list(unique_data.values())
+
+        # Debug: Print the filtered x and y data
+        print(f"Filtered x values: {self.graph1_filtered_x[:5]}")
+        print(f"Filtered y values: {self.graph1_filtered_y[:5]}")
+
+
+        self.zero_line = pg.InfiniteLine(angle=0, pos=0, pen=pg.mkPen('r', width=1, style=pg.QtCore.Qt.DashLine))
+        self.ui.graph1Widget_3.graph.addItem(self.zero_line)
+
+
+        self.graph1_plot= self.ui.graph1Widget_3.graph.plot(self.graph1_filtered_x, self.graph1_filtered_y, pen=pg.mkPen('w', width=1))
+
+       
+
+        # Store and print the selected range for verification
+        self.selected_range = (left, right, top, bottom)
+        print(f"Selected range: {self.selected_range}")
+
+    def on_select_2(self):
+        pos = self.rect_roi.pos()  # Position (top-left corner)
+        size = self.rect_roi.size()  # Size of the rectangle (width, height)
+
+        # Store the selected range (left, right, top, bottom)
+        left = pos.x()  # x-axis (time/sample) start
+        right = pos.x() + size[0]  # x-axis (time/sample) end
+        top = pos.y()  # y-axis (amplitude) start
+        bottom = pos.y() + size[1]  # y-axis (amplitude) end
+
+        # Debug: Print the selected rectangle bounds
+        print(f"Rectangle bounds - Left: {left}, Right: {right}, Top: {top}, Bottom: {bottom}")
+
+        # 1. Slice the x-data range
+        x_data = self.graph_2.previous_x_data  # Original x-data
+        y_data = self.graph_2.previous_signal_points  # Original y-data
+
+        # Find the nearest index for the 'left' and 'right' boundaries
+        left_idx = 0
+        right_idx = 0
+
+        # Find the nearest index to 'left'
+        # Find the nearest index to 'left'
+        for i, x in enumerate(x_data):
+            if x >= left:  # As soon as you hit or exceed the left boundary, take the index
+                left_idx = i
+                break  # Exit the loop as soon as the condition is met
+
+        # Find the nearest index to 'right'
+        for i, x in enumerate(x_data):
+            if x >= right:  # As soon as you hit or exceed the right boundary, take the index
+                right_idx = i
+                break  # Exit the loop as soon as the condition is met
+
+
+        # Ensure right_idx is greater than left_idx
+        right_idx = max(right_idx, left_idx + 1)
+
+        # Slice the x and y data based on the approximated x-axis selection
+        selected_x = x_data[left_idx:right_idx]
+        selected_y = y_data[left_idx:right_idx]
+
+       
+
+
+        left_value = selected_x[0]
+
+        filtered_selected_x = []
+        filtered_selected_y = []
+
+        for x, y in zip(selected_x, selected_y):
+            if x >= left_value:  # Keep only x values greater than or equal to left_value
+                filtered_selected_x.append(x)
+                filtered_selected_y.append(y)
+
+        # Debug: Print the filtered x and y data
+        
+
+
+     
+        # 2. Filter y-data based on the selected y-range (top to bottom) and ensure one-to-one mapping with x
+        
+
+        # Use a dictionary to store only one y-value per x-value
+        unique_data = {}
+
+
+
+        # Iterate through both x and y data simultaneously
+        for i, (x, y) in enumerate(zip(filtered_selected_x, filtered_selected_y)):
+            if top <= y <= bottom:  # Filter y-values within the y-axis range
+                if x not in unique_data:  # Only keep the first occurrence of x
+                    unique_data[x] = y
+
+        # Convert the dictionary back to two lists
+        self.graph2_filtered_x = list(unique_data.keys())
+        self.graph2_filtered_y = list(unique_data.values())
+
+        # Debug: Print the filtered x and y data
+        
+        print(f"Filtered y values: {self.graph2_filtered_y[:5]}")
+
+
+        self.zero_line = pg.InfiniteLine(angle=0, pos=0, pen=pg.mkPen('r', width=1, style=pg.QtCore.Qt.DashLine))
+        self.ui.graph1Widget_3.graph.addItem(self.zero_line)
+
+
+        self.graph2_plot=self.ui.graph1Widget_3.graph.plot(self.graph2_filtered_x, self.graph2_filtered_y, pen=pg.mkPen('w', width=1))
+        
+
+    def on_slider_change(self, value):
+         # Fixed amount to shift the graph
+        shift_amount = 0.01  # Fixed amount to shift the graph
+        self.total_shifed_glue_slider =  value * shift_amount  # Update the total shift amount
+        
+        # Shift x-data by the total shift amount
+        self.x_shifted = [x + self.total_shifed_glue_slider for x in self.graph1_filtered_x]
+        # Clear the previous plot before re-plotting
+        self.graph1_plot.clear()  # Clear the previous plot
+        self.graph1_plot = self.ui.graph1Widget_3.graph.plot(self.x_shifted, self.graph1_filtered_y, pen=pg.mkPen('w', width=1))
+
+        self.graph1_end_x = self.x_shifted[-1]
+        self.graph1_start_x=self.x_shifted[0]
+        self.graph1_end_y = self.graph1_filtered_y[-1]
+        self.graph1_start_y=self.graph1_filtered_y[0]  
+        self.graph2_start_x = self.graph2_filtered_x[0]
+        self.graph2_end_x=self.graph2_filtered_x[-1]
+        self.graph2_start_y = self.graph2_filtered_y[0]
+        self.graph2_end_y=self.graph2_filtered_y[-1]
+        
+        
+        
+
+    def on_glue_button_click(self):
+        # Get the interpolation method from the user (linear, cubic, etc.)
+        interpolation_order=self.ui.comboBox.currentText()
+
+        x1_end = self.graph1_end_x  
+        y1_end=self.graph1_end_y
+        x1_start=self.graph1_start_x
+        y1_start=self.graph1_start_y
+        x2_start = self.graph2_start_x
+        y2_start=self.graph2_start_y 
+        x2_end=self.graph2_end_x
+        y2_end=self.graph2_end_y
+        
+
+        if x1_end < x2_start:  # Gap detected, interpolate
+            x_new = np.linspace(x1_end, x2_start, num=100)  # Generate new x points between graph 1 and 2
+            
+            if interpolation_order == "linear":
+                f = interpolate.interp1d([x1_end, x2_start], [y1_end, y2_start], kind='linear')
+               
+            elif interpolation_order == "cubic":
+                f = interpolate.interp1d([x1_end, x2_start,x1_start,x2_end], [y1_end, y2_start,y1_start,y2_end], kind='cubic')
+            else:
+                self.status_label.setText("Invalid interpolation order")
+                return
+            
+            y_new = f(x_new)  # Get the interpolated y values
+            self.whole_x_data = list(self.graph1_filtered_x) + list(x_new) + list(self.graph2_filtered_x)
+            self.whole_y_data = list(self.graph1_filtered_y) + list(y_new) + list(self.graph2_filtered_y)
+            
+            # Plot the interpolated signal in the third graph
+            self.ui.graph1Widget_3.graph.plot(x_new, y_new, pen=pg.mkPen('w', width=1))
+
+        else:  # Overlap detected, average points
+            overlap_x = np.intersect1d(self.x_shifted, self.graph2_filtered_x)
+            
+            # Remove overlapping points and keep non-overlapping parts from both graphs
+            graph1_non_overlap_x = [x for x in self.x_shifted if x not in overlap_x]
+            graph1_non_overlap_y = [self.graph1_filtered_y[self.x_shifted.index(x)] for x in graph1_non_overlap_x]
+            
+            graph2_non_overlap_x = [x for x in self.graph2_filtered_x if x not in overlap_x]
+            graph2_non_overlap_y = [self.graph2_filtered_y[self.graph2_filtered_x.index(x)] for x in graph2_non_overlap_x]
+
+            # Interpolate the overlapping part
+            overlap_y1 = np.interp(overlap_x, self.x_shifted, self.graph1_filtered_y)
+            overlap_y2 = np.interp(overlap_x, self.graph2_filtered_x, self.graph2_filtered_y)
+            averaged_y = (overlap_y1 + overlap_y2) / 2  # Calculate the average of the overlapping y values
+
+            # Combine all x and y values into a single list
+            self.whole_x_data=graph1_non_overlap_x + list(overlap_x) + graph2_non_overlap_x
+           
+            self.whole_y_data= graph1_non_overlap_y + list(averaged_y) + graph2_non_overlap_y
+
+            # Sort the combined points by x to ensure smooth plotting
+            self.whole_x_data, self.whole_x_data= zip(*sorted(zip(self.whole_x_data, self.whole_y_data)))
+
+            # Clear the graph to remove any existing points
+            self.ui.graph1Widget_3.graph.clear()
+
+            # Plot the combined non-overlapping and overlapping data together
+            self.ui.graph1Widget_3.graph.plot(self.whole_x_data, self.whole_y_data, pen=pg.mkPen('w', width=1))
+
+            # Disconnect the slider signal to prevent further changes during glue operation
+            self.ui.slider_glue.valueChanged.disconnect(self.on_slider_change)
+
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
     app.setApplicationDisplayName("PyQt5 Tutorial with pyqtgraph")

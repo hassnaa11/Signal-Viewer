@@ -17,6 +17,7 @@ class SignalProcessor:
             self.data = df.iloc[:, 1].to_numpy()  # Assuming second column contains the signal
             self.current_index = 0
             self.total_length = len(self.data)
+   
 
     def get_next_data(self, window_width):
         # Return the next segment of data for real-time plotting
@@ -25,4 +26,5 @@ class SignalProcessor:
             self.current_index += 1  # Increment for real-time scrolling
             return data_segment
         else:
-            return None  
+            return None 
+     
