@@ -2,6 +2,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import pyqtgraph as pg
 from PyQt5 import QtCore
 from PyQt5.QtGui import QPainter, QPixmap
+from PyQt5.QtWidgets import QInputDialog
 
 import json
 import os
@@ -14,6 +15,15 @@ from collect_online_data import CollectOnlineData
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QColorDialog
+from PyQt5.QtWidgets import (
+    QApplication,
+    QWidget,
+    QVBoxLayout,
+    QPushButton,
+    QLabel,
+    QRubberBand,
+    QFileDialog,
+)
 from PyQt5.QtWidgets import (
     QApplication,
     QWidget,
@@ -39,13 +49,16 @@ from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg,
     NavigationToolbar2QT as Navi,
 )
+from matplotlib.backends.backend_qt5agg import (
+    FigureCanvasQTAgg,
+    NavigationToolbar2QT as Navi,
+)
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from signal_1 import SignalProcessor
 from graph import Graph
 from non_rectangular import BubbleChartApp
-
-# import pyedflib
+#import pyedflib
 import pyqtgraph as pg
 
 
@@ -53,7 +66,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.ui = Ui_MainWindow()
-
+        
         self.ui.setupUi(self)
         self.timer = QtCore.QTimer()
         self.timer2 = QtCore.QTimer()
@@ -79,8 +92,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.open_button_graph_1.clicked.connect(self.open_file_graph_1)
         self.ui.open_button_graph_2.clicked.connect(self.open_file_graph_2)
         self.ui.open_button_graph_3.clicked.connect(self.open_file_graph_3)
-        self.ui.stop_button_graph_1.clicked.connect(lambda: self.taking_snap_shot(1))
-        self.ui.stop_button_graph_2.clicked.connect(lambda: self.taking_snap_shot(2))
+        self.ui.stop_button_graph_1.clicked.connect(lambda:  self.taking_snap_shot(1))
+        self.ui.stop_button_graph_2.clicked.connect(lambda:  self.taking_snap_shot(2))
         self.ui.export_button.clicked.connect(self.PDF_maker)
 
         self.ui.signal_color_button_graph_1.clicked.connect(
@@ -99,14 +112,25 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.timer_graph_2.start(10)
         self.speed_graph_1 = 500  # Default speed in ms
         self.speed_graph_2 = 500  # Default speed in ms
+        # Initialize dictionaries to store signals by name
+        self.signals_graph_1 = {}
+        self.signals_graph_2 = {}
 
         # Initialize speed sliders and connect them
         self.ui.speed_slider_graph_1.valueChanged.connect(self.set_speed_graph_1)
         self.ui.speed_slider_graph_2.valueChanged.connect(self.set_speed_graph_2)
 
+        self.ui.move_to_graph_1_button.clicked.connect(self.move_signal_from_graph2_to_graph1)
+        self.ui.move_to_graph_2_button.clicked.connect(self.move_signal_from_graph1_to_graph2)
+
+        # Connect the checkbox state change signal to the toggle method
+        # self.ui.visible_checkBox_graph_2.stateChanged.connect(lambda: self.toggle_signal_visibility(1))
+        # self.ui.visible_checkBox_graph_2.stateChanged.connect(lambda: self.toggle_signal_visibility(2))
+
+        
         # Set up the timer for updating the graph
         # self.timer.timeout.connect(self.update_graphs)
-
+        
         self.ui.link_button.clicked.connect(self.link_graphs)
         self.ui.link_play_button.clicked.connect(self.stop_run_graph)
         self.isLinked = False
@@ -130,9 +154,11 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.plot_online_curve_graph1 = self.ui.graph1Widget.graph.plotItem.plot(
             pen=pg.mkPen(color="orange", width=2), symbol="o"
+        
         )
         self.plot_online_curve_graph2 = self.ui.graph2Widget.graph_2.plotItem.plot(
             pen=pg.mkPen(color="orange", width=2), symbol="o"
+        
         )
         self.ui.connect_online_button_graph_1.clicked.connect(self.connect_online)
         self.ui.connect_online_button_graph_2.clicked.connect(self.connect_online)
@@ -151,7 +177,6 @@ class MainWindow(QtWidgets.QMainWindow):
             hour, minute, second = parts
             return f"{hour.zfill(2)}:{minute.zfill(2)}:{second.zfill(2)}"
         return time_str
-
     def closeEvent(self, event):
         """Handle window close event to stop the timer"""
         self.graph_3.closeEvent(event)
@@ -302,7 +327,7 @@ class MainWindow(QtWidgets.QMainWindow):
             return f"{hour.zfill(2)}:{minute.zfill(2)}:{second.zfill(2)}"
         return time_str
     
-
+    
     def stop_run_graph(self):
         sender_button = self.sender()
         if sender_button == self.ui.play_button_graph_1:
@@ -357,22 +382,42 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ui.link_play_button.setIcon(self.ui.icon1)
 
     def open_file_graph_1(self):
-        # self.timer.start(500)
-        signal_processor = SignalProcessor(self.ui.graph1Widget.graph)
+          #self.timer.start(500)
+        signal_processor= SignalProcessor(self.ui.graph1Widget.graph)
         self.signal_processor1.append(signal_processor)  # Add to the list
 
         # Load the file and start plotting
         signal_processor.open_file(self)
 
         # Associate each signal processor with its graph widget
+        
         graph = Graph(signal_processor.plot_widget)
+        graph.signal_processor = signal_processor
         self.graphs_1.append(graph)
+
+
+        # After the file is opened, prompt user for a name and store it
+        new_name, ok = QInputDialog.getText(self, "Signal Name", "Enter a name for the new signal:")
+        if ok and new_name:
+            graph.add_signal(new_name, color = self.graph1_color)  # Adjust color as needed
+            graph.toggle_signal_visibility(new_name, True)
+
+            self.signals_graph_1[new_name] = (signal_processor, graph , signal_processor.plot_widget)
+            self.ui.signals_name_combo_box_graph_1.addItem(new_name)
+            self.ui.signals_name_combo_box_graph_1.setCurrentText(new_name)
+            self.ui.signal_name_lineEdit_graph_1.clear()
+
+            print(f"Opened file for {new_name} and added to Graph 1")
+            print(f"Graph 1 signals: {self.signals_graph_1}")
+        else:
+            print("No signal name provided for Graph 1")
+            
         if not self.is_timer_graph1_connected:
             self.timer_graph_1.timeout.connect(self.update_graph1)
             self.is_timer_graph1_connected = True
         self.timer_graph_1.setInterval(self.speed_graph_1)
         if not self.timer_graph_1.isActive():
-            self.timer_graph_1.start()
+            self.timer_graph_1.start()    
 
     def open_file_graph_2(self):
 
@@ -384,7 +429,26 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Associate each signal processor with its graph widget
         graph = Graph(signal_processor.plot_widget)
+        graph.signal_processor = signal_processor
         self.graphs_2.append(graph)
+
+        # After the file is opened, prompt user for a name and store it
+        new_name, ok = QInputDialog.getText(self, "Signal Name", "Enter a name for the new signal:")
+        
+        if ok and new_name:
+            graph.add_signal(new_name, color= self.graph2_color)  # Adjust color as needed
+            graph.toggle_signal_visibility(new_name, True)
+            
+            self.signals_graph_2[new_name] = (signal_processor, graph, signal_processor.plot_widget)
+            self.ui.signals_name_combo_box_graph_2.addItem(new_name)
+            self.ui.signals_name_combo_box_graph_2.setCurrentText(new_name)
+            self.ui.signal_name_lineEdit_graph_2.clear()
+            print(type(self.signals_graph_2[new_name]))
+            print(f"Opened file for {new_name} and added to Graph 2")
+            print(f"Graph 2 signals: {self.signals_graph_2}")
+        else:
+            print("No signal name provided for Graph 2")
+            
         if not self.is_timer_graph2_connected:
             self.timer_graph_2.timeout.connect(self.update_graph2)
             self.is_timer_graph2_connected = True
@@ -392,38 +456,40 @@ class MainWindow(QtWidgets.QMainWindow):
         if not self.timer_graph_2.isActive():
             self.timer_graph_2.start()
 
+        
     def update_graph1(self):
-        window_width = 500  # Adjust the window width as needed
+        window_width = 500 # Adjust the window width as needed
+        selected_name = self.ui.signals_name_combo_box_graph_1.currentText()
+        visibility =self.ui.visible_checkBox_graph_1.isChecked()
+        for graph in self.graphs_1:
+            graph.toggle_signal_visibility(selected_name, visibility)
         for signal_processor_1, graph in zip(self.signal_processor1, self.graphs_1):
             data = signal_processor_1.get_next_data(self.window_width)
+            # previous_data = signal_processor_1.get_previous_data()
             if data is not None:
                 print("update graph 1")
                 self.is_file1_opened = True
-                graph.update_graph(
-                    data,
-                    signal_processor_1.current_index,
-                    window_width,
-                    self.graph1_color,
-                )
+                graph.update_graph( data, signal_processor_1.current_index, window_width,self.graph1_color)
 
-    def update_graph2(self):
-        window_width = 500  # Adjust the window width as needed
+        
+    def update_graph2(self): 
+        window_width = 500 # Adjust the window width as needed
+        selected_name = self.ui.signals_name_combo_box_graph_2.currentText()
+        visibility =self.ui.visible_checkBox_graph_2.isChecked()
+        for graph in self.graphs_2:
+            graph.toggle_signal_visibility(selected_name, visibility)
         for signal_processor_2, graph in zip(self.signal_processor2, self.graphs_2):
             data = signal_processor_2.get_next_data(self.window_width)
+            # previous_data = signal_processor_2.get_previous_data()
             if data is not None:
                 print("update graph 2")
                 self.is_file2_opened = True
-                graph.update_graph(
-                    data,
-                    signal_processor_2.current_index,
-                    window_width,
-                    self.graph2_color,
-                )
+                graph.update_graph( data, signal_processor_2.current_index, window_width,self.graph2_color)
 
     def open_file_graph_3(self):
         if self.graph_3 is None:
             self.graph_3 = BubbleChartApp(self.graph_widget_3)
-
+        
         # Call the open_file method to open a CSV file
         self.graph_3.open_file(self)
 
@@ -439,12 +505,24 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def update_signal_color(self, color, graph_number):
         # Update the color of the plotted signal for the selected graph
-        print(graph_number)
+        selected_name = None
         if graph_number == 1:
-            self.graph1_color = color
-        else:
-            self.graph2_color = color
+            selected_name = self.ui.signals_name_combo_box_graph_1.currentText()
+        elif graph_number == 2:
+            selected_name = self.ui.signals_name_combo_box_graph_2.currentText()
 
+        if selected_name:
+            if graph_number == 1:
+                if selected_name in self.signals_graph_1:
+                    signal_processor, graph, plot_widget = self.signals_graph_1[selected_name]
+                    graph.signals[selected_name]['item'].setPen(pg.mkPen(color))
+            elif graph_number == 2:
+                if selected_name in self.signals_graph_2:
+                    signal_processor, graph, plot_widget = self.signals_graph_2[selected_name]
+                    graph.signals[selected_name]['item'].setPen(pg.mkPen(color))
+        else:
+            print("No signal selected to change color.")
+    
     def set_speed_graph_1(self, value):
         print("set speed graph 1")
         self.speed_graph_1 = value
@@ -469,13 +547,89 @@ class MainWindow(QtWidgets.QMainWindow):
             if not self.timer_graph_1.isActive():
                 self.timer_graph_1.start()
 
-    def update_graph_name_1(self):
+    def move_signal_from_graph1_to_graph2(self):
+        selected_name = self.ui.signals_name_combo_box_graph_1.currentText()
+        if selected_name in self.signals_graph_1:
+            signal_processor, graph, plot_widget = self.signals_graph_1[selected_name]
+            saved_data = signal_processor.get_data()
+
+            # Remove from Graph 1 and plot in Graph 2
+            graph.move_signal_to_another_graph(selected_name, self.graph2_color, saved_data, self.graphs_2[-1])
+
+            # Update signals_graph dictionaries
+            del self.signals_graph_1[selected_name]
+            self.ui.signals_name_combo_box_graph_1.removeItem(self.ui.signals_name_combo_box_graph_1.currentIndex())
+            self.signals_graph_2[selected_name] = (signal_processor, graph, plot_widget)
+            self.ui.signals_name_combo_box_graph_2.addItem(selected_name)
+        else:
+            print(f"Error: Signal '{selected_name}' not found in Graph 1.")
+
+    def move_signal_from_graph2_to_graph1(self):
+        selected_name = self.ui.signals_name_combo_box_graph_2.currentText()
+        if selected_name in self.signals_graph_2:
+            source_graph = self.graphs_2[-1]  # Ensure this refers to a Graph instance
+            target_graph = self.graphs_1[-1]  # Ensure this refers to a Graph instance
+            
+            # Call the method to move the signal and get necessary data
+            signal_processor, plot_widget, graph_color = self.signals_graph_2[selected_name]
+            
+            # Save the current data from the signal processor before moving
+            saved_data = signal_processor.get_data()
+            current_index = signal_processor.current_index  # Retrieve the current index
+            window_width = 500  # Ensure this is the right width for the target graph
+            
+            # Move the signal to the target graph
+            try:
+                source_graph.move_signal_to_another_graph(selected_name, self.graph1_color)
+            except AttributeError as e:
+                print(f"Error while moving signal: {e}")
+
+            # Update the target graph with the new data
+            target_graph.update_graph(saved_data, current_index, window_width, graph_color)
+
+            if not self.is_timer_graph1_connected:
+                self.timer_graph_1.timeout.connect(self.update_graph1)
+                self.is_timer_graph_1_connected = True
+                self.timer_graph_1.setInterval(self.speed_graph_1)
+            if not self.timer_graph_1.isActive():
+                self.timer_graph_1.start()
+
+
+            # Manage the visibility in the combo boxes
+            del self.signals_graph_2[selected_name]
+            self.ui.signals_name_combo_box_graph_2.removeItem(self.ui.signals_name_combo_box_graph_2.currentIndex())
+            self.signals_graph_1[selected_name] = (signal_processor, plot_widget)
+            self.ui.signals_name_combo_box_graph_1.addItem(selected_name)
+        else:
+            print(f"Error: Signal '{selected_name}' not found in Graph 2.")
+
+
+
+
+     
+    def update_graph_name_1(self):  
         new_name = self.ui.signal_name_lineEdit_graph_1.text()
         print(new_name)
         self.ui.nameegraph1.setText(new_name)
 
         # Create the label text item
+        self.ui.signals_name_combo_box_graph_1.addItem(new_name)
+        self.ui.signals_name_combo_box_graph_1.setCurrentText(new_name)
+        self.ui.signal_name_lineEdit_graph_1.clear()
 
+
+
+    def update_graph_name_2(self):  
+        new_name = self.ui.signal_name_lineEdit_graph_2.text()
+        print(new_name)
+        # self.ui.nameegraph2.setText(new_name)
+        
+        # Create the label text item
+        self.ui.signals_name_combo_box_graph_2.addItem(new_name)
+        self.ui.signals_name_combo_box_graph_2.setCurrentText(new_name)
+        self.ui.signal_name_lineEdit_graph_2.clear()
+
+        
         # Get the viewBox from the PlotWidget (for scaling)
         """ text_item = pg.TextItem(text=new_name, color='w', anchor=(0.5, 1))
         viewBox = self.graph_1.plot_widget.getViewBox()
@@ -513,14 +667,16 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.timer_graph_2.timeout.connect(self.update_graph2)
 
                 # Clear both graphs
-                for graph in self.graphs_1:
-                    graph.plot_widget.clear()
-                for graph in self.graphs_2:
-                    graph.plot_widget.clear()
+                # for graph in self.graphs_1:
+                #     graph.plot_widget.clear()
+                # for graph in self.graphs_2:
+                #     graph.plot_widget.clear()
                 # start from first
                 for signal_processor in self.signal_processor1:
+                    print("heeee  current_index = 0")
                     signal_processor.current_index = 0
                 for signal_processor in self.signal_processor2:
+                    print("kkkkk  current_index = 0")
                     signal_processor.current_index = 0
 
                 # To link Views (zoom in/out and scroll)
@@ -538,11 +694,16 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ui.pause_button_graph_2.hide()
                 self.ui.stop_button_graph_1.hide()
                 self.ui.stop_button_graph_2.hide()
-                self.ui.zoom_in_button_graph_1.hide()
-                self.ui.zoom_in_button_graph_2.hide()
+                self.ui.connect_online_button_graph_2.hide()
+                self.ui.connect_online_button_graph_1.hide()
+                self.ui.open_button_graph_2.hide()
+                self.ui.open_button_graph_1.hide()
+                self.ui.move_to_graph_1_button.hide()
+                self.ui.move_to_graph_2_button.hide()
 
                 self.timer_graph_1.start(self.speed_graph_1)
                 self.timer_graph_2.start(self.speed_graph_1)
+                
             else:
                 self.isLinked = False
         else:
@@ -580,8 +741,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.pause_button_graph_2.show()
         self.ui.stop_button_graph_1.show()
         self.ui.stop_button_graph_2.show()
-        self.ui.zoom_in_button_graph_1.show()
-        self.ui.zoom_in_button_graph_2.show()
+        self.ui.connect_online_button_graph_2.show()
+        self.ui.connect_online_button_graph_1.show()
+        self.ui.open_button_graph_2.show()
+        self.ui.open_button_graph_1.show()
+        self.ui.move_to_graph_1_button.show()
+        self.ui.move_to_graph_2_button.show()
 
     def link_views(self, source_plot, target_plot):
         def update_view():
