@@ -9,6 +9,8 @@ import numpy as np
 from datetime import datetime
 from main_gui import Ui_MainWindow
 from non_rectangle_plot_window import nonRectanglePlotWindow
+from collect_online_data import CollectOnlineData
+# import subprocess
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QColorDialog
@@ -92,8 +94,9 @@ class MainWindow(QtWidgets.QMainWindow):
         )
 
         self.timer_graph_1 = QtCore.QTimer()
-        self.timer_graph_1.start(10)
+        # self.timer_graph_1.start(10)
         self.timer_graph_2 = QtCore.QTimer()
+        # self.timer_graph_2.start(10)
         self.speed_graph_1 = 500  # Default speed in ms
         self.speed_graph_2 = 500  # Default speed in ms
 
@@ -119,14 +122,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.is_file2_opened = False
         self.first_graph_online_connected = False
         self.second_graph_online_connected = False
+        
+        # Collect Online Data
+        # self.collector_online = CollectOnlineData()
+        # self.timer_online = QtCore.QTimer()
+        # self.collector_online.data_fetched.connect(self.update_online_plot)
+        
         self.plot_online_curve_graph1 = self.ui.graph1Widget.graph.plotItem.plot(
             pen=pg.mkPen(color="orange", width=2), symbol="o"
         )
         self.plot_online_curve_graph2 = self.ui.graph2Widget.graph_2.plotItem.plot(
             pen=pg.mkPen(color="orange", width=2), symbol="o"
         )
-        self.ui.connect_online_button_graph_1.clicked.connect(self.update_online_plot)
-        self.ui.connect_online_button_graph_2.clicked.connect(self.update_online_plot)
+        self.ui.connect_online_button_graph_1.clicked.connect(self.connect_online)
+        self.ui.connect_online_button_graph_2.clicked.connect(self.connect_online)
 
         self.ui.play_button_graph_1.clicked.connect(self.stop_run_graph)
         self.ui.play_button_graph_2.clicked.connect(self.stop_run_graph)
@@ -147,27 +156,99 @@ class MainWindow(QtWidgets.QMainWindow):
         """Handle window close event to stop the timer"""
         self.graph_3.closeEvent(event)
 
-    def update_online_plot(self):
+    def connect_online(self):
+        
         sender_button = self.sender()
         print(sender_button)
-        if (
-            sender_button != self.ui.connect_online_button_graph_1
-            and sender_button != self.ui.connect_online_button_graph_2
-        ):  # No new click
-            sender_button = self.last_sender
-        elif (
-            sender_button == self.ui.connect_online_button_graph_1
-        ) and self.graph1_on:  # clicked on connect_online_button_graph_1
-            self.timer.timeout.connect(self.update_online_plot)
-            self.last_sender = sender_button
+        if sender_button == self.ui.connect_online_button_graph_1 and self.first_graph_online_connected:
+            print("disconnect 1")
+            self.disconnect_online(sender_button)
+        elif sender_button == self.ui.connect_online_button_graph_2 and self.second_graph_online_connected:
+            print("disconnect 2")
+            self.disconnect_online(sender_button)
+         
+        # elif (sender_button != self.ui.connect_online_button_graph_1 and sender_button != self.ui.connect_online_button_graph_2):  # No new click
+        #     sender_button = self.last_sender
+        elif (sender_button == self.ui.connect_online_button_graph_1) and self.graph1_on:  # clicked on connect_online_button_graph_1
+            print("connect 1")
             self.first_graph_online_connected = True
-        elif (
-            sender_button == self.ui.connect_online_button_graph_2
-        ) and self.graph2_on:  # clicked on connect_online_button_graph_2
-            self.timer.timeout.connect(self.update_online_plot)
-            self.last_sender = sender_button
+            # collect data from the website
+            
+            # self.timer_online.start(2000)
+            # self.timer_online.timeout.connect(self.collector_online.data_update)
+            
+            # if self.collector_online.running == False:  # Ensure the thread isn't already running
+            #     print("Start Thread run")
+            #     self.collector_online.start()  # Start the thread
+           
+            # self.collector_online.start()
+            
+            if not self.is_timer_graph1_connected:
+                print("connect 1::: ", self.is_timer_graph1_connected)
+                self.is_timer_graph1_connected = True
+                self.timer_graph_1.start(10)
+                self.timer_graph_1.timeout.connect(self.update_online_plot)
+                
+            self.ui.connect_online_button_graph_1.setText("Disconnect Online")
+            
+        elif (sender_button == self.ui.connect_online_button_graph_2) and self.graph2_on:  # clicked on connect_online_button_graph_2
+            print("connect 2")
             self.second_graph_online_connected = True
+            
+            # collect data from the website
+            # self.timer_online.start(2000)
+            # self.timer_online.timeout.connect(self.collector_online.data_update)
+            
+            # if self.collector_online.running == False:  # Ensure the thread isn't already running
+            #     print("Start Thread run")
+            #     self.collector_online.start()  # Start the thread
+            
+            # self.collector_online.start()
+                
+            if not self.is_timer_graph2_connected:
+                self.is_timer_graph2_connected = True
+                self.timer_graph_2.start(10)
+                self.timer_graph_2.timeout.connect(self.update_online_plot)
+                
+            self.ui.connect_online_button_graph_2.setText("Disconnect Online")    
+                    
+    def disconnect_online(self, button):            
+        if button == self.ui.connect_online_button_graph_1:
+            print("disconnecting")
+            # if  self.collector_online.running == True: 
+            #     print("Stop Thread graph 1")
+            #     self.collector_online.stop() 
+            # self.collector_online.wait()
+            
+            
+            # self.timer_online.timeout.disconnect(self.collector_online.data_update)
+            self.first_graph_online_connected = False
+            self.ui.connect_online_button_graph_1.setText("Connect Online")
+            # disconnect timer 1
+            self.is_timer_graph1_connected = False
+            self.timer_graph_1.timeout.disconnect(self.update_online_plot)
+            # Clear graph 1
+            self.plot_online_curve_graph1.setData([], [])
 
+        elif button == self.ui.connect_online_button_graph_2:
+            # if  self.collector_online.running == True: 
+            #     print("Stop Thread graph 2")
+            #     self.collector_online.stop()
+            # self.collector_online.wait()
+            
+            
+            self.second_graph_online_connected = False 
+            self.ui.connect_online_button_graph_2.setText("Connect Online") 
+            # disconnect timer 2
+            self.is_timer_graph2_connected = False
+            self.timer_graph_2.timeout.disconnect(self.update_online_plot) 
+            # Clear graph 2
+            self.plot_online_curve_graph2.setData([], [])
+            
+            
+
+            
+    def update_online_plot(self):
         try:
             with open("online_data.json", "r") as file:
                 self.data = json.load(file)
@@ -202,38 +283,62 @@ class MainWindow(QtWidgets.QMainWindow):
 
             if len(x_axis) > 0 and len(y_axis) > 0:
                 if self.graph1_on and self.first_graph_online_connected:
+                    print("graph 111")
+                    self.ui.graph1Widget.graph.setLimits(xMin=0, xMax=x_axis[x_axis.size - 1], yMin=y_axis[0], yMax=y_axis[y_axis.size - 1])
                     self.plot_online_curve_graph1.setData(x_axis, y_axis)
                 if self.graph2_on and self.second_graph_online_connected:
+                    print("graph 222")
+                    self.ui.graph2Widget.graph_2.setLimits(xMin=0, xMax=x_axis[x_axis.size - 1], yMin=y_axis[0], yMax=y_axis[y_axis.size - 1])
                     self.plot_online_curve_graph2.setData(x_axis, y_axis)
-                else:
-                    print("hahaha no sender")
+                # else:
+                #     print("hahaha no sender ")
         except Exception as e:
             print(f"Error loading or plotting data: {e}")
-
+    
     def format_time_string(self, time_str):
         parts = time_str.split(":")
         if len(parts) == 3:
             hour, minute, second = parts
             return f"{hour.zfill(2)}:{minute.zfill(2)}:{second.zfill(2)}"
         return time_str
+    
 
     def stop_run_graph(self):
         sender_button = self.sender()
         if sender_button == self.ui.play_button_graph_1:
+            print("graph 1 button ")
             self.graph1_on = not self.graph1_on
             if self.graph1_on:
-                self.timer_graph_1.timeout.connect(self.update_graph1)
+                if self.first_graph_online_connected:
+                    print("first online graph play")
+                    self.timer_graph_1.timeout.connect(self.update_online_plot)
+                else:    
+                    self.timer_graph_1.timeout.connect(self.update_graph1)
                 self.ui.play_button_graph_1.setIcon(self.ui.icon)
             else:
-                self.timer_graph_1.timeout.disconnect(self.update_graph1)
+                if self.first_graph_online_connected:
+                    print("first online graph stop")
+                    self.timer_graph_1.timeout.disconnect(self.update_online_plot)
+                else:
+                    self.timer_graph_1.timeout.disconnect(self.update_graph1)
                 self.ui.play_button_graph_1.setIcon(self.ui.icon1)
+        
         elif sender_button == self.ui.play_button_graph_2:
+            print("graph 2 button ")
             self.graph2_on = not self.graph2_on
             if self.graph2_on:
-                self.timer_graph_2.timeout.connect(self.update_graph2)
+                if self.second_graph_online_connected:
+                    print("second online graph play")
+                    self.timer_graph_2.timeout.connect(self.update_online_plot)
+                else:
+                    self.timer_graph_2.timeout.connect(self.update_graph2)
                 self.ui.play_button_graph_2.setIcon(self.ui.icon)
             else:
-                self.timer_graph_2.timeout.disconnect(self.update_graph2)
+                if self.second_graph_online_connected:
+                    print("second online graph stop")
+                    self.timer_graph_2.timeout.disconnect(self.update_online_plot)
+                else:    
+                    self.timer_graph_2.timeout.disconnect(self.update_graph2)
                 self.ui.play_button_graph_2.setIcon(self.ui.icon1)
 
         elif sender_button == self.ui.link_play_button:
