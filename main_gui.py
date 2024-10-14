@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 
 # Form implementation generated from reading ui file 'task1_test2.ui'
 #
@@ -121,6 +121,7 @@ class Ui_MainWindow(object):
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.frame.sizePolicy().hasHeightForWidth())
+        self.frame.setMinimumSize(QtCore.QSize(350, 0))
         self.frame.setSizePolicy(sizePolicy)
         self.frame.setStyleSheet("background-color: rgb(45, 50, 77);\n"
 "border-radius: 25px;\n"
@@ -150,6 +151,7 @@ class Ui_MainWindow(object):
         self.signal_name_lineEdit_graph_1.setObjectName("signal_name_lineEdit_graph_1")
         self.gridLayout.addWidget(self.signal_name_lineEdit_graph_1, 1, 1, 1, 1)
         self.visible_checkBox_graph_1 = QtWidgets.QCheckBox(self.frame)
+        self.visible_checkBox_graph_1.setChecked(True)
         self.visible_checkBox_graph_1.setStyleSheet("color: rgb(255, 255, 255);\n"
 "font: italic 10pt \"Georgia\";\n"
 "\n"
@@ -255,7 +257,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.addWidget(self.frame)
         self.gridLayout_4.addLayout(self.horizontalLayout_2, 3, 0, 1, 1)
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_3.setContentsMargins(15, -1, 275, -1)
+        self.horizontalLayout_3.setContentsMargins(15, -1, 365, -1)
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
         
         self.link_button = QtWidgets.QPushButton(self.centralwidget)
@@ -375,6 +377,9 @@ class Ui_MainWindow(object):
         icon3 = QtGui.QIcon()
         icon3.addPixmap(QtGui.QPixmap("./images/icons8-up-arrow-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.move_to_graph_1_button.setIcon(icon3)
+        icon5 = QtGui.QIcon()
+        icon5.addPixmap(QtGui.QPixmap("./images/icons8-down-arrow-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        # self.move_to_graph_2_button.setIcon(icon5)
         self.move_to_graph_1_button.setObjectName("move_to_graph_1_button")
         self.horizontalLayout_3.addWidget(self.move_to_graph_1_button)
         self.connect_online_button_graph_2 = QtWidgets.QPushButton(self.centralwidget)
@@ -451,6 +456,7 @@ class Ui_MainWindow(object):
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.frame_3.sizePolicy().hasHeightForWidth())
+        self.frame_3.setMinimumSize(QtCore.QSize(350, 0))
         self.frame_3.setSizePolicy(sizePolicy)
         self.frame_3.setStyleSheet("background-color: rgb(45, 50, 77);\n"
 "border-radius: 25px;\n"
@@ -495,7 +501,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_6.addWidget(self.frame_3)
         self.gridLayout_4.addLayout(self.horizontalLayout_6, 7, 0, 1, 1)
         self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_5.setContentsMargins(15, -1, 275, -1)
+        self.horizontalLayout_5.setContentsMargins(15, -1, 365, -1)
         self.horizontalLayout_5.setObjectName("horizontalLayout_5")
         self.graph_Label_3 = QtWidgets.QLabel(self.centralwidget)
         self.graph_Label_3.setStyleSheet("color: rgb(255, 255, 255);\n"
@@ -625,6 +631,7 @@ class Ui_MainWindow(object):
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.frame_2.sizePolicy().hasHeightForWidth())
+        self.frame_2.setMinimumSize(QtCore.QSize(350, 0))
         self.frame_2.setSizePolicy(sizePolicy)
         self.frame_2.setStyleSheet("background-color: rgb(45, 50, 77);\n"
 "border-radius: 25px;\n"
@@ -648,6 +655,7 @@ class Ui_MainWindow(object):
         self.signal_name_lineEdit_graph_2.setObjectName("signal_name_lineEdit_graph_2")
         self.gridLayout_2.addWidget(self.signal_name_lineEdit_graph_2, 1, 1, 1, 1)
         self.visible_checkBox_graph_2 = QtWidgets.QCheckBox(self.frame_2)
+        self.visible_checkBox_graph_2.setChecked(True)
         self.visible_checkBox_graph_2.setStyleSheet("color: rgb(255, 255, 255);\n"
 "font: italic 10pt \"Georgia\";\n"
 "\n"
@@ -837,7 +845,8 @@ class Ui_MainWindow(object):
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
 "border-radius: 15px;")
         self.move_to_graph_2_button.setText("")
-        self.move_to_graph_2_button.setIcon(icon3)
+        # self.move_to_graph_2_button.setIcon(icon3)
+        self.move_to_graph_2_button.setIcon(icon5)
         self.move_to_graph_2_button.setObjectName("move_to_graph_2_button")
         self.horizontalLayout.addWidget(self.move_to_graph_2_button)
         self.connect_online_button_graph_1 = QtWidgets.QPushButton(self.centralwidget)
@@ -931,8 +940,21 @@ class Ui_MainWindow(object):
         self.verticalLayout.setObjectName("verticalLayout")
         # spacerItem6 = QtWidgets.QSpacerItem(5, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         # self.verticalLayout.addItem(spacerItem6)
-        spacerItem6 = QtWidgets.QSpacerItem(140, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+        spacerItem6 = QtWidgets.QSpacerItem(27, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem6)
+        self.nonrectangle_graph_button = QtWidgets.QPushButton(self.centralwidget)
+        self.nonrectangle_graph_button.setMinimumSize(QtCore.QSize(170, 30))
+        self.nonrectangle_graph_button.setCursor(QtGui.QCursor(QtCore.Qt.OpenHandCursor))
+        self.nonrectangle_graph_button.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.nonrectangle_graph_button.setStyleSheet("font: italic 10pt \"Georgia\";\n"
+"font: 12pt \"Georgia\";\n"
+"\n"
+"color: rgb(255, 255, 255);\n"
+"background-color: rgb(120, 207, 233);\n"
+"buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
+"border-radius: 10px;")
+        self.nonrectangle_graph_button.setObjectName("nonrectangle_graph_button")
+        self.horizontalLayout.addWidget(self.nonrectangle_graph_button)
         self.export_button = QtWidgets.QPushButton(self.centralwidget)
         self.export_button.setMinimumSize(QtCore.QSize(140, 30))
         self.export_button.setCursor(QtGui.QCursor(QtCore.Qt.OpenHandCursor))
@@ -1078,9 +1100,8 @@ class Ui_MainWindow(object):
         self.open_button_graph_1.setToolTip("")
         self.open_button_graph_1.setWhatsThis(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#ffffff;\">)pen</span></p></body></html>"))
         self.open_button_graph_1.setText(_translate("MainWindow", "Open"))
+        self.nonrectangle_graph_button.setText(_translate("MainWindow", "Non-Rectangle "))
         self.export_button.setText(_translate("MainWindow", "Export Report"))
         self.signalViewerLabel.setText(_translate("MainWindow", "Live Signal Viewer"))
-
-
 
 
