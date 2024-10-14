@@ -10,7 +10,6 @@ from selenium.webdriver.common.by import By
 online_data_dict = {"Data_Y": [], "Time": []}
 
 def initialize_driver():
-    # Setup Chrome options to run in headless mode
     options = Options()
     options.add_argument("--headless")  # set headless mode
     options.add_argument("--disable-gpu")  # disable GPU acceleration

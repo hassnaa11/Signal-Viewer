@@ -823,7 +823,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
-    app.setApplicationDisplayName("PyQt5 Tutorial with pyqtgraph")
     ui = MainWindow()
     ui.show()
     app.exec_()
