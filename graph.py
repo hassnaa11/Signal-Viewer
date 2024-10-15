@@ -11,34 +11,44 @@ class Graph:
         self.plot_widget.getAxis('bottom').setPen('w')        
         self.zero_line = pg.InfiniteLine(angle=0, pos=0, pen=pg.mkPen('r', width=1, style=pg.QtCore.Qt.DashLine))
         self.signals = {}  # Track signal plot items and their visibility status
+        self.legend = self.plot_widget.addLegend()
         self.signal_processor = None
         self.second_time = False
-        # self.timer = QTimer()  # Initialize a timer for the graph
-        # self.timer.timeout.connect(self.update_graph)  # Connect the timer to update_graph method
-        # self.timer.start(100)  # Set the interval for updates (in milliseconds)
+
         
 
     def add_signal(self, name, color):
         """Add a new signal to the graph."""
         if name not in self.signals:  # Avoid duplicate signals
             plot_item = self.plot_widget.plot([], [], pen=pg.mkPen(color), name=name)
-            # self.signals[name] = (self.signal_processor, plot_item, self.plot_widget)
             self.signals[name] = {
                 'processor': self.signal_processor,  # Store the SignalProcessor instance
                 'item': plot_item,                   # Store the plot item
                 'visible': True                       # Store visibility status
             }  # Track visibility
+            print(f"Signal '{name}' added to the plot.")
+            # Add this signal to the legend
+            self.legend.removeItem(name)  # Remove the old entry if it exists
+            self.legend.addItem(plot_item, name)
+
+        else:
+            print(f"Signal '{name}' already exists in Graph.")
+
+    def update_signal_label(self, name, color):
+        #Update signal color and legend entry.
+        if name in self.signals:
+            self.signals[name]['item'].setPen(pg.mkPen(color))
 
     def toggle_signal_visibility(self, name, visible):
-        """Toggle visibility of a specific signal."""
+        #Toggle visibility of a specific signal.
         if name in self.signals:
             self.signals[name]['item'].setVisible(visible)
             self.signals[name]['visible'] = visible
+        else:
+            print(f"Signal '{name}' not found in the graph.")
 
     def update_graph(self, data, current_index, window_width, graph1_color):
         if data is not None:
-            # Clear the previous plot before replotting
-            # self.plot_widget.clear()
             if self.zero_line not in self.plot_widget.items():
                 self.plot_widget.addItem(self.zero_line)  # Add the zero line back  
             
@@ -77,31 +87,14 @@ class Graph:
             self.plot_widget.setXRange(start_x, end_x)
 
 
+    #this meyhod to remove the signal from the graph and used while moving the selected signal from a graph to another one so we need to remove the signal from the graph it moving from
     def remove_signal(self, name):
-        """Remove a signal from the graph by its name."""
         if name in self.signals:
-            self.plot_widget.removeItem(self.signals[name]['item'])  # Remove the plot item from the widget
-            del self.signals[name]  # Delete from the signals dictionary
+            self.signals[name]['item'].setVisible(False)  # Optionally hide it first
+            self.signals[name]['item'].scene().removeItem(self.signals[name]['item'])  # Remove from scene
+            del self.signals[name]  # Remove the selected signal from the dictionary
+            print(f"Signal '{name}' removed from the graph.")
+        else:
+            print(f"Signal '{name}' not found in the graph.")
 
-    # In the Graph class
-    def move_signal_to_another_graph(self, name, color):
-        """Move a signal from this graph to another graph."""
-        if name in self.signals:
-            # Stop the timer for this graph if it is active
-            if self.timer.isActive():
-                self.timer.stop()
-
-            # Retrieve the SignalProcessor for the current signal
-            signal_processor = self.signals[name]['processor']
-            
-            # Remove the signal from this graph
-            self.remove_signal(name)
-
-            # Prepare the new signal data
-            new_processor = SignalProcessor(self.plot_widget)
-            new_processor.data = signal_processor.data.copy()  # Assuming data is a numpy array
-            new_processor.current_index = signal_processor.current_index
-
-            # Return the new processor and the color for updating the target graph
-            return new_processor, color
-        return None, None  # Return None if the signal does not exist
+    
