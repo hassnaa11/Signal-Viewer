@@ -19,8 +19,6 @@ class SignalProcessor:
             self.current_index = 0
             self.total_length = len(self.data)
 
-    
-
     def get_next_data(self, window_width):
         # Return the next segment of data for real-time plotting
         if self.data is not None and self.current_index + window_width <= len(self.data):
@@ -37,8 +35,7 @@ class SignalProcessor:
             data_segment = self.data[0:self.current_index]
             return data_segment
         else:
-            return None     
-        
+            return None  
     def get_data(self):
         """Returns all data of the current signal."""
         return self.data

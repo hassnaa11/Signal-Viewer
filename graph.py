@@ -4,6 +4,8 @@ from signal_1 import SignalProcessor
 from PyQt5.QtCore import QTimer
 import copy
 class Graph:
+    previous_signal_pointss = []  # To store x values
+    previous_x_dataa = []  # To store y values
     def __init__(self, graph_widget):
         self.plot_widget = graph_widget
         self.plot_widget.setBackground('#2D324D')
@@ -45,8 +47,11 @@ class Graph:
                 self.plot_widget.addItem(self.zero_line)  # Add the zero line back  
             
             # Create x-axis data for plotting based on current_index
-            new_x_data = np.arange(current_index, current_index + len(data)) * 0.001  # 0.001 assumes 1 unit is 1 ms
+            new_x_data = np.arange(current_index, current_index + len(data)) * 0.001 
+            self.previous_signal_pointss.extend(data)
+             # 0.001 assumes 1 unit is 1 ms
             previous_x_data = np.arange(0, current_index) * 0.001
+            self.previous_x_dataa.extend(previous_x_data)
 
             for signal_name, signal_info in self.signals.items():
                 if signal_info['visible']:  # Only update visible signals
@@ -69,14 +74,20 @@ class Graph:
                     print ("setData   doneee")
                     print(signal_info)
                     print("XDATA: ",previous_x_data,"YDATA: ",data)
+                    # signal_info['item'].setData(x=new_x_data, y=data)  # Keep this line to update signals
+
+            # Adjust the x-axis to fit all data seen so far
+            # start_x = max(0, (current_index - window_width) * 0.001)  # Start of the x-range
+            # end_x = (current_index + len(data)) * 0.001               # End of the x-range
+            # self.plot_widget.setXRange(start_x, end_x)
             
             if current_index < 500:
                 # At begin x-axis range from 0 to window_width
                 self.plot_widget.setXRange(0, window_width * 0.001)   
                 self.plot_widget.setLimits(xMin=0, xMax=window_width *0.001 , yMin=min(data), yMax=max(data))              
             else:
-                self.index += 1
-                # After filling the initial window
+                # After filling the initial window, make the graph scroll by updating the x-axis range
+                # print("Window filled, scrolling", current_index)
                 self.plot_widget.setXRange((current_index - window_width) * 0.001, current_index * 0.001)
                 self.plot_widget.setLimits(xMin=0, xMax=(window_width + self.index) * 0.001, yMin=min(data), yMax=max(data))
 
