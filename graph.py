@@ -42,11 +42,9 @@ class Graph:
         
         if data is not None:
             print("in update graph.py", current_index)
-            # Clear the previous plot before replotting
-            # self.plot_widget.clear()
+
             if self.zero_line not in self.plot_widget.items():
                 self.plot_widget.addItem(self.zero_line)  # Add the zero line back  
-            
             
             # Create x-axis data for plotting based on current_index
             new_x_data = np.arange(current_index, current_index + len(data)) * 0.001 
@@ -55,7 +53,6 @@ class Graph:
             previous_x_data = np.arange(0, current_index) * 0.001
             self.previous_x_dataa.extend(previous_x_data)
 
-            # Update the visible signals with the new data
             for signal_name, signal_info in self.signals.items():
                 if signal_info['visible']:  # Only update visible signals
                     # get current data
@@ -67,17 +64,16 @@ class Graph:
                         x_data = None
                         y_data = None    
                     if x_data is None or y_data is None:
-                        x_data = np.array([])  # Initialize as empty arrays
+                        x_data = np.array([]) 
                         y_data = np.array([])
 
                     x_data = np.append(x_data, new_x_data)
                     y_data = np.append(y_data, data)
-                    # data = np.resize(data, len(x_data))  # Resize y_data to match x_data
 
                     signal_info['item'].setData(x=previous_x_data, y=data)
-                   
-                   
-                   
+                    print ("setData   doneee")
+                    print(signal_info)
+                    print("XDATA: ",previous_x_data,"YDATA: ",data)
                     # signal_info['item'].setData(x=new_x_data, y=data)  # Keep this line to update signals
 
             # Adjust the x-axis to fit all data seen so far

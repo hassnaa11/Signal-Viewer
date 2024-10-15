@@ -6,24 +6,22 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore
 
 online_data_dict = {"Data_Y": [], "Time": []}
 
 class CollectOnlineData(QtCore.QThread):
-    # Signal to emit fetched data
+    # Signal to emit data
     data_fetched = QtCore.pyqtSignal(str, str)    
     
     def __init__(self):
         super().__init__()
         self.driver = None
-        self.running = False  # Initially not running
+        self.running = False
 
     def initialize_driver(self):
-        options = Options()
-        
-        # You can try running without headless mode first to debug the issue
-        options.add_argument("--headless")  # Comment this out to test without headless mode
+        options = Options()        
+        options.add_argument("--headless")
         options.add_argument("--disable-software-rasterizer")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
@@ -32,7 +30,7 @@ class CollectOnlineData(QtCore.QThread):
         options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
         options.add_argument("--window-size=1920x1080")  # Window size for headless mode
         options.add_argument("--window-size=1920x1080")  # window size 1920*1080
-        options.add_argument("--window-position=-1920,-1080")  # change window position
+        options.add_argument("--window-position=-1920,-1080") 
         options.add_argument("--remote-debugging-port=9222")  # Avoid port conflicts
         options.add_argument("disable-infobars")  # Disable 'Chrome is being controlled' infobar
         options.add_argument("--disable-extensions")  # Disable extensions
@@ -46,19 +44,12 @@ class CollectOnlineData(QtCore.QThread):
         return driver
 
 
-    # def run(self):
-    #     self.running = True  # Set the running flag to true when the thread starts
-    #     self.driver = self.initialize_driver()  # Initialize the WebDriver
-    #     while self.running:
-    #         self.data_update()
-    #         self.sleep(1)  # Wait for 1 second
-            
     def run(self):
-        self.running = True  # Set the running flag to true when the thread starts
+        self.running = True 
         while self.running:
             try:
                 if not self.driver:
-                    self.driver = self.initialize_driver()  # Initialize the WebDriver if it's not initialized
+                    self.driver = self.initialize_driver()
                 self.data_update()
             except Exception as e:
                 print(f"Error during data update: {e}")
@@ -67,14 +58,14 @@ class CollectOnlineData(QtCore.QThread):
                         self.driver.quit()
                     except Exception as e_quit:
                         print(f"Error during driver quit: {e_quit}")
-                self.driver = None  # Reset the driver
+                self.driver = None
             self.sleep(1)  # Wait for 1 second
 
             
     def stop(self):
-        self.running = False  # Stop the thread
+        self.running = False
         if self.driver:
-            self.driver.quit()  # Quit the driver if it's running
+            self.driver.quit()
 
     def data_update(self):
         url = "https://theskylive.com/saturn-info"
