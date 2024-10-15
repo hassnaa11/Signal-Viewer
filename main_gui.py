@@ -323,6 +323,41 @@ class Ui_MainWindow(object):
         
         spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem1)
+        select_2 = QtGui.QIcon()
+        select_2.addPixmap(QtGui.QPixmap("./images/icons8-screenshot-100.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        self.select_button_graph2 = QtWidgets.QPushButton(self.centralwidget)
+        self.select_button_graph2.setIcon(select_2)
+        self.select_button_graph2.setMinimumSize(QtCore.QSize(30, 30))
+        self.select_button_graph2.setCursor(QtGui.QCursor(QtCore.Qt.OpenHandCursor))
+        self.select_button_graph2.setToolTipDuration(-1)
+        self.select_button_graph2.setStyleSheet("font: italic 10pt \"Georgia\";\n"
+"font: 12pt \"Georgia\";\n"
+"\n"
+"color: rgb(255, 255, 255);\n"
+"background-color: rgb(120, 207, 233);\n"
+"buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
+"border-radius: 15px;")
+        self.select_button_graph2.setText("")
+        snapshot_2 = QtGui.QIcon()
+        snapshot_2.addPixmap(QtGui.QPixmap("./images/icons8-camera-90.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        
+        self.select_button_graph2.setObjectName("select_button_graph2")
+        self.horizontalLayout_3.addWidget(self.select_button_graph2)
+        self.snapshot_button_graph2 = QtWidgets.QPushButton(self.centralwidget)
+        self.snapshot_button_graph2.setIcon(snapshot_2)
+        self.snapshot_button_graph2.setMinimumSize(QtCore.QSize(30, 30))
+        self.snapshot_button_graph2.setCursor(QtGui.QCursor(QtCore.Qt.OpenHandCursor))
+        self.snapshot_button_graph2.setStyleSheet("font: italic 10pt \"Georgia\";\n"
+"font: 12pt \"Georgia\";\n"
+"\n"
+"color: rgb(255, 255, 255);\n"
+"background-color: rgb(120, 207, 233);\n"
+"buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
+"border-radius: 15px;")
+        self.snapshot_button_graph2.setText("")
+        self.snapshot_button_graph2.setObjectName("snapshot_button_graph2")
+        self.horizontalLayout_3.addWidget(self.snapshot_button_graph2)
+        
         self.play_button_graph_2 = QtWidgets.QPushButton(self.centralwidget)
         self.play_button_graph_2.setCursor(QtGui.QCursor(QtCore.Qt.SplitVCursor))
         self.play_button_graph_2.setMouseTracking(True)
@@ -347,7 +382,7 @@ class Ui_MainWindow(object):
 "border-radius: 15px;")
         self.stop_button_graph_2.setText("")
         self.icon1 = QtGui.QIcon()
-        self.icon1.addPixmap(QtGui.QPixmap(".\images\icons8-pause-button-32.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        self.icon1.addPixmap(QtGui.QPixmap(".\images\icons8-audio-wave-90.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.stop_button_graph_2.setIcon(self.icon1)
         self.stop_button_graph_2.setObjectName("stop_button_graph_2")
         self.horizontalLayout_3.addWidget(self.stop_button_graph_2)
@@ -475,13 +510,35 @@ class Ui_MainWindow(object):
 "font: italic 10pt \"Georgia\";\n"
 "")
         self.signal_name_label_graph_3.setObjectName("signal_name_label_graph_3")
+        self.slider_glue = QtWidgets.QSlider(self.frame_3)
+        self.slider_glue.setOrientation(QtCore.Qt.Horizontal)
+        self.slider_glue.setObjectName("slider_glue")
+        self.gridLayout_3.addWidget(self.slider_glue, 3, 0, 1, 2)
+        
+        self.pushButton = QtWidgets.QPushButton(self.frame_3)
+        self.pushButton.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.pushButton.setMouseTracking(True)
+        self.pushButton.setStyleSheet("font: italic 10pt \"Georgia\";\n"
+"font: 12pt \"Georgia\";\n"
+"\n"
+"color: rgb(255, 255, 255);\n"
+"background-color: rgb(120, 207, 233);\n"
+"buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
+"border-radius: 10px;")
+        self.pushButton.setObjectName("pushButton")
+        self.gridLayout_3.addWidget(self.pushButton, 4, 0, 1, 1)
+       
         self.gridLayout_3.addWidget(self.signal_name_label_graph_3, 0, 0, 1, 1)
-        self.signal_name_lineEdit_graph_3 = QtWidgets.QLineEdit(self.frame_3)
-        self.signal_name_lineEdit_graph_3.setStyleSheet("border-radius: 10px;\n"
-"border-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"background-color: rgb(255, 255, 255);")
-        self.signal_name_lineEdit_graph_3.setObjectName("signal_name_lineEdit_graph_3")
-        self.gridLayout_3.addWidget(self.signal_name_lineEdit_graph_3, 0, 1, 1, 1)
+        self.comboBox = QtWidgets.QComboBox(self.frame_3)
+        self.comboBox.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.comboBox.setMouseTracking(True)
+        self.comboBox.setStyleSheet("background-color: rgb(120, 207, 233);\n"
+"buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
+"border-radius: 10px;")
+        self.comboBox.setObjectName("comboBox")
+        self.gridLayout_3.addWidget(self.comboBox, 0, 1, 1, 1)
+        self.comboBox.addItems(["linear", "cubic", "Option 3"])
+        
         self.visible_checkBox_graph_3 = QtWidgets.QCheckBox(self.frame_3)
         self.visible_checkBox_graph_3.setStyleSheet("color: rgb(255, 255, 255);\n"
 "font: italic 10pt \"Georgia\";\n"
@@ -782,6 +839,38 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.graph_Label_1)
         spacerItem5 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem5)
+        self.select_button_graph1 = QtWidgets.QPushButton(self.centralwidget)
+        self.select_button_graph1.setMinimumSize(QtCore.QSize(30, 30))
+        self.select_button_graph1.setCursor(QtGui.QCursor(QtCore.Qt.OpenHandCursor))
+        self.select_button_graph1.setStyleSheet("font: italic 10pt \"Georgia\";\n"
+"font: 12pt \"Georgia\";\n"
+"\n"
+"color: rgb(255, 255, 255);\n"
+"background-color: rgb(120, 207, 233);\n"
+"buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
+"border-radius: 15px;")
+        select = QtGui.QIcon()
+        select.addPixmap(QtGui.QPixmap("./images/icons8-screenshot-100.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        self.select_button_graph1.setText("")
+        self.select_button_graph1.setIcon(select)
+        self.select_button_graph1.setObjectName("select_button_graph1")
+        self.horizontalLayout.addWidget(self.select_button_graph1)
+        self.snapshot_button = QtWidgets.QPushButton(self.centralwidget)
+        self.snapshot_button.setMinimumSize(QtCore.QSize(30, 30))
+        self.snapshot_button.setCursor(QtGui.QCursor(QtCore.Qt.OpenHandCursor))
+        self.snapshot_button.setStyleSheet("font: italic 10pt \"Georgia\";\n"
+"font: 12pt \"Georgia\";\n"
+"\n"
+"color: rgb(255, 255, 255);\n"
+"background-color: rgb(120, 207, 233);\n"
+"buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
+"border-radius: 15px;")
+        snapshot = QtGui.QIcon()
+        snapshot.addPixmap(QtGui.QPixmap("./images/icons8-camera-90.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        self.snapshot_button.setText("")
+        self.snapshot_button.setIcon(snapshot)
+        self.snapshot_button.setObjectName("snapshot_button")
+        self.horizontalLayout.addWidget(self.snapshot_button)
         self.play_button_graph_1 = QtWidgets.QPushButton(self.centralwidget)
         self.play_button_graph_1.setCursor(QtGui.QCursor(QtCore.Qt.SplitVCursor))
         self.play_button_graph_1.setMouseTracking(True)
@@ -1083,7 +1172,9 @@ class Ui_MainWindow(object):
         self.zoo_out_button_graph_3.setWhatsThis(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#ffffff;\">)pen</span></p></body></html>"))
         self.open_button_graph_3.setToolTip("")
         self.open_button_graph_3.setWhatsThis(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#ffffff;\">)pen</span></p></body></html>"))
+        self.signal_name_label_graph_3.setText(_translate("MainWindow", "interpolation"))
         self.open_button_graph_3.setText(_translate("MainWindow", "Open"))
+        self.pushButton.setText(_translate("MainWindow", "GLUE"))
         self.signal_name_label_graph_2.setText(_translate("MainWindow", "Signal\'s Name"))
         self.visible_checkBox_graph_2.setText(_translate("MainWindow", "Visible"))
         self.signal_color_button_graph_2.setToolTip("")

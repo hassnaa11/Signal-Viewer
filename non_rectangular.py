@@ -19,8 +19,8 @@ class BubbleChartApp:
 
         # Set chart title and axes labels
         self.plot_widget.setTitle("Bubble Chart")
-        self.plot_widget.setLabel('bottom', 'Years')
-        self.plot_widget.setLabel('left', 'Sales')
+        self.plot_widget.setLabel('bottom', 'GDP per capita')
+        self.plot_widget.setLabel('left', 'Life expectancy)')
 
         # Empty data placeholders
         self.x = None
@@ -43,10 +43,10 @@ class BubbleChartApp:
             # Check the first few rows of the file (for debugging)
             print(df.head())
 
-            # Assuming the first column is year, second is sales, and third is bubble size
-            self.x = df.iloc[:, 0].to_numpy()  # Year data
-            self.y = df.iloc[:, 1].to_numpy()  # Sales data
-            self.sizes = np.array(df.iloc[:, 2].to_numpy() * 100)  # Bubble size, scaled
+            
+            self.x = df.iloc[:, 2].to_numpy() 
+            self.y = df.iloc[:, 1].to_numpy()  
+            self.sizes = np.array(df.iloc[:, 3].to_numpy() * 0.01)  
 
             # Set the total length of the data
             self.total_length = len(self.x)
@@ -64,7 +64,7 @@ class BubbleChartApp:
             x_data = self.x[:self.current_index + 1]
             y_data = self.y[:self.current_index + 1]
             size_data = self.sizes[:self.current_index + 1]
-            bubble_sizes = np.sqrt(size_data) * 3  # Scaling to prevent large bubbles
+            bubble_sizes = np.sqrt(size_data) * 0.08  # Scaling to prevent large bubbles
 
             # Update the bubble plot data
             self.bubble_plot.setData(x_data, y_data,  symbol='o', symbolSize=bubble_sizes, symbolBrush=(120, 207, 233))

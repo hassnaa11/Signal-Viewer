@@ -2,7 +2,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import pyqtgraph as pg
 from PyQt5 import QtCore
 from PyQt5.QtGui import QPainter, QPixmap
+from matplotlib.widgets import RectangleSelector
+from scipy import interpolate 
 from PyQt5.QtWidgets import QInputDialog
+
 
 import json
 import os
@@ -10,6 +13,8 @@ import numpy as np
 from datetime import datetime
 from main_gui import Ui_MainWindow
 from non_rectangle_plot_window import nonRectanglePlotWindow
+from collect_online_data import CollectOnlineData
+# import subprocess
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QColorDialog
@@ -78,21 +83,54 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.graph_1 = Graph(self.ui.graph1Widget.graph)
         self.graph_2 = Graph(self.ui.graph2Widget.graph_2)
-        self.graph_3 = BubbleChartApp(self.ui.graph1Widget_3.graph)
-        self.graph1_color = "w"
-        self.graph2_color = "w"
-        self.signal_processor1 = []
-        self.signal_processor2 = []  # List to hold all signal processors
+        #self.graph_3=BubbleChartApp(self.ui.graph1Widget_3.graph)
+        self.graph1_color="w"
+        self.graph2_color="w"
+        self.signal_processor1 = [] 
+        self.signal_processor2=[] # List to hold all signal processors
         self.graphs_1 = []  # List to hold corresponding graph widgets
-        self.graphs_2 = []
+        self.graphs_2=[]
+        self.graph2_filtered_x = []
+        self.graph2_filtered_y = []
+        self.graph1_filtered_x = []
+        self.graph1_filtered_y = []
+        self.x_shifted=[]
+        self.whole_x_data=[]
+        self.whole_y_data=[]
+        self.graph1_plot = None
+        self.graph2_plot = None
+        self.ui.slider_glue.setMinimum(-40)  # Set minimum value
+        self.ui.slider_glue.setMaximum(40)    # Set maximum value
+        self.ui.slider_glue.setValue(0)       # Initial slider value
+        self.ui.slider_glue.setSingleStep(1)  # Increment step when slider is moved
+        self.ui.slider_glue.valueChanged.connect(self.on_slider_change)
+        self.total_shifed_glue_slider = 0.0
+        self.graph1_end_x = None
+        self.graph1_start_x=None
+        self.graph1_end_y = None
+        self.graph1_start_y=None  
+        self.graph2_start_x = None
+        self.graph2_end_x=None
+        self.graph2_start_y =None
+        self.graph2_end_y=None
+        # Connect the slider value change to the function
+        
 
         # Connect buttons to their respective functions
         self.ui.open_button_graph_1.clicked.connect(self.open_file_graph_1)
         self.ui.open_button_graph_2.clicked.connect(self.open_file_graph_2)
         self.ui.open_button_graph_3.clicked.connect(self.open_file_graph_3)
-        self.ui.stop_button_graph_1.clicked.connect(lambda:  self.taking_snap_shot(1))
-        self.ui.stop_button_graph_2.clicked.connect(lambda:  self.taking_snap_shot(2))
+        self.ui.stop_button_graph_3.clicked.connect(lambda:self.taking_snapshot(3))
+        self.ui.snapshot_button.clicked.connect(lambda:self.taking_snapshot(1))
+        self.ui.snapshot_button_graph2.clicked.connect(lambda:self.taking_snapshot(2))
         self.ui.export_button.clicked.connect(self.PDF_maker)
+        
+        
+
+        self.ui.select_button_graph1.clicked.connect(self.select_graph_to_cut)
+        self.ui.select_button_graph2.clicked.connect(self.select_graph_to_cut_2)
+        self.ui.pushButton.clicked.connect(self.on_glue_button_click)
+        
 
         self.ui.signal_color_button_graph_1.clicked.connect(
             lambda: self.open_color_dialog(1)
@@ -109,11 +147,11 @@ class MainWindow(QtWidgets.QMainWindow):
         )
 
         self.timer_graph_1 = QtCore.QTimer()
-        self.timer_graph_1.start(10)
+        # self.timer_graph_1.start(10)
         self.timer_graph_2 = QtCore.QTimer()
-        self.speed_graph_1 = 500  # Speed for graph1
-        self.speed_graph_2 = 500  # Speed for graph2
-        # Initialize dictionaries that store the name , signal processoser, graph and the plotwidget for each signal in each graph
+        self.speed_graph_1 = 500  # Default speed in ms
+        self.speed_graph_2 = 500  # Default speed in ms
+        # Initialize dictionaries to store signals by name
         self.signals_graph_1 = {}
         self.signals_graph_2 = {}
         
@@ -141,6 +179,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.is_file2_opened = False
         self.first_graph_online_connected = False
         self.second_graph_online_connected = False
+        
+        # Collect Online Data
+        # self.collector_online = CollectOnlineData()
+        # self.timer_online = QtCore.QTimer()
+        # self.collector_online.data_fetched.connect(self.update_online_plot)
+        
         self.plot_online_curve_graph1 = self.ui.graph1Widget.graph.plotItem.plot(
             pen=pg.mkPen(color="orange", width=2), symbol="o"
         
@@ -149,16 +193,20 @@ class MainWindow(QtWidgets.QMainWindow):
             pen=pg.mkPen(color="orange", width=2), symbol="o"
         
         )
-        self.ui.connect_online_button_graph_1.clicked.connect(self.update_online_plot)
-        self.ui.connect_online_button_graph_2.clicked.connect(self.update_online_plot)
-        
+        self.ui.connect_online_button_graph_1.clicked.connect(self.connect_online)
+        self.ui.connect_online_button_graph_2.clicked.connect(self.connect_online)
+
         self.ui.play_button_graph_1.clicked.connect(self.stop_run_graph)
         self.ui.play_button_graph_2.clicked.connect(self.stop_run_graph)
         self.timer2.start(1000)
-        self.timer2.timeout.connect(self.graph_3.update_graph)
-        
+        #self.timer2.timeout.connect(self.graph_3.update_graph)
         self.ui.nonrectangle_graph_button.clicked.connect(self.show_non_rectangle_plot)
         self.timer.start(1000)
+        self.rect_roi = pg.RectROI([0.1, 0], [0.2, 0.2], pen='r')
+        self.rect_roi.addScaleHandle([1, 0.5], [0.5, 0.5])  # Adding scale handles
+        self.selected_range = None
+        
+
 
     def format_time_string(self, time_str):
         parts = time_str.split(":")
@@ -166,31 +214,101 @@ class MainWindow(QtWidgets.QMainWindow):
             hour, minute, second = parts
             return f"{hour.zfill(2)}:{minute.zfill(2)}:{second.zfill(2)}"
         return time_str
-    def closeEvent(self, event):
-        """Handle window close event to stop the timer"""
-        self.graph_3.closeEvent(event)
+   
 
-    def update_online_plot(self):
+    def connect_online(self):
+        
         sender_button = self.sender()
         print(sender_button)
-        if (
-            sender_button != self.ui.connect_online_button_graph_1
-            and sender_button != self.ui.connect_online_button_graph_2
-        ):  # No new click
-            sender_button = self.last_sender
-        elif (
-            sender_button == self.ui.connect_online_button_graph_1
-        ) and self.graph1_on:  # clicked on connect_online_button_graph_1
-            self.timer.timeout.connect(self.update_online_plot)
-            self.last_sender = sender_button
+        if sender_button == self.ui.connect_online_button_graph_1 and self.first_graph_online_connected:
+            print("disconnect 1")
+            self.disconnect_online(sender_button)
+        elif sender_button == self.ui.connect_online_button_graph_2 and self.second_graph_online_connected:
+            print("disconnect 2")
+            self.disconnect_online(sender_button)
+         
+        # elif (sender_button != self.ui.connect_online_button_graph_1 and sender_button != self.ui.connect_online_button_graph_2):  # No new click
+        #     sender_button = self.last_sender
+        elif (sender_button == self.ui.connect_online_button_graph_1) and self.graph1_on:  # clicked on connect_online_button_graph_1
+            print("connect 1")
             self.first_graph_online_connected = True
-        elif (
-            sender_button == self.ui.connect_online_button_graph_2
-        ) and self.graph2_on:  # clicked on connect_online_button_graph_2
-            self.timer.timeout.connect(self.update_online_plot)
-            self.last_sender = sender_button
+            # collect data from the website
+            
+            # self.timer_online.start(2000)
+            # self.timer_online.timeout.connect(self.collector_online.data_update)
+            
+            # if self.collector_online.running == False:  # Ensure the thread isn't already running
+            #     print("Start Thread run")
+            #     self.collector_online.start()  # Start the thread
+           
+            # self.collector_online.start()
+            
+            if not self.is_timer_graph1_connected:
+                print("connect 1::: ", self.is_timer_graph1_connected)
+                self.is_timer_graph1_connected = True
+                self.timer_graph_1.start(10)
+                self.timer_graph_1.timeout.connect(self.update_online_plot)
+                
+            self.ui.connect_online_button_graph_1.setText("Disconnect Online")
+            
+        elif (sender_button == self.ui.connect_online_button_graph_2) and self.graph2_on:  # clicked on connect_online_button_graph_2
+            print("connect 2")
             self.second_graph_online_connected = True
+            
+            # collect data from the website
+            # self.timer_online.start(2000)
+            # self.timer_online.timeout.connect(self.collector_online.data_update)
+            
+            # if self.collector_online.running == False:  # Ensure the thread isn't already running
+            #     print("Start Thread run")
+            #     self.collector_online.start()  # Start the thread
+            
+            # self.collector_online.start()
+                
+            if not self.is_timer_graph2_connected:
+                self.is_timer_graph2_connected = True
+                self.timer_graph_2.start(10)
+                self.timer_graph_2.timeout.connect(self.update_online_plot)
+                
+            self.ui.connect_online_button_graph_2.setText("Disconnect Online")    
+                    
+    def disconnect_online(self, button):            
+        if button == self.ui.connect_online_button_graph_1:
+            print("disconnecting")
+            # if  self.collector_online.running == True: 
+            #     print("Stop Thread graph 1")
+            #     self.collector_online.stop() 
+            # self.collector_online.wait()
+            
+            
+            # self.timer_online.timeout.disconnect(self.collector_online.data_update)
+            self.first_graph_online_connected = False
+            self.ui.connect_online_button_graph_1.setText("Connect Online")
+            # disconnect timer 1
+            self.is_timer_graph1_connected = False
+            self.timer_graph_1.timeout.disconnect(self.update_online_plot)
+            # Clear graph 1
+            self.plot_online_curve_graph1.setData([], [])
 
+        elif button == self.ui.connect_online_button_graph_2:
+            # if  self.collector_online.running == True: 
+            #     print("Stop Thread graph 2")
+            #     self.collector_online.stop()
+            # self.collector_online.wait()
+            
+            
+            self.second_graph_online_connected = False 
+            self.ui.connect_online_button_graph_2.setText("Connect Online") 
+            # disconnect timer 2
+            self.is_timer_graph2_connected = False
+            self.timer_graph_2.timeout.disconnect(self.update_online_plot) 
+            # Clear graph 2
+            self.plot_online_curve_graph2.setData([], [])
+            
+            
+
+            
+    def update_online_plot(self):
         try:
             with open("online_data.json", "r") as file:
                 self.data = json.load(file)
@@ -225,14 +343,18 @@ class MainWindow(QtWidgets.QMainWindow):
 
             if len(x_axis) > 0 and len(y_axis) > 0:
                 if self.graph1_on and self.first_graph_online_connected:
+                    print("graph 111")
+                    self.ui.graph1Widget.graph.setLimits(xMin=0, xMax=x_axis[x_axis.size - 1], yMin=y_axis[0], yMax=y_axis[y_axis.size - 1])
                     self.plot_online_curve_graph1.setData(x_axis, y_axis)
                 if self.graph2_on and self.second_graph_online_connected:
+                    print("graph 222")
+                    self.ui.graph2Widget.graph_2.setLimits(xMin=0, xMax=x_axis[x_axis.size - 1], yMin=y_axis[0], yMax=y_axis[y_axis.size - 1])
                     self.plot_online_curve_graph2.setData(x_axis, y_axis)
-                else:
-                    print("hahaha no sender")
+                # else:
+                #     print("hahaha no sender ")
         except Exception as e:
             print(f"Error loading or plotting data: {e}")
-
+    
     def format_time_string(self, time_str):
         parts = time_str.split(":")
         if len(parts) == 3:
@@ -240,23 +362,43 @@ class MainWindow(QtWidgets.QMainWindow):
             return f"{hour.zfill(2)}:{minute.zfill(2)}:{second.zfill(2)}"
         return time_str
     
+    
     def stop_run_graph(self):
         sender_button = self.sender()
         if sender_button == self.ui.play_button_graph_1:
+            print("graph 1 button ")
             self.graph1_on = not self.graph1_on
             if self.graph1_on:
-                self.timer_graph_1.timeout.connect(self.update_graph1)
+                if self.first_graph_online_connected:
+                    print("first online graph play")
+                    self.timer_graph_1.timeout.connect(self.update_online_plot)
+                else:    
+                    self.timer_graph_1.timeout.connect(self.update_graph1)
                 self.ui.play_button_graph_1.setIcon(self.ui.icon)
             else:
-                self.timer_graph_1.timeout.disconnect(self.update_graph1)
+                if self.first_graph_online_connected:
+                    print("first online graph stop")
+                    self.timer_graph_1.timeout.disconnect(self.update_online_plot)
+                else:
+                    self.timer_graph_1.timeout.disconnect(self.update_graph1)
                 self.ui.play_button_graph_1.setIcon(self.ui.icon1)
+        
         elif sender_button == self.ui.play_button_graph_2:
+            print("graph 2 button ")
             self.graph2_on = not self.graph2_on
             if self.graph2_on:
-                self.timer_graph_2.timeout.connect(self.update_graph2)
+                if self.second_graph_online_connected:
+                    print("second online graph play")
+                    self.timer_graph_2.timeout.connect(self.update_online_plot)
+                else:
+                    self.timer_graph_2.timeout.connect(self.update_graph2)
                 self.ui.play_button_graph_2.setIcon(self.ui.icon)
             else:
-                self.timer_graph_2.timeout.disconnect(self.update_graph2)
+                if self.second_graph_online_connected:
+                    print("second online graph stop")
+                    self.timer_graph_2.timeout.disconnect(self.update_online_plot)
+                else:    
+                    self.timer_graph_2.timeout.disconnect(self.update_graph2)
                 self.ui.play_button_graph_2.setIcon(self.ui.icon1)
 
         elif sender_button == self.ui.link_play_button:
@@ -312,7 +454,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.is_timer_graph1_connected = True
         self.timer_graph_1.setInterval(self.speed_graph_1)
         if not self.timer_graph_1.isActive():
-            self.timer_graph_1.start()    
+            self.timer_graph_1.start()
 
     def open_file_graph_2(self):
 
@@ -364,7 +506,7 @@ class MainWindow(QtWidgets.QMainWindow):
             data = signal_processor_1.get_next_data(self.window_width)
             # previous_data = signal_processor_1.get_previous_data()
             if data is not None:
-                # print("update graph 1")
+                print("update graph 1")
                 self.is_file1_opened = True
                 graph.update_graph( data, signal_processor_1.current_index, window_width,self.graph1_color)
 
@@ -379,7 +521,7 @@ class MainWindow(QtWidgets.QMainWindow):
             data = signal_processor_2.get_next_data(self.window_width)
             # previous_data = signal_processor_2.get_previous_data()
             if data is not None:
-                # print("update graph 2")
+                print("update graph 2")
                 self.is_file2_opened = True
                 graph.update_graph( data, signal_processor_2.current_index, window_width,self.graph2_color)
 
@@ -475,7 +617,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timer_graph_1.setInterval(self.speed_graph_2)
             if not self.timer_graph_1.isActive():
                 self.timer_graph_1.start()
-
     def move_signal_from_graph1_to_graph2(self):
         selected_name = self.ui.signals_name_combo_box_graph_1.currentText()
         if selected_name in self.signals_graph_1:
@@ -501,10 +642,35 @@ class MainWindow(QtWidgets.QMainWindow):
             return
 
         if selected_name in self.signals_graph_2:
-            signal_processor, graph2, plot_item2 = self.signals_graph_2[selected_name]
+            source_graph = self.graphs_2[-1]  # Ensure this refers to a Graph instance
+            target_graph = self.graphs_1[-1]  # Ensure this refers to a Graph instance
+            
+            # Call the method to move the signal and get necessary data
+            signal_processor, plot_widget, graph_color = self.signals_graph_2[selected_name]
+            
+            # Save the current data from the signal processor before moving
+            saved_data = signal_processor.get_data()
+            current_index = signal_processor.current_index  # Retrieve the current index
+            window_width = 500  # Ensure this is the right width for the target graph
+            
+            # Move the signal to the target graph
+            try:
+                source_graph.move_signal_to_another_graph(selected_name, self.graph1_color)
+            except AttributeError as e:
+                print(f"Error while moving signal: {e}")
 
-            # Remove the signal from Graph 2
-            graph2.remove_signal(selected_name)  # Ensure this properly removes the signal from the graph
+            # Update the target graph with the new data
+            target_graph.update_graph(saved_data, current_index, window_width, graph_color)
+
+            if not self.is_timer_graph1_connected:
+                self.timer_graph_1.timeout.connect(self.update_graph1)
+                self.is_timer_graph_1_connected = True
+                self.timer_graph_1.setInterval(self.speed_graph_1)
+            if not self.timer_graph_1.isActive():
+                self.timer_graph_1.start()
+
+
+            # Manage the visibility in the combo boxes
             del self.signals_graph_2[selected_name]
             self.ui.signals_name_combo_box_graph_2.removeItem(self.ui.signals_name_combo_box_graph_2.currentIndex())
 
@@ -531,8 +697,10 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             print(f"Signal '{selected_name}' not found in Graph 2.")
 
-        # print(f"Graph 1 signals after moving: {self.signals_graph_1.keys()}")
-        # print(f"Graph 2 signals after moving: {self.signals_graph_2.keys()}")
+
+
+
+
 
 
     def update_graph_name_1(self):  
@@ -676,14 +844,16 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.timer_graph_2.timeout.connect(self.update_graph2)
 
                 # Clear both graphs
-                for graph in self.graphs_1:
-                    graph.plot_widget.clear()
-                for graph in self.graphs_2:
-                    graph.plot_widget.clear()
+                # for graph in self.graphs_1:
+                #     graph.plot_widget.clear()
+                # for graph in self.graphs_2:
+                #     graph.plot_widget.clear()
                 # start from first
                 for signal_processor in self.signal_processor1:
+                    print("heeee  current_index = 0")
                     signal_processor.current_index = 0
                 for signal_processor in self.signal_processor2:
+                    print("kkkkk  current_index = 0")
                     signal_processor.current_index = 0
 
                 # To link Views (zoom in/out and scroll)
@@ -701,11 +871,16 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ui.reset_button_graph_2.hide()
                 self.ui.stop_button_graph_1.hide()
                 self.ui.stop_button_graph_2.hide()
-                self.ui.zoom_in_button_graph_1.hide()
-                self.ui.zoom_in_button_graph_2.hide()
+                self.ui.connect_online_button_graph_2.hide()
+                self.ui.connect_online_button_graph_1.hide()
+                self.ui.open_button_graph_2.hide()
+                self.ui.open_button_graph_1.hide()
+                self.ui.move_to_graph_1_button.hide()
+                self.ui.move_to_graph_2_button.hide()
 
                 self.timer_graph_1.start(self.speed_graph_1)
                 self.timer_graph_2.start(self.speed_graph_1)
+                
             else:
                 self.isLinked = False
         else:
@@ -726,9 +901,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if self.graph1_on:
                 self.timer_graph_1.timeout.connect(self.update_graph1)
             if self.graph2_on:
-                self.timer_graph_2.timeout.connect(self.update_graph2)
-                
-        # Disconnect the signals for view range (zoom)
+                self.timer_graph_2.timeout.connect(self.update_graph2)                                
         self.ui.graph1Widget.graph.sigRangeChanged.disconnect(self.link1_view)
         self.ui.graph2Widget.graph_2.sigRangeChanged.disconnect(self.link2_view)
                 
@@ -743,9 +916,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.reset_button_graph_2.show()
         self.ui.stop_button_graph_1.show()
         self.ui.stop_button_graph_2.show()
-        self.ui.zoom_in_button_graph_1.show()
-        self.ui.zoom_in_button_graph_2.show()
-
+        self.ui.connect_online_button_graph_2.show()
+        self.ui.connect_online_button_graph_1.show()
+        self.ui.open_button_graph_2.show()
+        self.ui.open_button_graph_1.show()
+        self.ui.move_to_graph_1_button.show()
+        self.ui.move_to_graph_2_button.show()
     def link_views(self, source_plot, target_plot):
         def update_view():
             target_plot.setXRange(*source_plot.getViewBox().viewRange()[0], padding=0)
@@ -758,29 +934,30 @@ class MainWindow(QtWidgets.QMainWindow):
         # Store connection hanehtago wehna bn3ml un link
         return connection        
 
-    def taking_snap_shot(self, x):
-        if x == 1:
-            snapshot = QPixmap(self.ui.graph1Widget.graph.size())
-            painter = QPainter(snapshot)
+
+                
+    def taking_snapshot(self, x):
+        snapshot = QPixmap(self.ui.graph1Widget_3.graph.size()) if x == 3 else QPixmap(self.ui.graph1Widget.graph.size()) if x == 1 else QPixmap(self.ui.graph2Widget.graph_2.size())
+        painter = QPainter(snapshot)
+
+        # Render the appropriate graph based on x
+        if x == 3:
+            self.ui.graph1Widget_3.graph.render(painter)
+        elif x == 1:
             self.ui.graph1Widget.graph.render(painter)
-        elif x == 3:
-            snapshot = QPixmap(self.ui.graph1Widget.graph.size())
-            painter = QPainter(snapshot)
+        elif x == 2:
             self.ui.graph2Widget.graph_2.render(painter)
 
-        # End the painter session (flush the drawing)
+        # End the painter session
         painter.end()
-        print("hh")
 
-        # Save the snapshot to an image file (optional)
-        if len(self.images) == 0:
-            snapshot.save(f"graph_snapshot{0}.png")
-            self.images.append(f"graph_snapshot{0}.png")
-            print("img")
-        else:
-            snapshot.save(f"graph_snapshot{len(self.images)}.png")
-            self.images.append(f"graph_snapshot{len(self.images)}.png")
-            print(f"img{len(self.images) - 1}")
+        # Save the snapshot to an image file
+        index = len(self.images)  # Get the current index for the snapshot
+        snapshot.save(f"graph{x}_snapshot{index}.png")
+        self.images.append((x, f"graph{x}_snapshot{index}.png"))  # Save a tuple of (graph_number, file_name)
+        print(f"Snapshot saved: graph{x}_snapshot{index}.png")
+
+
 
     def PDF_maker(self):
         # Create a PDF report using FPDF
@@ -788,22 +965,68 @@ class MainWindow(QtWidgets.QMainWindow):
         pdf.add_page()
 
         # Add title to the PDF
-        pdf.set_font("Arial", size=12)
+        pdf.set_font("Arial", "B", size=16)
         pdf.cell(200, 10, txt="Signal Glue Report", ln=True, align="C")
 
-        # Add the snapshot image to the PDF
-        for x in range(len(self.images)):
-            pdf.image(
-                f"graph_snapshot{x}.png", x=10, y=20 + x * 50, w=100
-            )  # Adjust position and size as needed
-            print(f"graph_snapshot{x}.png")
+        for i, (graph_index, snapshot_file) in enumerate(self.images):
+            # Set the initial y_offset with more space between sections
+            y_offset = 30 + (i * 100)  # Increase the space between sections to avoid overlap
 
-        # Add some data statistics (example)
-        pdf.set_xy(10, 120)  # Set position for the statistics text
-        pdf.set_font("Arial", size=10)
-        pdf.multi_cell(
-            0, 10, "Statistics:\n- Max value: 1.23\n- Min value: -0.56\n- Mean: 0.12"
-        )
+            # Add snapshot image and center it
+            pdf.image(snapshot_file, x=pdf.get_x() + 55, y=y_offset, w=100)  # Adjust x position to center
+
+            # Define the data for the current graph based on its index
+            if graph_index == 1:
+                x_data, y_data = self.graph1_filtered_x, self.graph1_filtered_y
+                graph_name = "Graph 1"
+            elif graph_index == 2:
+                x_data, y_data = self.graph2_filtered_x, self.graph2_filtered_y
+                graph_name = "Graph 2"
+            elif graph_index == 3:
+                x_data, y_data = self.whole_x_data, self.whole_y_data  # Glued graph data
+                graph_name = "Glued Graph 3"
+
+            # Calculate statistics for the current graph data
+            mean_value = np.mean(y_data)
+            std_value = np.std(y_data)
+            min_value = np.min(y_data)
+            max_value = np.max(y_data)
+            duration = x_data[-1] - x_data[0]  # Duration of the signal
+
+            # Add table title for each graph and center it
+            pdf.set_xy(10, y_offset + 40)  # Adjust y position for table to be right after the image
+            pdf.set_font("Arial", "B", size=12)
+            pdf.cell(0, 10, txt=f"Statistics for {graph_name}", ln=True, align="C")  # Center align
+
+            # Set font for the table
+            pdf.set_font("Arial", size=10)
+
+            # Define the statistics data
+            data = [
+                ["Mean", f"{mean_value:.2f}"],
+                ["Standard Deviation", f"{std_value:.2f}"],
+                ["Min Value", f"{min_value:.2f}"],
+                ["Max Value", f"{max_value:.2f}"],
+                ["Duration", f"{duration:.2f}"]
+            ]
+
+            # Set column widths and center the table
+            col_width = 80  # Increase the column width to balance the table width
+            row_height = 8
+            pdf.set_x((210 - (col_width * 2)) / 2)  # Center the table
+
+            # Add table header without an extra empty cell
+            headers = ["Statistic", "Value"]
+            for header in headers:
+                pdf.cell(col_width, row_height, header, border=1, align='C')
+            pdf.ln(row_height)
+
+            # Add the data rows to the table without an extra empty cell
+            for row in data:
+                pdf.set_x((210 - (col_width * 2)) / 2)  # Center each row
+                for item in row:
+                    pdf.cell(col_width, row_height, item, border=1, align='C')
+                pdf.ln(row_height)
 
         # Save the PDF to a file
         pdf_path = "signal_glue_report.pdf"
@@ -813,15 +1036,310 @@ class MainWindow(QtWidgets.QMainWindow):
             print(f"Report generated and saved at: {pdf_path}")
         else:
             print(f"Error: PDF report was not saved at {pdf_path}")
-            
+               
     def show_non_rectangle_plot(self):
         self.non_rectangle_plot= nonRectanglePlotWindow()
-        self.non_rectangle_plot.show()        
+        self.non_rectangle_plot.show()     
+    
+    def select_graph_to_cut_2(self):
+        if self.is_file2_opened == True:
+            self.ui.graph2Widget.graph_2.addItem(self.rect_roi)
+            # When the selection is made, you can access the ROI's position and size
+            self.ui.stop_button_graph_2.clicked.connect(self.on_select_2)
 
+    def select_graph_to_cut(self):
+        """Triggered when the 'Select Signal Portion' button is clicked"""
+        print("Rectangle selector activated. Select a portion of the signal.")
+        # You can now move or resize the rect_roi interactively to select a region
+        if self.is_file1_opened == True:
+            self.ui.graph1Widget.graph.addItem(self.rect_roi)
+            # When the selection is made, you can access the ROI's position and size
+            self.ui.stop_button_graph_1.clicked.connect(self.on_select)
+            
+
+     # Make sure NumPy is imported
+
+    def on_select(self):
+        """Handles the selection event"""
+        # Get the selected rectangle's coordinates and size
+        pos = self.rect_roi.pos()  # Position (top-left corner)
+        size = self.rect_roi.size()  # Size of the rectangle (width, height)
+
+        # Store the selected range (left, right, top, bottom)
+        left = pos.x()  # x-axis (time/sample) start
+        right = pos.x() + size[0]  # x-axis (time/sample) end
+        top = pos.y()  # y-axis (amplitude) start
+        bottom = pos.y() + size[1]  # y-axis (amplitude) end
+
+        # Debug: Print the selected rectangle bounds
+        print(f"Rectangle bounds - Left: {left}, Right: {right}, Top: {top}, Bottom: {bottom}")
+
+        # 1. Slice the x-data range
+        x_data = self.graph_1.previous_x_dataa  # Original x-data
+        y_data = self.graph_1.previous_signal_pointss  # Original y-data
+
+        # Find the nearest index for the 'left' and 'right' boundaries
+        left_idx = 0
+        right_idx = 0
+
+        # Find the nearest index to 'left'
+ 
+        for i, x in enumerate(x_data):
+            if x >= left:  # As soon as you hit or exceed the left boundary, take the index
+                left_idx = i
+                break  # Exit the loop as soon as the condition is met
+
+        # Find the nearest index to 'right'
+        for i, x in enumerate(x_data):
+            if x >= right:  # As soon as you hit or exceed the right boundary, take the index
+                right_idx = i
+                break  # Exit the loop as soon as the condition is met
+
+
+        # Ensure right_idx is greater than left_idx
+        right_idx = max(right_idx, left_idx + 1)
+
+        # Slice the x and y data based on the approximated x-axis selection
+        selected_x = x_data[left_idx:right_idx]
+        selected_y = y_data[left_idx:right_idx]
+
+        # Debug: Print the selected x and y data range
+        print(f"Selected x data: {selected_x[:5]}")  # Print the first 5 values for verification
+        print(f"Selected y data: {selected_y[:5]}")
+
+
+        left_value = selected_x[0]
+
+        filtered_selected_x = []
+        filtered_selected_y = []
+
+        for x, y in zip(selected_x, selected_y):
+            if x >= left_value:  # Keep only x values greater than or equal to left_value
+                filtered_selected_x.append(x)
+                filtered_selected_y.append(y)
+
+        # Debug: Print the filtered x and y data
+        print(f"Filtered x values: {filtered_selected_x[:5]}")
+        print(f"Filtered y values: {filtered_selected_y[:5]}")
+
+
+     
+        # 2. Filter y-data based on the selected y-range (top to bottom) and ensure one-to-one mapping with x
+        
+
+        # Use a dictionary to store only one y-value per x-value
+        unique_data = {}
+
+
+
+        # Iterate through both x and y data simultaneously
+        for i, (x, y) in enumerate(zip(filtered_selected_x, filtered_selected_y)):
+            if top <= y <= bottom:  # Filter y-values within the y-axis range
+                if x not in unique_data:  # Only keep the first occurrence of x
+                    unique_data[x] = y
+
+        # Convert the dictionary back to two lists
+        self.graph1_filtered_x = list(unique_data.keys())
+        self.graph1_filtered_y = list(unique_data.values())
+
+        # Debug: Print the filtered x and y data
+        print(f"Filtered x values: {self.graph1_filtered_x[10:10]}")
+        print(f"Filtered y values: {self.graph1_filtered_y[10:20]}")
+
+
+        self.zero_line = pg.InfiniteLine(angle=0, pos=0, pen=pg.mkPen('r', width=1, style=pg.QtCore.Qt.DashLine))
+        self.ui.graph1Widget_3.graph.addItem(self.zero_line)
+
+
+        self.graph1_plot= self.ui.graph1Widget_3.graph.plot(self.graph1_filtered_x, self.graph1_filtered_y, pen=pg.mkPen('w', width=1))
+
+       
+
+        # Store and print the selected range for verification
+        self.selected_range = (left, right, top, bottom)
+        print(f"Selected range: {self.selected_range}")
+
+    def on_select_2(self):
+        pos = self.rect_roi.pos()  # Position (top-left corner)
+        size = self.rect_roi.size()  # Size of the rectangle (width, height)
+
+        # Store the selected range (left, right, top, bottom)
+        left = pos.x()  # x-axis (time/sample) start
+        right = pos.x() + size[0]  # x-axis (time/sample) end
+        top = pos.y()  # y-axis (amplitude) start
+        bottom = pos.y() + size[1]  # y-axis (amplitude) end
+
+        # Debug: Print the selected rectangle bounds
+        print(f"Rectangle bounds - Left: {left}, Right: {right}, Top: {top}, Bottom: {bottom}")
+
+        # 1. Slice the x-data range
+        x_data = self.graph_2.previous_x_dataa # Original x-data
+        y_data = self.graph_2.previous_signal_pointss  # Original y-data
+
+        # Find the nearest index for the 'left' and 'right' boundaries
+        left_idx = 0
+        right_idx = 0
+
+        # Find the nearest index to 'left'
+        # Find the nearest index to 'left'
+        for i, x in enumerate(x_data):
+            if x >= left:  # As soon as you hit or exceed the left boundary, take the index
+                left_idx = i
+                break  # Exit the loop as soon as the condition is met
+
+        # Find the nearest index to 'right'
+        for i, x in enumerate(x_data):
+            if x >= right:  # As soon as you hit or exceed the right boundary, take the index
+                right_idx = i
+                break  # Exit the loop as soon as the condition is met
+
+
+        # Ensure right_idx is greater than left_idx
+        right_idx = max(right_idx, left_idx + 1)
+
+        # Slice the x and y data based on the approximated x-axis selection
+        selected_x = x_data[left_idx:right_idx]
+        selected_y = y_data[left_idx:right_idx]
+
+       
+
+
+        left_value = selected_x[0]
+
+        filtered_selected_x = []
+        filtered_selected_y = []
+
+        for x, y in zip(selected_x, selected_y):
+            if x >= left_value:  # Keep only x values greater than or equal to left_value
+                filtered_selected_x.append(x)
+                filtered_selected_y.append(y)
+
+        # Debug: Print the filtered x and y data
+        
+
+
+     
+        # 2. Filter y-data based on the selected y-range (top to bottom) and ensure one-to-one mapping with x
+        
+
+        # Use a dictionary to store only one y-value per x-value
+        unique_data = {}
+
+
+
+        # Iterate through both x and y data simultaneously
+        for i, (x, y) in enumerate(zip(filtered_selected_x, filtered_selected_y)):
+            if top <= y <= bottom:  # Filter y-values within the y-axis range
+                if x not in unique_data:  # Only keep the first occurrence of x
+                    unique_data[x] = y
+
+        # Convert the dictionary back to two lists
+        self.graph2_filtered_x = list(unique_data.keys())
+        self.graph2_filtered_y = list(unique_data.values())
+
+        # Debug: Print the filtered x and y data
+        
+        print(f"Filtered y values: {self.graph2_filtered_y[:5]}")
+        print(f"Filtered X values: {self.graph2_filtered_x[:5]}")
+
+
+        self.zero_line = pg.InfiniteLine(angle=0, pos=0, pen=pg.mkPen('r', width=1, style=pg.QtCore.Qt.DashLine))
+        self.ui.graph1Widget_3.graph.addItem(self.zero_line)
+
+
+        self.graph2_plot=self.ui.graph1Widget_3.graph.plot(self.graph2_filtered_x, self.graph2_filtered_y, pen=pg.mkPen('w', width=1))
+        
+
+    def on_slider_change(self, value):
+         # Fixed amount to shift the graph
+        shift_amount = 0.01  # Fixed amount to shift the graph
+        self.total_shifed_glue_slider =  value * shift_amount  # Update the total shift amount
+        
+        # Shift x-data by the total shift amount
+        self.x_shifted = [x + self.total_shifed_glue_slider for x in self.graph1_filtered_x]
+        # Clear the previous plot before re-plotting
+        self.graph1_plot.clear()  # Clear the previous plot
+        self.graph1_plot = self.ui.graph1Widget_3.graph.plot(self.x_shifted, self.graph1_filtered_y, pen=pg.mkPen('w', width=1))
+
+        self.graph1_end_x = self.x_shifted[-1]
+        self.graph1_start_x=self.x_shifted[0]
+        self.graph1_end_y = self.graph1_filtered_y[-1]
+        self.graph1_start_y=self.graph1_filtered_y[0]  
+        self.graph2_start_x = self.graph2_filtered_x[0]
+        self.graph2_end_x=self.graph2_filtered_x[-1]
+        self.graph2_start_y = self.graph2_filtered_y[0]
+        self.graph2_end_y=self.graph2_filtered_y[-1]
+        
+        
+        
+
+    def on_glue_button_click(self):
+        # Get the interpolation method from the user (linear, cubic, etc.)
+        interpolation_order=self.ui.comboBox.currentText()
+
+        x1_end = self.graph1_end_x  
+        y1_end=self.graph1_end_y
+        x1_start=self.graph1_start_x
+        y1_start=self.graph1_start_y
+        x2_start = self.graph2_start_x
+        y2_start=self.graph2_start_y 
+        x2_end=self.graph2_end_x
+        y2_end=self.graph2_end_y
+        
+
+        if x1_end < x2_start:  # Gap detected, interpolate
+            x_new = np.linspace(x1_end, x2_start, num=100)  # Generate new x points between graph 1 and 2
+            
+            if interpolation_order == "linear":
+                f = interpolate.interp1d([x1_end, x2_start], [y1_end, y2_start], kind='linear')
+               
+            elif interpolation_order == "cubic":
+                f = interpolate.interp1d([x1_end, x2_start,x1_start,x2_end], [y1_end, y2_start,y1_start,y2_end], kind='cubic')
+            else:
+                self.status_label.setText("Invalid interpolation order")
+                return
+            
+            y_new = f(x_new)  # Get the interpolated y values
+            self.whole_x_data = list(self.graph1_filtered_x) + list(x_new) + list(self.graph2_filtered_x)
+            self.whole_y_data = list(self.graph1_filtered_y) + list(y_new) + list(self.graph2_filtered_y)
+            
+            # Plot the interpolated signal in the third graph
+            self.ui.graph1Widget_3.graph.plot(x_new, y_new, pen=pg.mkPen('w', width=1))
+
+        else:  # Overlap detected, average points
+            overlap_x = np.intersect1d(self.x_shifted, self.graph2_filtered_x)
+            
+            # Remove overlapping points and keep non-overlapping parts from both graphs
+            graph1_non_overlap_x = [x for x in self.x_shifted if x not in overlap_x]
+            graph1_non_overlap_y = [self.graph1_filtered_y[self.x_shifted.index(x)] for x in graph1_non_overlap_x]
+            
+            graph2_non_overlap_x = [x for x in self.graph2_filtered_x if x not in overlap_x]
+            graph2_non_overlap_y = [self.graph2_filtered_y[self.graph2_filtered_x.index(x)] for x in graph2_non_overlap_x]
+
+            # Interpolate the overlapping part
+            overlap_y1 = np.interp(overlap_x, self.x_shifted, self.graph1_filtered_y)
+            overlap_y2 = np.interp(overlap_x, self.graph2_filtered_x, self.graph2_filtered_y)
+            averaged_y = (overlap_y1 + overlap_y2) / 2  # Calculate the average of the overlapping y values
+
+            # Combine all x and y values into a single list
+            self.whole_x_data=graph1_non_overlap_x + list(overlap_x) + graph2_non_overlap_x
+           
+            self.whole_y_data= graph1_non_overlap_y + list(averaged_y) + graph2_non_overlap_y
+
+            # Sort the combined points by x to ensure smooth plotting
+            self.whole_x_data, self.whole_x_data= zip(*sorted(zip(self.whole_x_data, self.whole_y_data)))
+
+            # Clear the graph to remove any existing points
+            self.ui.graph1Widget_3.graph.clear()
+
+            # Plot the combined non-overlapping and overlapping data together
+            self.ui.graph1Widget_3.graph.plot(self.whole_x_data, self.whole_y_data, pen=pg.mkPen('w', width=1))
+
+            # Disconnect the slider signal to prevent further changes during glue operation
+            self.ui.slider_glue.valueChanged.disconnect(self.on_slider_change)
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
-    app.setApplicationDisplayName("PyQt5 Tutorial with pyqtgraph")
     ui = MainWindow()
     ui.show()
     app.exec_()

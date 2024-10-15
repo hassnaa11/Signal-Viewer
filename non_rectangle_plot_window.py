@@ -1,11 +1,13 @@
-import os
 from PyQt5 import QtWidgets
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import numpy as np
 import pandas as pd
-from matplotlib.collections import LineCollection
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.collections import LineCollection
+from matplotlib import cm
+
 
 class nonRectanglePlotWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -13,81 +15,126 @@ class nonRectanglePlotWindow(QtWidgets.QMainWindow):
 
         self.setWindowTitle("Climate Spiral")
         self.setGeometry(200, 200, 1000, 800)
-        
-        self.figure, self.ax = plt.subplots(figsize=(14, 14))
+
+        self.figure, self.ax = plt.subplots(
+            subplot_kw={"projection": "polar"}, figsize=(14, 14), facecolor="#22283e"
+        )
 
         self.canvas = FigureCanvas(self.figure)
-        self.setCentralWidget(self.canvas)
+        self.toolbar = NavigationToolbar(self.canvas, self)
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(self.toolbar)
+        layout.addWidget(self.canvas)
+        central_widget = QtWidgets.QWidget()
+        central_widget.setLayout(layout)
+        self.setCentralWidget(central_widget)
+
         self.draw_plot()
 
     def draw_plot(self):
-
-        def segment_circle(num_segments):
-            segment_rad = 2 * np.pi / num_segments
-            segment_rads = segment_rad * np.arange(num_segments)
-            coordX = np.cos(segment_rads)
-            coordY = np.sin(segment_rads)
-            return np.c_[coordX, coordY, segment_rads]
-
-        r = 7.0
         months = [
-            "Mar", "Feb", "Jan", "Dec", "Nov", "Oct", "Sep", "Aug", "Jul", "Jun", "May", "Apr"
+            "Mar",
+            "Feb",
+            "Jan",
+            "Dec",
+            "Nov",
+            "Oct",
+            "Sep",
+            "Aug",
+            "Jul",
+            "Jun",
+            "May",
+            "Apr",
         ]
         month_idx = [2, 1, 0, 11, 10, 9, 8, 7, 6, 5, 4, 3]
-        radius = r + 0.4
-        month_points = segment_circle(len(months))
 
-        df = pd.read_csv("dataset\HadCRUT.5.0.2.0.analysis.summary_series.global.monthly.csv")
-        df['Time'] = pd.to_datetime(df['Time'])
-        r_factor = r / 3.6
-        x_orig = df["Anomaly (deg C)"].to_numpy() + 1.5
-        x_vals = []
-        y_vals = []
-        for i in range(len(x_orig)):
-            r_pos = x_orig[i] * r_factor
-            x_unit_r, y_unit_r = month_points[month_idx[i % 12], :2]
-            x_r, y_r = (r_pos * x_unit_r, r_pos * y_unit_r)
-            x_vals.append(x_r)
-            y_vals.append(y_r)
+        df = pd.read_csv(
+            "dataset\HadCRUT.5.0.2.0.analysis.summary_series.global.monthly.csv"
+        )
+        df["Time"] = pd.to_datetime(df["Time"])
 
-        self.ax.patch.set_facecolor("grey")
-        self.ax.axis("equal")
-        self.ax.set(xlim=(-10, 10), ylim=(-10, 10))
+        r_factor = 7.0 / 3.6  # scaling factor
+        anomalies = df["Anomaly (deg C)"].to_numpy() + 1.5  # offset + 1.5
 
-        circle = plt.Circle((0, 0), r, fc="#000000")
-        self.ax.add_patch(circle)
-        circle_2 = plt.Circle((0, 0), r_factor * 2.5, ec="red", fc=None, fill=False, lw=3.0)
-        self.ax.add_patch(circle_2)
-        circle_1_5 = plt.Circle((0, 0), r_factor * 3.0, ec="red", fc=None, fill=False, lw=3.0)
-        self.ax.add_patch(circle_1_5)
+        # calc angles of months
+        num_months = len(months)
+        theta_vals = np.linspace(0, 2 * np.pi, num_months, endpoint=False)
 
-        props_months = {"ha": "center", "va": "center", "fontsize": 24, "color": "white"}
-        props_year = {"ha": "center", "va": "center", "fontsize": 36, "color": "white"}
-        props_temp = {"ha": "center", "va": "center", "fontsize": 32, "color": "red"}
-        self.ax.text(0, r_factor * 2.5, "1.5°C", props_temp, bbox=dict(facecolor="black"))
-        self.ax.text(0, r_factor * 3.0, "2.0°C", props_temp, bbox=dict(facecolor="black"))
+        r_vals = []
+        theta_plot_vals = []
 
-        # month labels 
-        for j in range(len(months)):
-            x_unit_r, y_unit_r, angle = month_points[j]
-            x_radius, y_radius = (radius * x_unit_r, radius * y_unit_r)
-            angle = angle - 0.5 * np.pi
-            self.ax.text(x_radius, y_radius, months[j], props_months, rotation=np.rad2deg(angle))
+        for i in range(len(anomalies)):
+            # radius based on temperature anomaly
+            r_pos = anomalies[i] * r_factor
+            # angle of the month
+            theta_pos = theta_vals[month_idx[i % 12]]
+            r_vals.append(r_pos)
+            theta_plot_vals.append(theta_pos)
+
+        self.ax.set_facecolor("#2D324D")
+        self.ax.set_ylim(0, r_factor * 3.6)
+        self.ax.set_theta_direction(-1)  # clockwise
+        self.ax.set_theta_offset(np.pi / 2.0)
+        self.ax.tick_params(colors="white")
+        self.ax.grid(True, color="white", linestyle="--")
+        self.ax.spines["polar"].set_color("white")
+
+        # self.ax.text(np.pi/2, r_factor * 2.5, "1.5°C", ha="center", va="center", fontsize=16, color="yellow")
+        # self.ax.text(np.pi/2, r_factor * 3.0, "2.0°C", ha="center", va="center", fontsize=16, color="yellow")
+        self.ax.plot([0], [0], marker="o", color="yellow")
+
+        # write months names
+        for i, month in enumerate(months):
+            self.ax.text(
+                theta_vals[i],
+                r_factor * 4.3,
+                month,
+                ha="center",
+                va="center",
+                fontsize=16,
+                color="white",
+            )
 
         # create LineCollection
-        lc = LineCollection([], cmap=plt.get_cmap("jet"), norm=plt.Normalize(0, 3.6))
+        lc = LineCollection(
+            [],
+            cmap=cm.get_cmap("jet"),
+            norm=plt.Normalize(min(anomalies), max(anomalies)),
+        )
         self.ax.add_collection(lc)
+
         # year text placeholder
-        year_text = self.ax.text(0, 0, "", props_year)
+        year_text = self.ax.text(
+            0.5,
+            0.5,
+            "",
+            ha="center",
+            va="center",
+            fontsize=36,
+            color="white",
+            transform=self.ax.transAxes,
+        )
 
         def animate(i):
-            if i > 1:
-                pts = np.array([x_vals[:i], y_vals[:i]]).T.reshape(-1, 1, 2)
+            if i > 1:  # min 2 points to draw line
+                pts = np.array([theta_plot_vals[:i], r_vals[:i]]).T.reshape(-1, 1, 2)
                 segs = np.concatenate([pts[:-1], pts[1:]], axis=1)
                 lc.set_segments(segs)
-                lc.set_array(np.asarray(x_orig[:i]))  # update color array
-            year = 1850 + (i // 12)  
-            year_text.set_text(str(year))  # year text
+                lc.set_array(
+                    np.array(anomalies[:i])
+                )  # color based on temperature anomaly
 
-        self.anim = FuncAnimation(self.figure, animate, frames=len(x_orig), interval=0.5, repeat=False)
+            year = 1850 + (i // 12)
+            year_text.set_text(str(year))
+
+        self.anim = FuncAnimation(
+            self.figure, animate, frames=len(anomalies), interval=0.5, repeat=False
+        )
         self.canvas.draw()
+
+
+if __name__ == "__main__":
+    app = QtWidgets.QApplication([])
+    ui = nonRectanglePlotWindow()
+    ui.show()
+    app.exec_()
