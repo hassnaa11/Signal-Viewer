@@ -729,7 +729,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if selected_name in self.signals_graph_1:
             # Update signal's name in signals dictionary and combo box
             signal_processor, graph, _ = self.signals_graph_1.pop(selected_name)
-            
+            color = graph.signals[selected_name]['item'].opts['pen'].color()
             # Directly update the graph's signals dictionary with the new name
             graph.signals[new_name] = graph.signals.pop(selected_name)
 
@@ -740,9 +740,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.signals_name_combo_box_graph_1.setItemText(index, new_name)
             self.ui.signal_name_lineEdit_graph_1.clear()
             self.ui.signals_name_combo_box_graph_1.setCurrentText(new_name)
-
-            # Get the color of the selected signal
-            color = graph.signals[selected_name]['item'].opts['pen'].color()
 
             # Update the label and the color for the new signal name
             graph.update_signal_label(new_name, color)
@@ -763,7 +760,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if selected_name in self.signals_graph_2:
             # Update signal's name in signals dictionary and combo box
             signal_processor, graph, _ = self.signals_graph_2.pop(selected_name)
-            
+            color = graph.signals[selected_name]['item'].opts['pen'].color()
             # Directly update the graph's signals dictionary with the new name
             graph.signals[new_name] = graph.signals.pop(selected_name)
 
@@ -774,9 +771,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.signals_name_combo_box_graph_2.setItemText(index, new_name)
             self.ui.signal_name_lineEdit_graph_2.clear()
             self.ui.signals_name_combo_box_graph_2.setCurrentText(new_name)
-
-            # Get the color of the selected signal
-            color = graph.signals[selected_name]['item'].opts['pen'].color()
 
             # Update the label and the color for the new signal name
             graph.update_signal_label(new_name, color)
