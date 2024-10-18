@@ -2,7 +2,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import pyqtgraph as pg
 from PyQt5 import QtCore
 from PyQt5.QtGui import QPainter, QPixmap
-from matplotlib.widgets import RectangleSelector
 from scipy import interpolate 
 from PyQt5.QtWidgets import QInputDialog
 
@@ -69,8 +68,15 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.ui = Ui_MainWindow()
-        
         self.ui.setupUi(self)
+        
+        self.ui.graph1Widget.graph.plotItem.setLabel('left', 'Voltage')
+        self.ui.graph1Widget.graph.plotItem.setLabel('bottom', 'Time (s)')
+        self.ui.graph2Widget.graph_2.plotItem.setLabel('left', 'Voltage')
+        self.ui.graph2Widget.graph_2.plotItem.setLabel('bottom', 'Time (s)')
+        self.ui.graph1Widget_3.graph.plotItem.setLabel('left', 'Voltage')
+        self.ui.graph1Widget_3.graph.plotItem.setLabel('bottom', 'Time (s)')
+        
         self.timer = QtCore.QTimer()
         self.timer2 = QtCore.QTimer()
         self.ui.graph1Widget.graph.setLimits(xMin=0)
@@ -220,19 +226,21 @@ class MainWindow(QtWidgets.QMainWindow):
    
 
     def connect_online(self):
-        
         sender_button = self.sender()
         print(sender_button)
         if sender_button == self.ui.connect_online_button_graph_1 and self.first_graph_online_connected:
+            self.ui.graph1Widget.graph.plotItem.setLabel('left', 'Voltage')
             print("disconnect 1")
             self.disconnect_online(sender_button)
         elif sender_button == self.ui.connect_online_button_graph_2 and self.second_graph_online_connected:
+            self.ui.graph2Widget.graph_2.plotItem.setLabel('left', 'Voltage')
             print("disconnect 2")
             self.disconnect_online(sender_button)
          
         # elif (sender_button != self.ui.connect_online_button_graph_1 and sender_button != self.ui.connect_online_button_graph_2):  # No new click
         #     sender_button = self.last_sender
         elif (sender_button == self.ui.connect_online_button_graph_1) and self.graph1_on:  # clicked on connect_online_button_graph_1
+            self.ui.graph1Widget.graph.plotItem.setLabel('left', 'Distance (km)')
             print("connect 1")
             self.first_graph_online_connected = True
             # collect data from the website
@@ -255,6 +263,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.connect_online_button_graph_1.setText("Disconnect Online")
             
         elif (sender_button == self.ui.connect_online_button_graph_2) and self.graph2_on:  # clicked on connect_online_button_graph_2
+            self.ui.graph2Widget.graph_2.plotItem.setLabel('left', 'Distance (km)') 
             print("connect 2")
             self.second_graph_online_connected = True
             
@@ -275,7 +284,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 
             self.ui.connect_online_button_graph_2.setText("Disconnect Online")    
                     
-    def disconnect_online(self, button):            
+    def disconnect_online(self, button):           
         if button == self.ui.connect_online_button_graph_1:
             print("disconnecting")
             # if  self.collector_online.running == True: 
@@ -419,6 +428,16 @@ class MainWindow(QtWidgets.QMainWindow):
                 print("Successfully disconnected from update_graph1.")
                 self.ui.link_play_button.setIcon(self.ui.icon1)
 
+                
+    def show_input_dialog(self):
+        input_dialog = QInputDialog(self)
+        input_dialog.setStyleSheet("""
+            QInputDialog { background-color: white; }
+            QLineEdit { background-color: white; color: black; }
+            QPushButton { background-color: white; color: black; }
+        """)
+        return input_dialog.getText(self, "Signal Name", "Enter a name for the new signal:")
+
     def open_file_graph_1(self):
           #self.timer.start(500)
         signal_processor= SignalProcessor(self.ui.graph1Widget.graph)
@@ -435,7 +454,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
         # After the file is opened, prompt user for a name and store it
-        new_name, ok = QInputDialog.getText(self, "Signal Name", "Enter a name for the new signal:")
+        new_name, ok = QInputDialog.getText(self, "Signal Name", "Enter a name for the new signal: ")
         if ok and new_name:
             graph.add_signal(new_name, color = self.graph1_color)  # Adjust color as needed
             graph.toggle_signal_visibility(new_name, True)
@@ -471,7 +490,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.graphs_2.append(graph)
 
         # After the file is opened, prompt user for a name and store it
-        new_name, ok = QInputDialog.getText(self, "Signal Name", "Enter a name for the new signal:")
+        new_name, ok = self.show_input_dialog()
+
         
         if ok and new_name:
             graph.add_signal(new_name, color= self.graph2_color)  # Adjust color as needed
@@ -492,7 +512,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.is_timer_graph2_connected = True
         self.timer_graph_2.setInterval(self.speed_graph_2)
         if not self.timer_graph_2.isActive():
-            self.timer_graph_2.start()
+            self.timer_graph_2.start()      
 
         
     def update_graph1(self):
@@ -739,6 +759,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ui.open_button_graph_1.hide()
                 self.ui.move_to_graph_1_button.hide()
                 self.ui.move_to_graph_2_button.hide()
+                self.ui.select_button_graph1.hide()
+                self.ui.select_button_graph2.hide()
+                self.ui.snapshot_button.hide()
+                self.ui.snapshot_button_graph2.hide()
 
                 self.timer_graph_1.start(self.speed_graph_1)
                 self.timer_graph_2.start(self.speed_graph_1)
@@ -784,6 +808,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.open_button_graph_1.show()
         self.ui.move_to_graph_1_button.show()
         self.ui.move_to_graph_2_button.show()
+        self.ui.select_button_graph1.show()
+        self.ui.select_button_graph2.show()
+        self.ui.snapshot_button.show()
+        self.ui.snapshot_button_graph2.show()
+        
+        
     def link_views(self, source_plot, target_plot):
         def update_view():
             target_plot.setXRange(*source_plot.getViewBox().viewRange()[0], padding=0)
