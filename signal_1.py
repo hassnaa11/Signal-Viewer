@@ -16,6 +16,7 @@ class SignalProcessor:
         if file_path:
             df = pd.read_csv(file_path)
             self.data = df.iloc[:, 1].to_numpy()  # Assuming second column contains the signal
+            # print (self.data)
             self.current_index = 0
             self.total_length = len(self.data)
 
@@ -39,3 +40,11 @@ class SignalProcessor:
     def get_data(self):
         """Returns all data of the current signal."""
         return self.data
+    
+
+    def rewind_graph(self):
+        """Rewind the signal to the beginning and restart plotting."""
+        self.current_index = 0  # Reset the index to the start
+        # Restart the plotting process
+        # self.plot_widget.clear()  # Clear current plot to restart from beginning
+        print("Signal rewound to the beginning.")
