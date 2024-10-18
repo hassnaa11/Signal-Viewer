@@ -49,13 +49,13 @@ class Graph:
         if name in self.signals:
             self.signals[name]['item'].setVisible(visible)
             self.signals[name]['visible'] = visible
-        else:
-            print(f"Signal '{name}' not found in the graph.")
+        # else:
+        #     print(f"Signal '{name}' not found in the graph.")
 
     def update_graph(self, data, current_index, window_width, graph1_color):
         
         if data is not None:
-            print("in update graph.py", current_index)
+            # print("in update graph.py", current_index)
 
             if self.zero_line not in self.plot_widget.items():
                 self.plot_widget.addItem(self.zero_line)  # Add the zero line back  
@@ -85,9 +85,9 @@ class Graph:
                     y_data = np.append(y_data, data)
 
                     signal_info['item'].setData(x=previous_x_data, y=data)
-                    print ("setData   doneee")
-                    print(signal_info)
-                    print("XDATA: ",previous_x_data,"YDATA: ",data)
+                    # print ("setData   doneee")
+                    # print(signal_info)
+                    # print("XDATA: ",previous_x_data,"YDATA: ",data)
                     # signal_info['item'].setData(x=new_x_data, y=data)  # Keep this line to update signals
             
             if current_index < 500:
@@ -95,6 +95,7 @@ class Graph:
                 self.plot_widget.setXRange(0, window_width * 0.001)   
                 self.plot_widget.setLimits(xMin=0, xMax=window_width *0.001 , yMin=min(data), yMax=max(data))              
             else:
+                self.index+=1
                 # After filling the initial window, make the graph scroll by updating the x-axis range
                 # print("Window filled, scrolling", current_index)
                 self.plot_widget.setXRange((current_index - window_width) * 0.001, current_index * 0.001)
@@ -103,7 +104,7 @@ class Graph:
     #this meyhod to remove the signal from the graph and used while moving the selected signal from a graph to another one so we need to remove the signal from the graph it moving from
     def remove_signal(self, name):
         if name in self.signals:
-            self.signals[name]['item'].setVisible(False)  # Optionally hide it first
+            # self.signals[name]['item'].setVisible(False)  # Optionally hide it first
             self.signals[name]['item'].scene().removeItem(self.signals[name]['item'])  # Remove from scene
             del self.signals[name]  # Remove the selected signal from the dictionary
             print(f"Signal '{name}' removed from the graph.")

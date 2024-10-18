@@ -120,7 +120,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.open_button_graph_1.clicked.connect(self.open_file_graph_1)
         self.ui.open_button_graph_2.clicked.connect(self.open_file_graph_2)
         self.ui.open_button_graph_3.clicked.connect(self.open_file_graph_3)
-        self.ui.stop_button_graph_3.clicked.connect(lambda:self.taking_snapshot(3))
+        self.ui.snapshot_button_graph_3.clicked.connect(lambda:self.taking_snapshot(3))
         self.ui.snapshot_button.clicked.connect(lambda:self.taking_snapshot(1))
         self.ui.snapshot_button_graph2.clicked.connect(lambda:self.taking_snapshot(2))
         self.ui.export_button.clicked.connect(self.PDF_maker)
@@ -381,7 +381,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.timer_graph_1.timeout.disconnect(self.update_online_plot)
                 else:
                     self.timer_graph_1.timeout.disconnect(self.update_graph1)
-                self.ui.play_button_graph_1.setIcon(self.ui.icon1)
+                self.ui.play_button_graph_1.setIcon(self.ui.pause)
         
         elif sender_button == self.ui.play_button_graph_2:
             print("graph 2 button ")
@@ -399,7 +399,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.timer_graph_2.timeout.disconnect(self.update_online_plot)
                 else:    
                     self.timer_graph_2.timeout.disconnect(self.update_graph2)
-                self.ui.play_button_graph_2.setIcon(self.ui.icon1)
+                self.ui.play_button_graph_2.setIcon(self.ui.pause)
 
         elif sender_button == self.ui.link_play_button:
             print("heyyyy link_play_button")
@@ -484,9 +484,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print(f"Opened file for {new_name} and added to Graph 2")
             print(f"Graph 2 signals: {self.signals_graph_2}")
         else:
-            print("No signal name provided for Graph 2")
-
-        
+            print("No signal name provided for Graph 2")      
             
         if not self.is_timer_graph2_connected:
             self.timer_graph_2.timeout.connect(self.update_graph2)
@@ -506,7 +504,7 @@ class MainWindow(QtWidgets.QMainWindow):
             data = signal_processor_1.get_next_data(self.window_width)
             # previous_data = signal_processor_1.get_previous_data()
             if data is not None:
-                print("update graph 1")
+                # print("update graph 1")
                 self.is_file1_opened = True
                 graph.update_graph( data, signal_processor_1.current_index, window_width,self.graph1_color)
 
@@ -521,7 +519,7 @@ class MainWindow(QtWidgets.QMainWindow):
             data = signal_processor_2.get_next_data(self.window_width)
             # previous_data = signal_processor_2.get_previous_data()
             if data is not None:
-                print("update graph 2")
+                # print("update graph 2")
                 self.is_file2_opened = True
                 graph.update_graph( data, signal_processor_2.current_index, window_width,self.graph2_color)
 
@@ -592,7 +590,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 print(f"Rewound signal '{selected_name}' on Graph 2")
 
 
-    
     def set_speed_graph_1(self, value):
         print("set speed graph 1")
         self.speed_graph_1 = value
@@ -617,89 +614,111 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timer_graph_1.setInterval(self.speed_graph_2)
             if not self.timer_graph_1.isActive():
                 self.timer_graph_1.start()
+
+
     def move_signal_from_graph1_to_graph2(self):
         selected_name = self.ui.signals_name_combo_box_graph_1.currentText()
-        if selected_name in self.signals_graph_1:
-            signal_processor, graph, plot_widget = self.signals_graph_1[selected_name]
-            saved_data = signal_processor.get_data()
 
-            # Remove from Graph 1 and plot in Graph 2
-            graph.move_signal_to_another_graph(selected_name, self.graph2_color, saved_data, self.graphs_2[-1])
-
-            # Update signals_graph dictionaries
-            del self.signals_graph_1[selected_name]
-            self.ui.signals_name_combo_box_graph_1.removeItem(self.ui.signals_name_combo_box_graph_1.currentIndex())
-            self.signals_graph_2[selected_name] = (signal_processor, graph, plot_widget)
-            self.ui.signals_name_combo_box_graph_2.addItem(selected_name)
-        else:
-            print(f"Error: Signal '{selected_name}' not found in Graph 1.")
-
-    def move_signal_from_graph2_to_graph1(self):
-        selected_name = self.ui.signals_name_combo_box_graph_2.currentText()
-        
         if not selected_name:  # Check if the selected_name is empty
             print("No signal selected for moving.")
             return
 
-        if selected_name in self.signals_graph_2:
-            source_graph = self.graphs_2[-1]  # Ensure this refers to a Graph instance
-            target_graph = self.graphs_1[-1]  # Ensure this refers to a Graph instance
+        if selected_name in self.signals_graph_1:
+            signal_processor, graph1, plot_item2 = self.signals_graph_1[selected_name]
+            current_color = graph1.signals[selected_name]['item'].opts['pen'].color()
+            # Remove the signal from Graph 2
+            graph1.legend.removeItem(selected_name)
+            graph1.remove_signal(selected_name)  # Ensure this properly removes the signal from the graph
+            del self.signals_graph_1[selected_name]
+            self.ui.signals_name_combo_box_graph_1.removeItem(self.ui.signals_name_combo_box_graph_1.currentIndex()) 
+
+            graph2 = Graph(self.ui.graph2Widget.graph_2)  
+            self.signal_processor2.append(signal_processor)
             
-            # Call the method to move the signal and get necessary data
-            signal_processor, plot_widget, graph_color = self.signals_graph_2[selected_name]
+            graph2.signal_processor = signal_processor
+            self.graphs_2.append(graph2)
+
+            graph2.add_signal(selected_name, color = current_color)
+            graph2.update_signal_label(selected_name, color= current_color)
+            graph2.toggle_signal_visibility(selected_name, True)
+
+            self.signals_graph_2[selected_name] = (signal_processor, graph2, signal_processor.plot_widget)
+            self.ui.signals_name_combo_box_graph_2.addItem(selected_name)
             
-            # Save the current data from the signal processor before moving
-            saved_data = signal_processor.get_data()
-            current_index = signal_processor.current_index  # Retrieve the current index
-            window_width = 500  # Ensure this is the right width for the target graph
-            
-            # Move the signal to the target graph
-            try:
-                source_graph.move_signal_to_another_graph(selected_name, self.graph1_color)
-            except AttributeError as e:
-                print(f"Error while moving signal: {e}")
-
-            # Update the target graph with the new data
-            target_graph.update_graph(saved_data, current_index, window_width, graph_color)
-
-            if not self.is_timer_graph1_connected:
-                self.timer_graph_1.timeout.connect(self.update_graph1)
-                self.is_timer_graph_1_connected = True
-                self.timer_graph_1.setInterval(self.speed_graph_1)
-            if not self.timer_graph_1.isActive():
-                self.timer_graph_1.start()
-
-
-            # Manage the visibility in the combo boxes
-            del self.signals_graph_2[selected_name]
-            self.ui.signals_name_combo_box_graph_2.removeItem(self.ui.signals_name_combo_box_graph_2.currentIndex())
-
-            # Add the signal to Graph 1
-            graph1 = self.graphs_1[-1]  # Use appropriate index based on your code structure
-            plot_item1 = graph1.plot_widget.plot([], [], pen=pg.mkPen(self.graph1_color), name=selected_name)  # Use the correct signal data
-
-            # Update signals dictionary for Graph 1
-            self.signal_processor1.append(signal_processor)
-            graph1.signal_processor = signal_processor
-            self.graphs_1.append(graph1)
-            self.signals_graph_1[selected_name] = (signal_processor, graph1, plot_item1)
-
-
-            # Rewind the signal processor for Graph 1
+            # Rewind the signal processor for Graph 2
             signal_processor.current_index = 0
 
-            # Connect the timer for Graph 1 to read the new signal
-            self.timer_graph_1.timeout.connect(self.update_graph1)
+            # Connect the timer for Graph 2 to read the new signal
+            if not self.is_timer_graph2_connected:
+                self.timer_graph_2.timeout.connect(self.update_graph2)
+                self.is_timer_graph2_connected = True
+            self.timer_graph_2.setInterval(self.speed_graph_2)
+            if not self.timer_graph_2.isActive():
+                self.timer_graph_2.start()
 
-            print(f"Moved and rewound signal '{selected_name}' from Graph 2 to Graph 1")
+            if not self.signals_graph_1:  # Check if there are no signals left in Graph 2
+                if self.timer_graph_1.isActive():
+                    self.timer_graph_1.stop()
+                    print("Graph 1 timer stopped as no signals are left.")
+
+
             print(f"Graph 1 signals after moving: {self.signals_graph_1.keys()}")
             print(f"Graph 2 signals after moving: {self.signals_graph_2.keys()}")
         else:
             print(f"Signal '{selected_name}' not found in Graph 2.")
 
 
+    def move_signal_from_graph2_to_graph1(self):
+        selected_name = self.ui.signals_name_combo_box_graph_2.currentText()
+
+        if not selected_name:  # Check if the selected_name is empty
+            print("No signal selected for moving.")
+            return
+
+        if selected_name in self.signals_graph_2:
+            signal_processor, graph2, plot_item2 = self.signals_graph_2[selected_name]
+            current_color = graph2.signals[selected_name]['item'].opts['pen'].color()
+            # Remove the signal from Graph 2
+            graph2.legend.removeItem(selected_name)
+            graph2.remove_signal(selected_name)  # Ensure this properly removes the signal from the graph
+            del self.signals_graph_2[selected_name]
+            self.ui.signals_name_combo_box_graph_2.removeItem(self.ui.signals_name_combo_box_graph_2.currentIndex()) 
+
+            graph1 = Graph(self.ui.graph1Widget.graph)  
+            self.signal_processor1.append(signal_processor)
+            
+            graph1.signal_processor = signal_processor
+            self.graphs_1.append(graph1)
+
+            graph1.add_signal(selected_name, color = current_color)
+            graph1.update_signal_label(selected_name, color= current_color)
+            graph1.toggle_signal_visibility(selected_name, True)
+
+            self.signals_graph_1[selected_name] = (signal_processor, graph1, signal_processor.plot_widget)
+            self.ui.signals_name_combo_box_graph_1.addItem(selected_name)
+            
+            # Rewind the signal processor for Graph 1
+            signal_processor.current_index = 0
+
+            # Connect the timer for Graph 1 to read the new signal
+            if not self.is_timer_graph1_connected:
+                self.timer_graph_1.timeout.connect(self.update_graph1)
+                self.is_timer_graph1_connected = True
+            self.timer_graph_1.setInterval(self.speed_graph_1)
+            if not self.timer_graph_1.isActive():
+                self.timer_graph_1.start()
 
 
+            if not self.signals_graph_2:  # Check if there are no signals left in Graph 2
+                if self.timer_graph_2.isActive():
+                    self.timer_graph_2.stop()
+                    print("Graph 2 timer stopped as no signals are left.")
+
+
+            print(f"Graph 1 signals after moving: {self.signals_graph_1.keys()}")
+            print(f"Graph 2 signals after moving: {self.signals_graph_2.keys()}")
+        else:
+            print(f"Signal '{selected_name}' not found in Graph 2.")
 
 
 
@@ -723,7 +742,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.signals_name_combo_box_graph_1.setCurrentText(new_name)
 
             # Get the color of the selected signal
-            color = self.graph1_color
+            color = graph.signals[selected_name]['item'].opts['pen'].color()
 
             # Update the label and the color for the new signal name
             graph.update_signal_label(new_name, color)
@@ -757,7 +776,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.signals_name_combo_box_graph_2.setCurrentText(new_name)
 
             # Get the color of the selected signal
-            color = self.graph2_color
+            color = graph.signals[selected_name]['item'].opts['pen'].color()
 
             # Update the label and the color for the new signal name
             graph.update_signal_label(new_name, color)
@@ -769,48 +788,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
             print(f"Updated signal name to {new_name} with color {color}")
 
-    # def update_signal_label(self, name, color, graph):
-    #     # Initialize label_items dictionary if not already initialized
-    #     if not hasattr(graph, 'label_items'):
-    #         graph.label_items = {}
-
-    #     # Check if the label exists before accessing its index
-    #     if name in graph.label_items:
-    #         # Existing label, we remove and replace it with updated settings
-    #         label_item, color_line = graph.label_items.pop(name)
-    #         graph.plot_widget.removeItem(label_item)
-    #         graph.plot_widget.removeItem(color_line)
-
-    #     # Calculate the label index for positioning if there are other labels
-    #     label_index = len(graph.label_items)  # Stagger based on current count of labels
-
-    #     # Add label at a fixed starting position, with a slight vertical offset
-    #     y_offset = 0.15 * label_index  # Adjust based on label count for separation
-
-    #     # Create and configure label item
-    #     label_item = pg.TextItem(
-    #         text=f'{name}', anchor=(0, 0.5), color=color, fill=pg.mkColor(0, 0, 0, 0)
-    #     )
-    #     graph.plot_widget.addItem(label_item)
-
-    #     # Position the label in a non-overlapping manner
-    #     x_pos = 0.0
-    #     y_pos = 1.75 - y_offset
-    #     label_item.setPos(x_pos, y_pos)
-
-    #     # Create a color line next to the label
-    #     line_x_start = x_pos + 0.05
-    #     color_line = pg.PlotDataItem([line_x_start - 0.02, line_x_start], [y_pos, y_pos], pen=pg.mkPen(color, width=2))
-    #     graph.plot_widget.addItem(color_line)
-
-    #     # Store the label and color line together
-    #     graph.label_items[name] = (label_item, color_line)
-
-
+    
         # Get the viewBox from the PlotWidget (for scaling)
         """ text_item = pg.TextItem(text=new_name, color='w', anchor=(0.5, 1))
         viewBox = self.graph_1.plot_widget.getViewBox()
-        
         # Get the current scale (zoom level) of the viewBox
         scale_x, scale_y = viewBox.viewRange()[0][1], viewBox.viewRange()[1][1]
         
