@@ -120,7 +120,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.open_button_graph_1.clicked.connect(self.open_file_graph_1)
         self.ui.open_button_graph_2.clicked.connect(self.open_file_graph_2)
         self.ui.open_button_graph_3.clicked.connect(self.open_file_graph_3)
-        self.ui.stop_button_graph_3.clicked.connect(lambda:self.taking_snapshot(3))
+        self.ui.snaphsot_button_graph3.clicked.connect(lambda:self.taking_snapshot(3))
         self.ui.snapshot_button.clicked.connect(lambda:self.taking_snapshot(1))
         self.ui.snapshot_button_graph2.clicked.connect(lambda:self.taking_snapshot(2))
         self.ui.export_button.clicked.connect(self.PDF_maker)
@@ -907,7 +907,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.is_file2_opened == True:
             self.ui.graph2Widget.graph_2.addItem(self.rect_roi)
             # When the selection is made, you can access the ROI's position and size
-            self.ui.stop_button_graph_2.clicked.connect(self.on_select_2)
+            self.ui.signal_button_graph2.clicked.connect(self.on_select_2)
 
     def select_graph_to_cut(self):
         """Triggered when the 'Select Signal Portion' button is clicked"""
@@ -916,7 +916,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.is_file1_opened == True:
             self.ui.graph1Widget.graph.addItem(self.rect_roi)
             # When the selection is made, you can access the ROI's position and size
-            self.ui.stop_button_graph_1.clicked.connect(self.on_select)
+            self.ui.signal_button_graph1.clicked.connect(self.on_select)
             
 
      # Make sure NumPy is imported
