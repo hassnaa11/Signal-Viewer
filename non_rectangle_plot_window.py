@@ -1,139 +1,174 @@
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore, QtGui
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import numpy as np
 import pandas as pd
-from matplotlib.collections import LineCollection
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
+from matplotlib import cm
+from matplotlib.colors import Normalize
 
 
 class nonRectanglePlotWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Climate Spiral")
-        self.setGeometry(200, 200, 1000, 800)
+        self.setWindowTitle("Climate Anomalies")
+        self.setGeometry(300, 100, 1150, 800)
 
-        self.figure, self.ax = plt.subplots(figsize=(14, 14), facecolor="#22283e")
-        # self.ax.spines['top'].set_color('#22283e')
-        # self.ax.spines['bottom'].set_color('#22283e')
-        # self.ax.spines['left'].set_color('#22283e')
-        # self.ax.spines['right'].set_color('#22283e')
+        self.main_layout = QtWidgets.QVBoxLayout()
+        header_widget = QtWidgets.QWidget()
+        header_layout = QtWidgets.QHBoxLayout(header_widget)
+        header_layout.setContentsMargins(0, 0, 30, 0) 
+        header_widget.setStyleSheet("background-color: #2D324D; border-radius:15px;") 
+        self.label = QtWidgets.QLabel("Global Temperature Change (1850 - 2024)")
+        self.label.setStyleSheet("color: white; font-size: 30px;padding: 15px;")
 
-        self.canvas = FigureCanvas(self.figure)
-        self.toolbar = NavigationToolbar(self.canvas, self)
-        layout = QtWidgets.QVBoxLayout()
-        layout.addWidget(self.toolbar)
-        layout.addWidget(self.canvas)
+        self.play_button = QtWidgets.QPushButton()
+        self.play_button.setStyleSheet(
+            "background-color: rgb(120, 207, 233); border-radius: 20; width: 40px; height: 40px;"
+        )
+        self.play_button.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.rewind_button = QtWidgets.QPushButton()
+        self.rewind_button.setStyleSheet(
+            "background-color: rgb(120, 207, 233); border-radius: 20px; width: 40px; height: 40px;"
+        )
+        self.rewind_button.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.play_button.setIcon(QtGui.QIcon("images\icons8-play-32.png"))
+        self.play_button.setIconSize(QtCore.QSize(35, 35))
+        self.rewind_button.setIcon(QtGui.QIcon("images\icons8-rewind-64.png"))
+        self.rewind_button.setIconSize(QtCore.QSize(30, 30))
+
+        header_layout.addWidget(self.label)
+        header_layout.addStretch()
+        header_layout.addWidget(self.play_button)
+        header_layout.addWidget(self.rewind_button)
+
+        self.main_layout.addWidget(header_widget)
+
         central_widget = QtWidgets.QWidget()
-        central_widget.setLayout(layout)
+        central_widget.setLayout(self.main_layout)
+        central_widget.setStyleSheet("background-color: #22283e;")
         self.setCentralWidget(central_widget)
 
+        self.counter = 0
+        self.current_frame = 0
+        self.is_paused = False
+        self.is_rewind = False
+        self.play_button.clicked.connect(self.pause_resume)
+        self.rewind_button.clicked.connect(self.rewind)
         self.draw_plot()
 
     def draw_plot(self):
-
-        def segment_circle(num_segments):
-            segment_rad = 2 * np.pi / num_segments
-            segment_rads = segment_rad * np.arange(num_segments)
-            coordX = np.cos(segment_rads)
-            coordY = np.sin(segment_rads)
-            return np.c_[coordX, coordY, segment_rads]
-
-        r = 7.0
+        self.figure, self.ax = plt.subplots(
+            subplot_kw={"projection": "polar"}, figsize=(14, 14), facecolor="#22283e"
+        )
+        self.canvas = FigureCanvas(self.figure)
+        self.main_layout.addWidget(self.canvas)
+        
         months = [
-            "Mar",
-            "Feb",
             "Jan",
-            "Dec",
-            "Nov",
-            "Oct",
-            "Sep",
-            "Aug",
-            "Jul",
-            "Jun",
-            "May",
+            "Feb",
+            "Mar",
             "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
         ]
-        month_idx = [2, 1, 0, 11, 10, 9, 8, 7, 6, 5, 4, 3]
-        radius = r + 0.4
-        month_points = segment_circle(len(months))
 
         df = pd.read_csv(
             "dataset\HadCRUT.5.0.2.0.analysis.summary_series.global.monthly.csv"
         )
-        df["Time"] = pd.to_datetime(df["Time"])
-        r_factor = r / 3.6
-        x_orig = df["Anomaly (deg C)"].to_numpy() + 1.5
-        x_vals = []
-        y_vals = []
-        for i in range(len(x_orig)):
-            r_pos = x_orig[i] * r_factor
-            x_unit_r, y_unit_r = month_points[month_idx[i % 12], :2]
-            x_r, y_r = (r_pos * x_unit_r, r_pos * y_unit_r)
-            x_vals.append(x_r)
-            y_vals.append(y_r)
+        self.anomaly_values = df["Anomaly (deg C)"] + 1.5
+        months_degrees = np.linspace(0, 2 * np.pi, 12, endpoint=False)
+        theta_values = np.tile(months_degrees, 175)
 
-        self.ax.patch.set_facecolor("#22283e")
-        self.ax.axis("equal")
-        self.ax.set(xlim=(-10, 10), ylim=(-10, 10))
+        self.ax.set_facecolor("#2D324D")
+        self.ax.set_ylim(0, 3)
+        self.ax.set_theta_direction(-1)
+        self.ax.set_theta_offset(np.pi / 2.0)
+        self.ax.tick_params(colors="white")
+        self.ax.grid(True, color="white", linestyle="--")
+        self.ax.spines["polar"].set_color("white")
 
-        circle = plt.Circle((0, 0), r, fc="#22283e")
-        self.ax.add_patch(circle)
-        circle_2 = plt.Circle((0, 0), r_factor * 2.5, ec="yellow", fill=False)
-        self.ax.add_patch(circle_2)
-        circle_1_5 = plt.Circle((0, 0), r_factor * 3.0, ec="yellow", fill=False)
-        self.ax.add_patch(circle_1_5)
-
-        props_months = {"ha": "center", "va": "center", "fontsize": 24, "color": "white"}
-        props_year = {"ha": "center", "va": "center", "fontsize": 36, "color": "white"}
-        props_temp = {"ha": "center", "va": "center", "fontsize": 16, "color": "white"}
-        self.ax.text(
-            0,
-            r_factor * 2.5,
-            "1.5°C",
-            props_temp,
-            bbox=dict(facecolor="#22283e", edgecolor="none"),
-        )
-        self.ax.text(
-            0,
-            r_factor * 3.0,
-            "2.0°C",
-            props_temp,
-            bbox=dict(facecolor="#22283e", edgecolor="none"),
-        )
-
-        # write month labels
-        for j in range(len(months)):
-            x_unit_r, y_unit_r, angle = month_points[j]
-            x_radius, y_radius = (radius * x_unit_r, radius * y_unit_r)
-            angle = angle - 0.5 * np.pi
+        # write months names
+        for i, month in enumerate(months):
             self.ax.text(
-                x_radius, y_radius, months[j], props_months, rotation=np.rad2deg(angle)
+                months_degrees[i],
+                3.6,
+                month,
+                ha="center",
+                va="center",
+                fontsize=16,
+                color="white",
             )
 
-        # create LineCollection to render multiple line segments
-        lc = LineCollection([], cmap=plt.get_cmap("jet"), norm=plt.Normalize(0, 3.6))
-        self.ax.add_collection(lc)
-        
-        # year text placeholder
-        year_text = self.ax.text(0, 0, "", props_year)
+        # year number placeholder
+        year_number = self.ax.text(
+            0.5,
+            0.5,
+            "",
+            ha="center",
+            va="center",
+            fontsize=34,
+            color="white",
+            transform=self.ax.transAxes,
+        )
+        norm = Normalize(vmin=min(self.anomaly_values), vmax=max(self.anomaly_values))
+        cmap = cm.jet
 
         def animate(i):
-            if i > 1: # 2 points minimum to draw a line
-                pts = np.array([x_vals[:i], y_vals[:i]]).T.reshape(-1, 1, 2)  # shape: (i, 1, 2)
-                segs = np.concatenate([pts[:-1], pts[1:]], axis=1)
-                lc.set_segments(segs)
-                lc.set_array(np.asarray(x_orig[:i]))  # update color
-            # update year number
-            year = 1850 + (i // 12)
-            year_text.set_text(str(year))
+            if not self.is_paused:
+                if i > 1:
+                    color = cmap(norm(self.anomaly_values[i]))
+                    self.ax.plot(
+                        theta_values[self.counter : i],
+                        self.anomaly_values[self.counter : i],
+                        color=color,
+                    )
+                    self.counter += 1
+                    print(self.counter)
+
+                year = 1850 + (i // 12)
+                year_number.set_text(str(year))
 
         self.anim = FuncAnimation(
-            self.figure, animate, frames=len(x_orig), interval=0.5, repeat=False
+            self.figure, animate, frames=len(self.anomaly_values), interval=0.1, repeat=False
         )
         self.canvas.draw()
+        
+    def pause_resume(self):
+        if self.counter >= 2094:
+            return
+        self.is_paused = not self.is_paused
+        if self.is_paused:
+            self.play_button.setIcon(QtGui.QIcon("images\icons8-pause-90.png"))
+            self.anim.event_source.stop()
+        else:
+            self.play_button.setIcon(QtGui.QIcon("images\icons8-play-32.png"))
+            self.anim.event_source.start()
+            
+        
+    def rewind(self):
+        self.is_paused = False 
+        self.play_button.setIcon(QtGui.QIcon("images\icons8-play-32.png"))
+        if self.counter < 2094:
+            self.anim.event_source.stop()
+        self.counter = 0    
+        
+        self.figure.clear()
+        self.figure = None
+        self.canvas.deleteLater()
+        self.ax.cla() 
+        self.ax = None 
+        
+        self.draw_plot()
+
 
 
 if __name__ == "__main__":
