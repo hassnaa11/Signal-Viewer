@@ -172,6 +172,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.ui.link_button.clicked.connect(self.link_graphs)
         self.ui.link_play_button.clicked.connect(self.stop_run_graph)
+        self.ui.link_rewind_button.clicked.connect(lambda: self.rewind_graph(1))
         self.isLinked = False
 
         self.is_timer_graph1_connected = False
@@ -423,7 +424,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.timer_graph_1.timeout.disconnect(self.update_graph1)
                 self.timer_graph_2.timeout.disconnect(self.update_graph2)
                 print("Successfully disconnected from update_graph1.")
-                self.ui.link_play_button.setIcon(self.ui.icon1)
+                self.ui.link_play_button.setIcon(self.ui.pause)
 
                 
     def show_input_dialog(self):
@@ -589,8 +590,13 @@ class MainWindow(QtWidgets.QMainWindow):
             print("No signal selected to change color.")
 
     def rewind_graph(self, graph_number):
+        if self.isLinked:
+            for signal_processor in self.signal_processor1:
+                signal_processor.current_index = 0
+            for signal_processor in self.signal_processor2:
+                signal_processor.current_index = 0
         #for graph1
-        if graph_number == 1:
+        elif graph_number == 1:
             #take the selected name 
             selected_name = self.ui.signals_name_combo_box_graph_1.currentText()
             if selected_name:
@@ -599,14 +605,16 @@ class MainWindow(QtWidgets.QMainWindow):
                 #rewind_graph() a method in signal_1.py
                 signal_processor.rewind_graph()
                 #udpate the signal afyer rewinding
-                self.timer_graph_1.timeout.connect(self.update_graph1) 
+                # if not self.is_timer_graph1_connected:
+                #     self.timer_graph_1.timeout.connect(self.update_graph1) 
                 print(f"Rewound signal '{selected_name}' on Graph 1")
+                    
         elif graph_number == 2:
             selected_name = self.ui.signals_name_combo_box_graph_2.currentText()
             if selected_name:
                 signal_processor = self.signals_graph_2[selected_name][0]
                 signal_processor.rewind_graph()
-                self.timer_graph_2.start()
+                # self.timer_graph_2.start()
                 print(f"Rewound signal '{selected_name}' on Graph 2")
 
 
@@ -861,6 +869,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ui.link_play_button.show()
                 self.ui.link_rewind_button.show()
                 self.ui.play_button_graph_1.hide()
+                # self.ui.play_button_graph_1.setDisabled(True)
                 self.ui.play_button_graph_2.hide()
                 self.ui.reset_button_graph_1.hide()
                 self.ui.reset_button_graph_2.hide()
