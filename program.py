@@ -4,8 +4,7 @@ from PyQt5 import QtCore
 from PyQt5.QtGui import QPainter, QPixmap
 from scipy import interpolate 
 from PyQt5.QtWidgets import QInputDialog
-
-
+from PyQt5.QtWidgets import QGraphicsOpacityEffect
 import json
 import os
 import numpy as np
@@ -187,10 +186,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.first_graph_online_connected = False
         self.second_graph_online_connected = False
         
-        # Collect Online Data
-        # self.collector_online = CollectOnlineData()
-        # self.timer_online = QtCore.QTimer()
-        # self.collector_online.data_fetched.connect(self.update_online_plot)
+        # Collect Online Data Thread
+        self.collector_online = CollectOnlineData()
         
         self.plot_online_curve_graph1 = self.ui.graph1Widget.graph.plotItem.plot(
             pen=pg.mkPen(color="orange", width=2), symbol="o"
@@ -210,9 +207,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.nonrectangle_graph_button.clicked.connect(self.show_non_rectangle_plot)
         self.timer.start(1000)
         self.rect_roi = pg.RectROI([0.1, 0], [0.2, 0.2], pen='r')
-        self.rect_roi.addScaleHandle([1, 0.5], [0.5, 0.5])  # Adding scale handles
-        self.selected_range = None
-        
+        self.rect_roi.addScaleHandle([1, 0.5], [0.5, 0.5]) 
+        self.selected_range = None        
 
 
     def format_time_string(self, time_str):
@@ -226,21 +222,24 @@ class MainWindow(QtWidgets.QMainWindow):
     def connect_online(self):
         sender_button = self.sender()
         print(sender_button)
+        
         if sender_button == self.ui.connect_online_button_graph_1 and self.first_graph_online_connected:
             self.ui.graph1Widget.graph.plotItem.setLabel('left', 'Voltage')
             print("disconnect 1")
             self.disconnect_online(sender_button)
+        
         elif sender_button == self.ui.connect_online_button_graph_2 and self.second_graph_online_connected:
             self.ui.graph2Widget.graph_2.plotItem.setLabel('left', 'Voltage')
             print("disconnect 2")
             self.disconnect_online(sender_button)
-         
-        # elif (sender_button != self.ui.connect_online_button_graph_1 and sender_button != self.ui.connect_online_button_graph_2):  # No new click
-        #     sender_button = self.last_sender
+
         elif (sender_button == self.ui.connect_online_button_graph_1) and self.graph1_on:  # clicked on connect_online_button_graph_1
             self.ui.graph1Widget.graph.plotItem.setLabel('left', 'Distance (km)')
             print("connect 1")
             self.first_graph_online_connected = True
+            self.ui.open_button_graph_1.setDisabled(True)
+            self.ui.open_button_graph_1.setGraphicsEffect(effect := QGraphicsOpacityEffect()) or effect.setOpacity(0.4)
+
             # collect data from the website
             
             # self.timer_online.start(2000)
@@ -250,7 +249,9 @@ class MainWindow(QtWidgets.QMainWindow):
             #     print("Start Thread run")
             #     self.collector_online.start()  # Start the thread
            
-            # self.collector_online.start()
+            if self.collector_online.running == False:
+                self.collector_online.start()
+                self.collector_online.data_fetched.connect(self.update_online_plot)
             
             if not self.is_timer_graph1_connected:
                 print("connect 1::: ", self.is_timer_graph1_connected)
@@ -264,6 +265,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.graph2Widget.graph_2.plotItem.setLabel('left', 'Distance (km)') 
             print("connect 2")
             self.second_graph_online_connected = True
+            self.ui.open_button_graph_2.setDisabled(True)
+            self.ui.open_button_graph_2.setGraphicsEffect(effect := QGraphicsOpacityEffect()) or effect.setOpacity(0.4)
+
             
             # collect data from the website
             # self.timer_online.start(2000)
@@ -273,7 +277,9 @@ class MainWindow(QtWidgets.QMainWindow):
             #     print("Start Thread run")
             #     self.collector_online.start()  # Start the thread
             
-            # self.collector_online.start()
+            if self.collector_online.running == False:
+                self.collector_online.start()
+                self.collector_online.data_fetched.connect(self.update_online_plot)
                 
             if not self.is_timer_graph2_connected:
                 self.is_timer_graph2_connected = True
@@ -285,38 +291,43 @@ class MainWindow(QtWidgets.QMainWindow):
     def disconnect_online(self, button):           
         if button == self.ui.connect_online_button_graph_1:
             print("disconnecting")
-            # if  self.collector_online.running == True: 
-            #     print("Stop Thread graph 1")
-            #     self.collector_online.stop() 
-            # self.collector_online.wait()
-            
+            # open button graph 1 disable and opacity
+            self.ui.open_button_graph_1.setDisabled(False)
+            self.ui.open_button_graph_1.setGraphicsEffect(effect := QGraphicsOpacityEffect()) or effect.setOpacity(1)
+
+            if  self.collector_online.running == True and not self.second_graph_online_connected: 
+                print("Stop Thread graph 1")
+                self.collector_online.stop() 
+            print("Donee Stop Thread graph 2")
             
             # self.timer_online.timeout.disconnect(self.collector_online.data_update)
             self.first_graph_online_connected = False
             self.ui.connect_online_button_graph_1.setText("Connect Online")
             # disconnect timer 1
             self.is_timer_graph1_connected = False
-            self.timer_graph_1.timeout.disconnect(self.update_online_plot)
+            if self.graph1_on:
+                self.timer_graph_1.timeout.disconnect(self.update_online_plot)
             # Clear graph 1
             self.plot_online_curve_graph1.setData([], [])
-
+            
         elif button == self.ui.connect_online_button_graph_2:
-            # if  self.collector_online.running == True: 
-            #     print("Stop Thread graph 2")
-            #     self.collector_online.stop()
-            # self.collector_online.wait()
-            
-            
+            # open button graph 2 disable and opacity
+            self.ui.open_button_graph_2.setDisabled(False)
+            self.ui.open_button_graph_2.setGraphicsEffect(effect := QGraphicsOpacityEffect()) or effect.setOpacity(1)
+
+            if  self.collector_online.running == True and not self.first_graph_online_connected: 
+                print("Stop Thread graph 2")
+                self.collector_online.stop()
+        
             self.second_graph_online_connected = False 
             self.ui.connect_online_button_graph_2.setText("Connect Online") 
             # disconnect timer 2
             self.is_timer_graph2_connected = False
-            self.timer_graph_2.timeout.disconnect(self.update_online_plot) 
+            if self.graph2_on:
+                self.timer_graph_2.timeout.disconnect(self.update_online_plot) 
             # Clear graph 2
             self.plot_online_curve_graph2.setData([], [])
             
-            
-
             
     def update_online_plot(self):
         try:
@@ -363,7 +374,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 # else:
                 #     print("hahaha no sender ")
         except Exception as e:
-            print(f"Error loading or plotting data: {e}")
+            print(f"error plot online data: {e}")
     
     def format_time_string(self, time_str):
         parts = time_str.split(":")
@@ -390,6 +401,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     print("first online graph stop")
                     self.timer_graph_1.timeout.disconnect(self.update_online_plot)
                 else:
+                    print("first local graph stop")
                     self.timer_graph_1.timeout.disconnect(self.update_graph1)
                 self.ui.play_button_graph_1.setIcon(self.ui.pause)
         
@@ -454,6 +466,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # After the file is opened, prompt user for a name and add the signal to the dictionary signals_graph_1 wher the name is the id 
         new_name, ok = QInputDialog.getText(self, "Signal Name", "Enter a name for the new signal:")
         if ok and new_name:
+            self.ui.connect_online_button_graph_1.setDisabled(True)
+            self.ui.connect_online_button_graph_1.setGraphicsEffect(effect := QGraphicsOpacityEffect()) or effect.setOpacity(0.4)
+
             graph.add_signal(new_name, color = self.graph1_color)
             #set the new signal to be visible
             graph.toggle_signal_visibility(new_name, True)
@@ -473,8 +488,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timer_graph_1.timeout.connect(self.update_graph1)
             self.is_timer_graph1_connected = True
         self.timer_graph_1.setInterval(self.speed_graph_1)
-        if not self.timer_graph_1.isActive():
-            self.timer_graph_1.start()
+        # if not self.timer_graph_1.isActive():
+        #     self.timer_graph_1.start()
 
     def open_file_graph_2(self):
 
@@ -494,6 +509,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         
         if ok and new_name:
+            self.ui.connect_online_button_graph_2.setDisabled(True)
+            self.ui.connect_online_button_graph_2.setGraphicsEffect(effect := QGraphicsOpacityEffect()) or effect.setOpacity(0.4)
+            
             graph.add_signal(new_name, color= self.graph2_color)  # Adjust color as needed
             graph.toggle_signal_visibility(new_name, True)
             graph.update_signal_label(new_name, color= self.graph2_color)
@@ -511,8 +529,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timer_graph_2.timeout.connect(self.update_graph2)
             self.is_timer_graph2_connected = True
         self.timer_graph_2.setInterval(self.speed_graph_2)
-        if not self.timer_graph_2.isActive():
-            self.timer_graph_2.start()      
+        # if not self.timer_graph_2.isActive():
+        #     self.timer_graph_2.start()      
 
         
     def update_graph1(self):
