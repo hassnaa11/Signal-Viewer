@@ -54,7 +54,8 @@ class Graph:
             
             new_x_data = np.arange(current_index, current_index + len(data)) * 0.001  # 0.001 assumes 1 unit is 1 ms
             previous_x_data = np.arange(0, current_index) * 0.001
-
+            self.previous_signal_pointss.extend(data)
+            self.previous_x_dataa.extend(previous_x_data)
             for signal_name, signal_info in self.signals.items():
                 if signal_info['visible']:  # Only update visible signals
                     if self.second_time:

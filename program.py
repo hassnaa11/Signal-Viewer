@@ -891,8 +891,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ui.play_button_graph_2.hide()
                 self.ui.reset_button_graph_1.hide()
                 self.ui.reset_button_graph_2.hide()
-                self.ui.stop_button_graph_1.hide()
-                self.ui.stop_button_graph_2.hide()
+                self.ui.select_button_graph_1.hide()
+                self.ui.select_button_graph_2.hide()
                 self.ui.connect_online_button_graph_2.hide()
                 self.ui.connect_online_button_graph_1.hide()
                 self.ui.open_button_graph_2.hide()
@@ -940,8 +940,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.play_button_graph_2.show()
         self.ui.reset_button_graph_1.show()
         self.ui.reset_button_graph_2.show()
-        self.ui.stop_button_graph_1.show()
-        self.ui.stop_button_graph_2.show()
+        self.ui.select_button_graph_1.show()
+        self.ui.select_button_graph_2.show()
         self.ui.connect_online_button_graph_2.show()
         self.ui.connect_online_button_graph_1.show()
         self.ui.open_button_graph_2.show()
@@ -1077,7 +1077,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.is_file2_opened == True:
             self.ui.graph2Widget.graph_2.addItem(self.rect_roi)
             # When the selection is made, you can access the ROI's position and size
-            self.ui.stop_button_graph_2.clicked.connect(self.on_select_2)
+            self.ui.select_button_graph_2.clicked.connect(self.on_select_2)
 
     def select_graph_to_cut(self):
         """Triggered when the 'Select Signal Portion' button is clicked"""
@@ -1086,7 +1086,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.is_file1_opened == True:
             self.ui.graph1Widget.graph.addItem(self.rect_roi)
             # When the selection is made, you can access the ROI's position and size
-            self.ui.stop_button_graph_1.clicked.connect(self.on_select)
+            self.ui.select_button_graph_1.clicked.connect(self.on_select)
             
 
      # Make sure NumPy is imported
@@ -1359,7 +1359,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.whole_y_data= graph1_non_overlap_y + list(averaged_y) + graph2_non_overlap_y
 
             # Sort the combined points by x to ensure smooth plotting
-            self.whole_x_data, self.whole_x_data= zip(*sorted(zip(self.whole_x_data, self.whole_y_data)))
+            self.whole_x_data, self.whole_y_data= zip(*sorted(zip(self.whole_x_data, self.whole_y_data)))
 
             # Clear the graph to remove any existing points
             self.ui.graph1Widget_3.graph.clear()
