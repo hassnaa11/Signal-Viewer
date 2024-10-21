@@ -1,8 +1,11 @@
 import pyqtgraph as pg
 import numpy as np
+
 class Graph:
     previous_signal_pointss = [] 
     previous_x_dataa = []
+    index = 1
+    max_index = 0
     def __init__(self, graph_widget):
         self.plot_widget = graph_widget
         self.plot_widget.setBackground('#2D324D')
@@ -13,7 +16,7 @@ class Graph:
         self.legend = self.plot_widget.addLegend()
         self.signal_processor = None
         self.second_time = False
-        self.index = 1
+        # self.index = 1
 
 
     def add_signal(self, name, color):
@@ -73,16 +76,27 @@ class Graph:
                     y_data = np.append(y_data, data)
 
                     signal_info['item'].setData(x=previous_x_data, y=data)
+            
+            # for signal in self.signals:
+            #     if signal['processor'].current_index > self.max_index:
+            #         self.max_index = signal.current_index
 
-            if current_index < 500:
+            
+            if current_index < 500 and self.index == 1:
+                # Initially, plot and fix the x-axis range to show the data from 0 to window_width
+                # print("Less than window width, no scrolling", current_index)
                 # At begin x-axis range from 0 to window_width
                 self.plot_widget.setXRange(0, window_width * 0.001)   
-                self.plot_widget.setLimits(xMin=0, xMax=window_width *0.001 , yMin=min(data), yMax=max(data))              
+                self.plot_widget.setLimits( yMin=min(data), yMax=max(data))              
+            # elif current_index < 500:
+            #     self.plot_widget.setXRange(0, window_width * 0.001)
             else:
-                self.index+=1
                 # After filling the initial window, make the graph scroll by updating the x-axis range
+                # print("Window filled, scrolling", current_index)
+                self.index += 1
+                # After filling the initial window
                 self.plot_widget.setXRange((current_index - window_width) * 0.001, current_index * 0.001)
-                self.plot_widget.setLimits(xMin=0, xMax=(window_width + self.index) * 0.001, yMin=min(data), yMax=max(data))
+                self.plot_widget.setLimits( yMin=min(data), yMax=max(data))
 
     def remove_signal(self, name):
         if name in self.signals:

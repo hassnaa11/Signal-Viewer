@@ -1,4 +1,4 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore,QtWidgets
 import pyqtgraph as pg
 from PyQt5 import QtCore
 from PyQt5.QtGui import QPainter, QPixmap
@@ -12,58 +12,16 @@ from datetime import datetime
 from main_gui import Ui_MainWindow
 from non_rectangle_plot_window import nonRectanglePlotWindow
 from collect_online_data import CollectOnlineData
-# import subprocess
-
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import QColorDialog
-from PyQt5.QtWidgets import (
-    QApplication,
-    QWidget,
-    QVBoxLayout,
-    QPushButton,
-    QLabel,
-    QRubberBand,
-    QFileDialog,
-)
-from PyQt5.QtWidgets import (
-    QApplication,
-    QWidget,
-    QVBoxLayout,
-    QPushButton,
-    QLabel,
-    QRubberBand,
-    QFileDialog,
-)
-from PyQt5.QtCore import QRect, QPoint, QSize, Qt
-from PyQt5.QtCore import QRect, QPoint
-from PyQt5.QtGui import QPixmap, QMouseEvent
 from fpdf import FPDF
-
-
-from PyQt5.QtCore import QTimer  # For QTimer
-from PyQt5.QtWidgets import QGridLayout  # For QGridLayout
-
-import matplotlib
-import matplotlib.pyplot as plt
-from PyQt5.QtWidgets import QFileDialog
-from matplotlib.backends.backend_qt5agg import (
-    FigureCanvasQTAgg,
-    NavigationToolbar2QT as Navi,
-)
-from matplotlib.backends.backend_qt5agg import (
-    FigureCanvasQTAgg,
-    NavigationToolbar2QT as Navi,
-)
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
 from signal_1 import SignalProcessor
 from graph import Graph
 from non_rectangular import BubbleChartApp
-#import pyedflib
-import pyqtgraph as pg
-
 
 class MainWindow(QtWidgets.QMainWindow):
+    max_index_graph1 = 0
+    max_index_graph2 = 0
     def __init__(self):
         super().__init__()
         self.ui = Ui_MainWindow()
@@ -221,40 +179,26 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def connect_online(self):
         sender_button = self.sender()
-        print(sender_button)
         
         if sender_button == self.ui.connect_online_button_graph_1 and self.first_graph_online_connected:
             self.ui.graph1Widget.graph.plotItem.setLabel('left', 'Voltage')
-            print("disconnect 1")
             self.disconnect_online(sender_button)
         
         elif sender_button == self.ui.connect_online_button_graph_2 and self.second_graph_online_connected:
             self.ui.graph2Widget.graph_2.plotItem.setLabel('left', 'Voltage')
-            print("disconnect 2")
             self.disconnect_online(sender_button)
 
         elif (sender_button == self.ui.connect_online_button_graph_1) and self.graph1_on:  # clicked on connect_online_button_graph_1
             self.ui.graph1Widget.graph.plotItem.setLabel('left', 'Distance (km)')
-            print("connect 1")
             self.first_graph_online_connected = True
             self.ui.open_button_graph_1.setDisabled(True)
             self.ui.open_button_graph_1.setGraphicsEffect(effect := QGraphicsOpacityEffect()) or effect.setOpacity(0.4)
 
-            # collect data from the website
-            
-            # self.timer_online.start(2000)
-            # self.timer_online.timeout.connect(self.collector_online.data_update)
-            
-            # if self.collector_online.running == False:  # Ensure the thread isn't already running
-            #     print("Start Thread run")
-            #     self.collector_online.start()  # Start the thread
-           
             if self.collector_online.running == False:
                 self.collector_online.start()
                 self.collector_online.data_fetched.connect(self.update_online_plot)
             
             if not self.is_timer_graph1_connected:
-                print("connect 1::: ", self.is_timer_graph1_connected)
                 self.is_timer_graph1_connected = True
                 self.timer_graph_1.start(10)
                 self.timer_graph_1.timeout.connect(self.update_online_plot)
@@ -263,20 +207,10 @@ class MainWindow(QtWidgets.QMainWindow):
             
         elif (sender_button == self.ui.connect_online_button_graph_2) and self.graph2_on:  # clicked on connect_online_button_graph_2
             self.ui.graph2Widget.graph_2.plotItem.setLabel('left', 'Distance (km)') 
-            print("connect 2")
             self.second_graph_online_connected = True
             self.ui.open_button_graph_2.setDisabled(True)
             self.ui.open_button_graph_2.setGraphicsEffect(effect := QGraphicsOpacityEffect()) or effect.setOpacity(0.4)
 
-            
-            # collect data from the website
-            # self.timer_online.start(2000)
-            # self.timer_online.timeout.connect(self.collector_online.data_update)
-            
-            # if self.collector_online.running == False:  # Ensure the thread isn't already running
-            #     print("Start Thread run")
-            #     self.collector_online.start()  # Start the thread
-            
             if self.collector_online.running == False:
                 self.collector_online.start()
                 self.collector_online.data_fetched.connect(self.update_online_plot)
@@ -290,17 +224,14 @@ class MainWindow(QtWidgets.QMainWindow):
                     
     def disconnect_online(self, button):           
         if button == self.ui.connect_online_button_graph_1:
-            print("disconnecting")
             # open button graph 1 disable and opacity
             self.ui.open_button_graph_1.setDisabled(False)
             self.ui.open_button_graph_1.setGraphicsEffect(effect := QGraphicsOpacityEffect()) or effect.setOpacity(1)
 
+            # stop thread
             if  self.collector_online.running == True and not self.second_graph_online_connected: 
-                print("Stop Thread graph 1")
                 self.collector_online.stop() 
-            print("Donee Stop Thread graph 2")
             
-            # self.timer_online.timeout.disconnect(self.collector_online.data_update)
             self.first_graph_online_connected = False
             self.ui.connect_online_button_graph_1.setText("Connect Online")
             # disconnect timer 1
@@ -316,7 +247,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.open_button_graph_2.setGraphicsEffect(effect := QGraphicsOpacityEffect()) or effect.setOpacity(1)
 
             if  self.collector_online.running == True and not self.first_graph_online_connected: 
-                print("Stop Thread graph 2")
                 self.collector_online.stop()
         
             self.second_graph_online_connected = False 
@@ -364,15 +294,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
             if len(x_axis) > 0 and len(y_axis) > 0:
                 if self.graph1_on and self.first_graph_online_connected:
-                    print("graph 111")
                     self.ui.graph1Widget.graph.setLimits(xMin=0, xMax=x_axis[x_axis.size - 1], yMin=y_axis[0], yMax=y_axis[y_axis.size - 1])
                     self.plot_online_curve_graph1.setData(x_axis, y_axis)
                 if self.graph2_on and self.second_graph_online_connected:
-                    print("graph 222")
                     self.ui.graph2Widget.graph_2.setLimits(xMin=0, xMax=x_axis[x_axis.size - 1], yMin=y_axis[0], yMax=y_axis[y_axis.size - 1])
                     self.plot_online_curve_graph2.setData(x_axis, y_axis)
-                # else:
-                #     print("hahaha no sender ")
         except Exception as e:
             print(f"error plot online data: {e}")
     
@@ -387,55 +313,44 @@ class MainWindow(QtWidgets.QMainWindow):
     def stop_run_graph(self):
         sender_button = self.sender()
         if sender_button == self.ui.play_button_graph_1:
-            print("graph 1 button ")
             self.graph1_on = not self.graph1_on
             if self.graph1_on:
                 if self.first_graph_online_connected:
-                    print("first online graph play")
                     self.timer_graph_1.timeout.connect(self.update_online_plot)
                 else:    
                     self.timer_graph_1.timeout.connect(self.update_graph1)
                 self.ui.play_button_graph_1.setIcon(self.ui.icon)
             else:
                 if self.first_graph_online_connected:
-                    print("first online graph stop")
                     self.timer_graph_1.timeout.disconnect(self.update_online_plot)
                 else:
-                    print("first local graph stop")
                     self.timer_graph_1.timeout.disconnect(self.update_graph1)
                 self.ui.play_button_graph_1.setIcon(self.ui.pause)
         
         elif sender_button == self.ui.play_button_graph_2:
-            print("graph 2 button ")
             self.graph2_on = not self.graph2_on
             if self.graph2_on:
                 if self.second_graph_online_connected:
-                    print("second online graph play")
                     self.timer_graph_2.timeout.connect(self.update_online_plot)
                 else:
                     self.timer_graph_2.timeout.connect(self.update_graph2)
                 self.ui.play_button_graph_2.setIcon(self.ui.icon)
             else:
                 if self.second_graph_online_connected:
-                    print("second online graph stop")
                     self.timer_graph_2.timeout.disconnect(self.update_online_plot)
                 else:    
                     self.timer_graph_2.timeout.disconnect(self.update_graph2)
                 self.ui.play_button_graph_2.setIcon(self.ui.pause)
 
         elif sender_button == self.ui.link_play_button:
-            print("heyyyy link_play_button")
             self.play_both = not self.play_both
             if self.play_both:
-                print("runnnnnnnnn:   ", self.play_both)
                 self.timer_graph_1.timeout.connect(self.update_graph1)
                 self.timer_graph_2.timeout.connect(self.update_graph2)
                 self.ui.link_play_button.setIcon(self.ui.icon)
             elif not self.play_both:
-                print("stoppppppppp:   ", self.play_both)
                 self.timer_graph_1.timeout.disconnect(self.update_graph1)
                 self.timer_graph_2.timeout.disconnect(self.update_graph2)
-                print("Successfully disconnected from update_graph1.")
                 self.ui.link_play_button.setIcon(self.ui.pause)
 
                 
@@ -532,33 +447,50 @@ class MainWindow(QtWidgets.QMainWindow):
         # if not self.timer_graph_2.isActive():
         #     self.timer_graph_2.start()      
 
-        
+
     def update_graph1(self):
-        window_width = 500 # Adjust the window width as needed
+        window_width = 500 
+        
+        for signal in self.signal_processor1:
+            if signal.current_index > self.max_index_graph1:
+                self.max_index_graph1 = signal.current_index
+                
+        if self.max_index_graph1 >= window_width:
+            self.ui.graph1Widget.graph.setLimits(xMin=0, xMax=(self.max_index_graph1) * 0.001)  
+        else: 
+            self.ui.graph1Widget.graph.setLimits(xMin=0, xMax=window_width *0.001)    
+
         selected_name = self.ui.signals_name_combo_box_graph_1.currentText()
         visibility =self.ui.visible_checkBox_graph_1.isChecked()
         for graph in self.graphs_1:
             graph.toggle_signal_visibility(selected_name, visibility)
         for signal_processor_1, graph in zip(self.signal_processor1, self.graphs_1):
             data = signal_processor_1.get_next_data(self.window_width)
-            # previous_data = signal_processor_1.get_previous_data()
             if data is not None:
-                # print("update graph 1")
                 self.is_file1_opened = True
                 graph.update_graph( data, signal_processor_1.current_index, window_width,self.graph1_color)
-
+                
         
     def update_graph2(self): 
-        window_width = 500 # Adjust the window width as needed
+        window_width = 500 
+        
+        for signal in self.signal_processor2:
+            if signal.current_index > self.max_index_graph2:
+                self.max_index_graph2 = signal.current_index
+                
+        if self.max_index_graph2 >= window_width:
+            self.ui.graph2Widget.graph_2.setLimits(xMin=0, xMax=(self.max_index_graph2) * 0.001)  
+        else: 
+            self.ui.graph2Widget.graph_2.setLimits(xMin=0, xMax=window_width *0.001)    
+
+        
         selected_name = self.ui.signals_name_combo_box_graph_2.currentText()
         visibility =self.ui.visible_checkBox_graph_2.isChecked()
         for graph in self.graphs_2:
             graph.toggle_signal_visibility(selected_name, visibility)
         for signal_processor_2, graph in zip(self.signal_processor2, self.graphs_2):
             data = signal_processor_2.get_next_data(self.window_width)
-            # previous_data = signal_processor_2.get_previous_data()
             if data is not None:
-                # print("update graph 2")
                 self.is_file2_opened = True
                 graph.update_graph( data, signal_processor_2.current_index, window_width,self.graph2_color)
 
@@ -608,6 +540,13 @@ class MainWindow(QtWidgets.QMainWindow):
             print("No signal selected to change color.")
 
     def rewind_graph(self, graph_number):
+        # for x limit
+        if graph_number == 1:
+            self.max_index_graph1 = 0
+        else:    
+            self.max_index_graph2 = 0 
+            
+        # rewind on link       
         if self.isLinked:
             for signal_processor in self.signal_processor1:
                 signal_processor.current_index = 0
@@ -858,23 +797,18 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.play_both = True
                 # initially play
                 if not self.graph1_on:
-                    print("Connect 1111 after link ")
                     self.timer_graph_1.timeout.connect(self.update_graph1)
                 if not self.graph2_on:
-                    print("Connect 2222 after link ")
                     self.timer_graph_2.timeout.connect(self.update_graph2)
+                    
+                # for x limit
+                self.max_index_graph1 = 0
+                self.max_index_graph2 = 0    
 
-                # Clear both graphs
-                # for graph in self.graphs_1:
-                #     graph.plot_widget.clear()
-                # for graph in self.graphs_2:
-                #     graph.plot_widget.clear()
                 # start from first
                 for signal_processor in self.signal_processor1:
-                    print("heeee  current_index = 0")
                     signal_processor.current_index = 0
                 for signal_processor in self.signal_processor2:
-                    print("kkkkk  current_index = 0")
                     signal_processor.current_index = 0
 
                 # To link Views (zoom in/out and scroll)
@@ -887,7 +821,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ui.link_play_button.show()
                 self.ui.link_rewind_button.show()
                 self.ui.play_button_graph_1.hide()
-                # self.ui.play_button_graph_1.setDisabled(True)
                 self.ui.play_button_graph_2.hide()
                 self.ui.reset_button_graph_1.hide()
                 self.ui.reset_button_graph_2.hide()
@@ -913,24 +846,19 @@ class MainWindow(QtWidgets.QMainWindow):
             self.un_link_graphs()
 
     def un_link_graphs(self):
-        print("un linkk")
         # Return graphs to play same as before start linking
-        print(self.play_both)
         if self.play_both:
-            print("play both:  ", self.play_both)
             if not self.graph1_on:
                 self.timer_graph_1.timeout.disconnect(self.update_graph1)
             if not self.graph2_on:
                 self.timer_graph_2.timeout.disconnect(self.update_graph2)
         else:
-            print("not play both:  ", self.play_both)
             if self.graph1_on:
                 self.timer_graph_1.timeout.connect(self.update_graph1)
             if self.graph2_on:
                 self.timer_graph_2.timeout.connect(self.update_graph2)                                
         self.ui.graph1Widget.graph.sigRangeChanged.disconnect(self.link1_view)
         self.ui.graph2Widget.graph_2.sigRangeChanged.disconnect(self.link2_view)
-                
         self.play_both = False
         # GUI
         self.ui.link_button.setText("Link")
