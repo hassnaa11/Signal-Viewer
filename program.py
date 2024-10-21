@@ -125,7 +125,6 @@ class MainWindow(QtWidgets.QMainWindow):
         # Connect buttons to their respective functions
         self.ui.open_button_graph_1.clicked.connect(self.open_file_graph_1)
         self.ui.open_button_graph_2.clicked.connect(self.open_file_graph_2)
-        self.ui.open_button_graph_3.clicked.connect(self.open_file_graph_3)
         self.ui.snapshot_button_graph_3.clicked.connect(lambda:self.taking_snapshot(3))
         self.ui.snapshot_button.clicked.connect(lambda:self.taking_snapshot(1))
         self.ui.snapshot_button_graph2.clicked.connect(lambda:self.taking_snapshot(2))
@@ -544,12 +543,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.is_file2_opened = True
                 graph.update_graph( data, signal_processor_2.current_index, window_width,self.graph2_color)
 
-    def open_file_graph_3(self):
-        if self.graph_3 is None:
-            self.graph_3 = BubbleChartApp(self.graph_widget_3)
-        
-        # Call the open_file method to open a CSV file
-        self.graph_3.open_file(self)
+   
 
     def open_color_dialog(self, graph_number):
         # Open a color dialog and get the selected color
