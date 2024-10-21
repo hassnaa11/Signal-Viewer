@@ -26,7 +26,7 @@ def data_update(driver):
     try:
         data_y = driver.find_element(By.CLASS_NAME, "distanceKm.text-flash").text
     except Exception as e:
-        print("Error in finding element:", e)
+        print("error find element: ", e)
         return None, None
 
     time = datetime.datetime.now()
@@ -43,11 +43,11 @@ if __name__ == "__main__":
             if data_y and time_reg:
                 online_data_dict["Data_Y"].append(data_y)
                 online_data_dict["Time"].append(time_reg)
-                with open("online_data.json", "w") as f:
-                    json.dump(online_data_dict, f)
+                with open("online_data.json", "w") as file:
+                    json.dump(online_data_dict, file)
                 print(online_data_dict)
             else:
-                print("Failed to fetch data.")
+                print("failed to add data")
     finally:
         driver.quit()
         
