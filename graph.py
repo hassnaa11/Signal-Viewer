@@ -50,7 +50,6 @@ class Graph:
     def update_graph(self, data, current_index, window_width, graph1_color):
         
         if data is not None:
-            print("in update graph.py", current_index)
             if self.zero_line not in self.plot_widget.items():
                 self.plot_widget.addItem(self.zero_line)  # Add the zero line back  
             

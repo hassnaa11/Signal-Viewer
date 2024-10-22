@@ -20,8 +20,6 @@ from graph import Graph
 from non_rectangular import BubbleChartApp
 
 class MainWindow(QtWidgets.QMainWindow):
-    max_index_graph1 = 0
-    max_index_graph2 = 0
     def __init__(self):
         super().__init__()
         self.ui = Ui_MainWindow()
@@ -36,6 +34,8 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.timer = QtCore.QTimer()
         self.timer2 = QtCore.QTimer()
+        self.max_index_graph1 = 0
+        self.max_index_graph2 = 0
         self.ui.graph1Widget.graph.setLimits(xMin=0)
         self.ui.graph2Widget.graph_2.setLimits(xMin=0)
         self.ui.graph1Widget_3.graph.setLimits(xMin=0)
@@ -608,8 +608,13 @@ class MainWindow(QtWidgets.QMainWindow):
             print("No signal selected for moving.")
             return
 
-        if selected_name in self.signals_graph_1:
+        if selected_name in self.signals_graph_1:        
             signal_processor, graph1, plot_item2 = self.signals_graph_1[selected_name]
+            
+            for i, signal in enumerate(self.signal_processor1):
+                if signal == signal_processor:
+                    del self.signal_processor1[i]
+            
             current_color = graph1.signals[selected_name]['item'].opts['pen'].color()
             # Remove the signal from Graph 2
             graph1.legend.removeItem(selected_name)
@@ -651,6 +656,9 @@ class MainWindow(QtWidgets.QMainWindow):
             print(f"Graph 2 signals after moving: {self.signals_graph_2.keys()}")
         else:
             print(f"Signal '{selected_name}' not found in Graph 2.")
+        
+        print("G1: ", self.signals_graph_1) 
+        print("G2: ", self.signals_graph_2)     
 
 
     def move_signal_from_graph2_to_graph1(self):
@@ -660,8 +668,13 @@ class MainWindow(QtWidgets.QMainWindow):
             print("No signal selected for moving.")
             return
 
-        if selected_name in self.signals_graph_2:
+        if selected_name in self.signals_graph_2:         
             signal_processor, graph2, plot_item2 = self.signals_graph_2[selected_name]
+            
+            for i, signal in enumerate(self.signal_processor2):
+                if signal == signal_processor:
+                    del self.signal_processor2[i]
+                    
             current_color = graph2.signals[selected_name]['item'].opts['pen'].color()
             # Remove the signal from Graph 2
             graph2.legend.removeItem(selected_name)
@@ -669,7 +682,7 @@ class MainWindow(QtWidgets.QMainWindow):
             del self.signals_graph_2[selected_name]
             self.ui.signals_name_combo_box_graph_2.removeItem(self.ui.signals_name_combo_box_graph_2.currentIndex()) 
 
-            graph1 = Graph(self.ui.graph1Widget.graph)  
+            graph1 = Graph(self.ui.graph1Widget.graph) 
             self.signal_processor1.append(signal_processor)
             
             graph1.signal_processor = signal_processor
