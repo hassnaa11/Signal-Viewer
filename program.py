@@ -138,19 +138,23 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.signal_color_button_graph_2.clicked.connect(
             lambda: self.open_color_dialog(2)
         )
-        self.ui.signal_name_lineEdit_graph_1.returnPressed.connect(
-            self.update_graph_name_1
-        )
+        # self.ui.signal_name_lineEdit_graph_1.returnPressed.connect(
+        #     self.update_graph_name_1
+        # )
 
-        self.ui.signal_name_lineEdit_graph_2.returnPressed.connect(
-            self.update_graph_name_2
-        )
+        # self.ui.signal_name_lineEdit_graph_2.returnPressed.connect(
+        #     self.update_graph_name_2
+        # )
+
+        self.ui.signal_name_lineEdit_graph_1.returnPressed.connect(lambda: self.update_graph_name(1))
+        self.ui.signal_name_lineEdit_graph_2.returnPressed.connect(lambda: self.update_graph_name(2))
+
 
         self.timer_graph_1 = QtCore.QTimer()
         # self.timer_graph_1.start(10)
         self.timer_graph_2 = QtCore.QTimer()
-        self.speed_graph_1 = 500  # Default speed in ms
-        self.speed_graph_2 = 500  # Default speed in ms
+        self.speed_graph_1 = 100  # Default speed in ms
+        self.speed_graph_2 = 100  # Default speed in ms
         # Initialize dictionaries to store signals by name
         self.signals_graph_1 = {}
         self.signals_graph_2 = {}
@@ -430,25 +434,23 @@ class MainWindow(QtWidgets.QMainWindow):
         graph.signal_processor = signal_processor
         self.graphs_1.append(graph)
 
+        default_name_prefix = "Signal"
+        signal_count = len(self.signals_graph_1) + 1
+        new_name = f"{default_name_prefix} {signal_count}"
 
-        # After the file is opened, prompt user for a name and add the signal to the dictionary signals_graph_1 wher the name is the id 
-        new_name, ok = QInputDialog.getText(self, "Signal Name", "Enter a name for the new signal:")
-        if ok and new_name:
-            graph.add_signal(new_name, color = self.graph1_color)
-            #set the new signal to be visible
-            graph.toggle_signal_visibility(new_name, True)
-            #add the name of the new signal to the legand of the graph
-            graph.update_signal_label(new_name, color= self.graph2_color)
-            self.signals_graph_1[new_name] = (signal_processor, graph , signal_processor.plot_widget)
-            self.ui.signals_name_combo_box_graph_1.addItem(new_name)
-            self.ui.signals_name_combo_box_graph_1.setCurrentText(new_name)
-            self.ui.signal_name_lineEdit_graph_1.clear()
+        graph.add_signal(new_name, color = self.graph1_color)
+        #set the new signal to be visible
+        graph.toggle_signal_visibility(new_name, True)
+        #add the name of the new signal to the legand of the graph
+        graph.update_signal_label(new_name, color= self.graph2_color)
+        self.signals_graph_1[new_name] = (signal_processor, graph , signal_processor.plot_widget)
+        self.ui.signals_name_combo_box_graph_1.addItem(new_name)
+        self.ui.signals_name_combo_box_graph_1.setCurrentText(new_name)
+        self.ui.signal_name_lineEdit_graph_1.clear()
 
-            print(f"Opened file for {new_name} and added to Graph 1")
-            print(f"Graph 1 signals: {self.signals_graph_1}")
-        else:
-            print("No signal name provided for Graph 1")
-        #set the timer and its update for graph1   
+        print(f"Opened file for {new_name} and added to Graph 1")
+        print(f"Graph 1 signals: {self.signals_graph_1}")
+
         if not self.is_timer_graph1_connected:
             self.timer_graph_1.timeout.connect(self.update_graph1)
             self.is_timer_graph1_connected = True
@@ -469,22 +471,22 @@ class MainWindow(QtWidgets.QMainWindow):
         graph.signal_processor = signal_processor
         self.graphs_2.append(graph)
 
-        # After the file is opened, prompt user for a name and store it
-        new_name, ok = QInputDialog.getText(self, "Signal Name", "Enter a name for the new signal:")
-        
-        if ok and new_name:
-            graph.add_signal(new_name, color= self.graph2_color)  # Adjust color as needed
-            graph.toggle_signal_visibility(new_name, True)
-            graph.update_signal_label(new_name, color= self.graph2_color)
-            self.signals_graph_2[new_name] = (signal_processor, graph, signal_processor.plot_widget)
-            self.ui.signals_name_combo_box_graph_2.addItem(new_name)
-            self.ui.signals_name_combo_box_graph_2.setCurrentText(new_name)
-            self.ui.signal_name_lineEdit_graph_2.clear()
-            print(type(self.signals_graph_2[new_name]))
-            print(f"Opened file for {new_name} and added to Graph 2")
-            print(f"Graph 2 signals: {self.signals_graph_2}")
-        else:
-            print("No signal name provided for Graph 2")      
+        default_name_prefix = "Signal"
+        signal_count = len(self.signals_graph_1) + 1
+        new_name = f"{default_name_prefix} {signal_count}"
+
+        graph.add_signal(new_name, color = self.graph1_color)
+        #set the new signal to be visible
+        graph.toggle_signal_visibility(new_name, True)
+        #add the name of the new signal to the legand of the graph
+        graph.update_signal_label(new_name, color= self.graph2_color)
+        self.signals_graph_2[new_name] = (signal_processor, graph , signal_processor.plot_widget)
+        self.ui.signals_name_combo_box_graph_2.addItem(new_name)
+        self.ui.signals_name_combo_box_graph_2.setCurrentText(new_name)
+        self.ui.signal_name_lineEdit_graph_2.clear()
+
+        print(f"Opened file for {new_name} and added to Graph 1")
+        print(f"Graph 1 signals: {self.signals_graph_2}")   
             
         if not self.is_timer_graph2_connected:
             self.timer_graph_2.timeout.connect(self.update_graph2)
@@ -632,6 +634,12 @@ class MainWindow(QtWidgets.QMainWindow):
             del self.signals_graph_1[selected_name]
             self.ui.signals_name_combo_box_graph_1.removeItem(self.ui.signals_name_combo_box_graph_1.currentIndex()) 
 
+            if graph1 in self.graphs_1:
+                self.graphs_1.remove(graph1)
+            if signal_processor in self.signal_processor1:
+                self.signal_processor1.remove(signal_processor)
+
+
             graph2 = Graph(self.ui.graph2Widget.graph_2)  
             self.signal_processor2.append(signal_processor)
             
@@ -684,6 +692,11 @@ class MainWindow(QtWidgets.QMainWindow):
             del self.signals_graph_2[selected_name]
             self.ui.signals_name_combo_box_graph_2.removeItem(self.ui.signals_name_combo_box_graph_2.currentIndex()) 
 
+            if graph2 in self.graphs_2:
+                self.graphs_2.remove(graph2)
+            if signal_processor in self.signal_processor2:
+                self.signal_processor2.remove(signal_processor)
+
             graph1 = Graph(self.ui.graph1Widget.graph)  
             self.signal_processor1.append(signal_processor)
             
@@ -721,62 +734,34 @@ class MainWindow(QtWidgets.QMainWindow):
             print(f"Signal '{selected_name}' not found in Graph 2.")
 
 
+    def update_graph_name(self, graph_number):  
+        if graph_number == 1:
+            new_name = self.ui.signal_name_lineEdit_graph_1.text()
+            selected_name = self.ui.signals_name_combo_box_graph_1.currentText()
+            signal_dict = self.signals_graph_1
+            combo_box = self.ui.signals_name_combo_box_graph_1
+            line_edit = self.ui.signal_name_lineEdit_graph_1
+        else:  # For Graph 2
+            new_name = self.ui.signal_name_lineEdit_graph_2.text()
+            selected_name = self.ui.signals_name_combo_box_graph_2.currentText()
+            signal_dict = self.signals_graph_2
+            combo_box = self.ui.signals_name_combo_box_graph_2
+            line_edit = self.ui.signal_name_lineEdit_graph_2
 
-    def update_graph_name_1(self):  
-        new_name = self.ui.signal_name_lineEdit_graph_1.text()
-        selected_name = self.ui.signals_name_combo_box_graph_1.currentText()
-
-        if selected_name in self.signals_graph_1:
+        if selected_name in signal_dict:
             # Update signal's name in signals dictionary and combo box
-            signal_processor, graph, _ = self.signals_graph_1.pop(selected_name)
-            
-            # Directly update the graph's signals dictionary with the new name
-            graph.signals[new_name] = graph.signals.pop(selected_name)
-
-            self.signals_graph_1[new_name] = (signal_processor, graph, graph.plot_widget)
-
-            # Update combo box and legand on the graph
-            index = self.ui.signals_name_combo_box_graph_1.findText(selected_name)
-            self.ui.signals_name_combo_box_graph_1.setItemText(index, new_name)
-            self.ui.signal_name_lineEdit_graph_1.clear()
-            self.ui.signals_name_combo_box_graph_1.setCurrentText(new_name)
-
-            # Get the color of the selected signal
+            signal_processor, graph, _ = signal_dict.pop(selected_name)
             color = graph.signals[selected_name]['item'].opts['pen'].color()
 
-            # Update the label and the color for the new signal name
-            graph.update_signal_label(new_name, color)
-            graph.signals[new_name]['item'].setPen(pg.mkPen(color))  # Apply the color to the plot
-
-            # Update the legend entry to reflect the new signal name
-            graph.legend.removeItem(selected_name)  # Remove the old legand
-            graph.legend.addItem(graph.signals[new_name]['item'], new_name)  # Add new entry to legend
-
-            print(f"Updated signal name to {new_name} with color {color}")
-
-
- 
-    def update_graph_name_2(self):  
-        new_name = self.ui.signal_name_lineEdit_graph_2.text()
-        selected_name = self.ui.signals_name_combo_box_graph_2.currentText()
-
-        if selected_name in self.signals_graph_2:
-            # Update signal's name in signals dictionary and combo box
-            signal_processor, graph, _ = self.signals_graph_2.pop(selected_name)
-            
             # Directly update the graph's signals dictionary with the new name
             graph.signals[new_name] = graph.signals.pop(selected_name)
+            signal_dict[new_name] = (signal_processor, graph, graph.plot_widget)
 
-            self.signals_graph_2[new_name] = (signal_processor, graph, graph.plot_widget)
-
-            # Update combo box and label on the graph
-            index = self.ui.signals_name_combo_box_graph_2.findText(selected_name)
-            self.ui.signals_name_combo_box_graph_2.setItemText(index, new_name)
-            self.ui.signal_name_lineEdit_graph_2.clear()
-            self.ui.signals_name_combo_box_graph_2.setCurrentText(new_name)
-
-            # Get the color of the selected signal
-            color = graph.signals[selected_name]['item'].opts['pen'].color()
+            # Update combo box
+            index = combo_box.findText(selected_name)
+            combo_box.setItemText(index, new_name)
+            line_edit.clear()
+            combo_box.setCurrentText(new_name)
 
             # Update the label and the color for the new signal name
             graph.update_signal_label(new_name, color)
@@ -787,9 +772,10 @@ class MainWindow(QtWidgets.QMainWindow):
             graph.legend.addItem(graph.signals[new_name]['item'], new_name)  # Add new entry to legend
 
             print(f"Updated signal name to {new_name} with color {color}")
+        else:
+            print(f"Signal '{selected_name}' not found in Graph {graph_number}.")
 
-    
-        # Get the viewBox from the PlotWidget (for scaling)
+
         """ text_item = pg.TextItem(text=new_name, color='w', anchor=(0.5, 1))
         viewBox = self.graph_1.plot_widget.getViewBox()
         # Get the current scale (zoom level) of the viewBox
