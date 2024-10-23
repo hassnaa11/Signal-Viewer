@@ -14,13 +14,20 @@ class nonRectanglePlotWindow(QtWidgets.QMainWindow):
         super().__init__()
 
         self.setWindowTitle("Climate Anomalies")
-        self.setGeometry(300, 100, 1150, 800)
+        self.setGeometry(300, 80, 1150, 920)
 
         self.main_layout = QtWidgets.QVBoxLayout()
         header_widget = QtWidgets.QWidget()
         header_layout = QtWidgets.QHBoxLayout(header_widget)
-        header_layout.setContentsMargins(0, 0, 30, 0) 
+        header_layout.setContentsMargins(0,0, 30, 0)
         header_widget.setStyleSheet("background-color: #2D324D; border-radius:15px;") 
+        
+        self.footer_widget = QtWidgets.QWidget()
+        footer_layout = QtWidgets.QHBoxLayout(self.footer_widget)
+        self.footer_widget.setStyleSheet("background-color: #2D324D; border-radius:15px;")
+        spacerItem = QtWidgets.QSpacerItem(5, 5,QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        footer_layout.addItem(spacerItem)
+        
         self.label = QtWidgets.QLabel("Global Temperature Change (1850 - 2024)")
         self.label.setStyleSheet("color: white; font-size: 30px;padding: 15px;")
 
@@ -41,8 +48,10 @@ class nonRectanglePlotWindow(QtWidgets.QMainWindow):
 
         header_layout.addWidget(self.label)
         header_layout.addStretch()
-        header_layout.addWidget(self.play_button)
-        header_layout.addWidget(self.rewind_button)
+        
+        footer_layout.addWidget(self.play_button)
+        footer_layout.addWidget(self.rewind_button)
+        footer_layout.addStretch()
 
         self.main_layout.addWidget(header_widget)
 
@@ -50,7 +59,8 @@ class nonRectanglePlotWindow(QtWidgets.QMainWindow):
         central_widget.setLayout(self.main_layout)
         central_widget.setStyleSheet("background-color: #22283e;")
         self.setCentralWidget(central_widget)
-
+        
+        
         self.counter = 0
         self.current_frame = 0
         self.is_paused = False
@@ -65,6 +75,7 @@ class nonRectanglePlotWindow(QtWidgets.QMainWindow):
         )
         self.canvas = FigureCanvas(self.figure)
         self.main_layout.addWidget(self.canvas)
+        self.main_layout.addWidget(self.footer_widget)
         
         months = [
             "Jan",
