@@ -113,8 +113,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.timer_graph_1 = QtCore.QTimer()
         # self.timer_graph_1.start(10)
         self.timer_graph_2 = QtCore.QTimer()
-        self.speed_graph_1 = 500  # Default speed in ms
-        self.speed_graph_2 = 500  # Default speed in ms
+        self.speed_graph_1 = 25  # Default speed in ms
+        self.speed_graph_2 = 25  # Default speed in ms
         # Initialize dictionaries to store signals by name
         self.signals_graph_1 = {}
         self.signals_graph_2 = {}

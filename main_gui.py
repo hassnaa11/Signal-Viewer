@@ -187,9 +187,9 @@ class Ui_MainWindow(object):
         border-radius: 4px;
     }
 """)
-        self.speed_slider_graph_1.setMinimum(50)  # Minimum speed interval (in ms)
-        self.speed_slider_graph_1.setMaximum(1000)  # Maximum speed interval (in ms)
-        self.speed_slider_graph_1.setValue(500)  # Default speed interval (in ms)
+        self.speed_slider_graph_1.setMinimum(5)  # Minimum speed interval (in ms)
+        self.speed_slider_graph_1.setMaximum(50)  # Maximum speed interval (in ms)
+        self.speed_slider_graph_1.setValue(22)  # Default speed interval (in ms)
         
         self.gridLayout.addWidget(self.speed_slider_graph_1, 3, 1, 1, 1)
         self.gridLayout.addWidget(self.speed_label_graph_1, 3, 0, 1, 1)
@@ -689,9 +689,9 @@ class Ui_MainWindow(object):
         border-radius: 4px;
     }
 """)
-        self.speed_slider_graph_2.setMinimum(50)  # Minimum speed interval (in ms)
-        self.speed_slider_graph_2.setMaximum(1000)  # Maximum speed interval (in ms)
-        self.speed_slider_graph_2.setValue(500)  # Default speed interval (in ms)
+        self.speed_slider_graph_2.setMinimum(5)  # Minimum speed interval (in ms)
+        self.speed_slider_graph_2.setMaximum(50)  # Maximum speed interval (in ms)
+        self.speed_slider_graph_2.setValue(22)  # Default speed interval (in ms)
         
         self.gridLayout_2.addWidget(self.speed_slider_graph_2, 3, 1, 1, 1)
         self.gridLayout_2.addWidget(self.speed_label_graph_2, 3, 0, 1, 1)
