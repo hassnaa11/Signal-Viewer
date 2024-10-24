@@ -1,26 +1,23 @@
 import pyqtgraph as pg
 import numpy as np
-from signal_1 import SignalProcessor
-from PyQt5.QtCore import QTimer
-import copy
+
 class Graph:
-    previous_signal_pointss = []  # To store x values
-    previous_x_dataa = []  # To store y values
+    previous_signal_pointss = [] 
+    previous_x_dataa = []
+    index = 1
+    max_index = 0
     def __init__(self, graph_widget):
         self.plot_widget = graph_widget
         self.plot_widget.setBackground('#2D324D')
         self.plot_widget.getAxis('left').setPen('w')
         self.plot_widget.getAxis('bottom').setPen('w')        
         self.zero_line = pg.InfiniteLine(angle=0, pos=0, pen=pg.mkPen('r', width=1, style=pg.QtCore.Qt.DashLine))
-        self.signals = {}  # Track signal plot items and their visibility status
+        self.signals = {} 
         self.legend = self.plot_widget.addLegend()
         self.signal_processor = None
         self.second_time = False
-        self.index = 1
-        # self.timer = QTimer()  # Initialize a timer for the graph
-        # self.timer.timeout.connect(self.update_graph)  # Connect the timer to update_graph method
-        # self.timer.start(100)  # Set the interval for updates (in milliseconds)
-        
+        # self.index = 1
+
 
     def add_signal(self, name, color):
         """Add a new signal to the graph."""
@@ -49,27 +46,20 @@ class Graph:
         if name in self.signals:
             self.signals[name]['item'].setVisible(visible)
             self.signals[name]['visible'] = visible
-        # else:
-        #     print(f"Signal '{name}' not found in the graph.")
 
     def update_graph(self, data, current_index, window_width, graph1_color):
         
         if data is not None:
-            # print("in update graph.py", current_index)
-
             if self.zero_line not in self.plot_widget.items():
                 self.plot_widget.addItem(self.zero_line)  # Add the zero line back  
             
-            # Create x-axis data for plotting based on current_index
-            new_x_data = np.arange(current_index, current_index + len(data)) * 0.001 
-            self.previous_signal_pointss.extend(data)
-             # 0.001 assumes 1 unit is 1 ms
+            
+            new_x_data = np.arange(current_index, current_index + len(data)) * 0.001  # 0.001 assumes 1 unit is 1 ms
             previous_x_data = np.arange(0, current_index) * 0.001
+            self.previous_signal_pointss.extend(data)
             self.previous_x_dataa.extend(previous_x_data)
-
             for signal_name, signal_info in self.signals.items():
                 if signal_info['visible']:  # Only update visible signals
-                    # get current data
                     if self.second_time:
                         x_data, y_data = signal_info['item'].getData()
                         self.second_time = True
@@ -85,26 +75,30 @@ class Graph:
                     y_data = np.append(y_data, data)
 
                     signal_info['item'].setData(x=previous_x_data, y=data)
-                    # print ("setData   doneee")
-                    # print(signal_info)
-                    # print("XDATA: ",previous_x_data,"YDATA: ",data)
-                    # signal_info['item'].setData(x=new_x_data, y=data)  # Keep this line to update signals
             
-            if current_index < 500:
+            # for signal in self.signals:
+            #     if signal['processor'].current_index > self.max_index:
+            #         self.max_index = signal.current_index
+
+            
+            if current_index < 500 and self.index == 1:
+                # Initially, plot and fix the x-axis range to show the data from 0 to window_width
+                # print("Less than window width, no scrolling", current_index)
                 # At begin x-axis range from 0 to window_width
                 self.plot_widget.setXRange(0, window_width * 0.001)   
-                self.plot_widget.setLimits(xMin=0, xMax=window_width *0.001 , yMin=min(data), yMax=max(data))              
+                self.plot_widget.setLimits( yMin=min(data), yMax=max(data))              
+            # elif current_index < 500:
+            #     self.plot_widget.setXRange(0, window_width * 0.001)
             else:
-                self.index+=1
                 # After filling the initial window, make the graph scroll by updating the x-axis range
                 # print("Window filled, scrolling", current_index)
+                self.index += 1
+                # After filling the initial window
                 self.plot_widget.setXRange((current_index - window_width) * 0.001, current_index * 0.001)
-                self.plot_widget.setLimits(xMin=0, xMax=(window_width + self.index) * 0.001, yMin=min(data), yMax=max(data))
+                self.plot_widget.setLimits( yMin=min(data), yMax=max(data))
 
-    #this meyhod to remove the signal from the graph and used while moving the selected signal from a graph to another one so we need to remove the signal from the graph it moving from
     def remove_signal(self, name):
         if name in self.signals:
-            # self.signals[name]['item'].setVisible(False)  # Optionally hide it first
             self.signals[name]['item'].scene().removeItem(self.signals[name]['item'])  # Remove from scene
             del self.signals[name]  # Remove the selected signal from the dictionary
             print(f"Signal '{name}' removed from the graph.")
