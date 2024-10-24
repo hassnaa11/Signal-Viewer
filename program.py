@@ -1321,8 +1321,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.whole_y_data = list(self.graph1_filtered_y) + list(y_new) + list(self.graph2_filtered_y)
             
             self.ui.graph1Widget_3.graph.plot(x_new, y_new, pen=pg.mkPen('w', width=1))
+            
 
         else:  
+
+
+            # Finding overlap and separating non-overlapping parts
             overlap_x = np.intersect1d(self.x_shifted, self.graph2_filtered_x)
 
             # Remove overlapping points and keep non-overlapping parts from both graphs
@@ -1332,9 +1336,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 for x in graph1_non_overlap_x
             ]
 
-            graph2_non_overlap_x = [
-                x for x in self.graph2_filtered_x if x not in overlap_x
-            ]
+            graph2_non_overlap_x = [x for x in self.graph2_filtered_x if x not in overlap_x]
             graph2_non_overlap_y = [
                 self.graph2_filtered_y[self.graph2_filtered_x.index(x)]
                 for x in graph2_non_overlap_x
@@ -1342,33 +1344,63 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # Interpolate the overlapping part
             overlap_y1 = np.interp(overlap_x, self.x_shifted, self.graph1_filtered_y)
-            overlap_y2 = np.interp(
-                overlap_x, self.graph2_filtered_x, self.graph2_filtered_y
-            )
-            averaged_y = (
-                overlap_y1 + overlap_y2
-            ) / 2  # Calculate the average of the overlapping y values
+            overlap_y2 = np.interp(overlap_x, self.graph2_filtered_x, self.graph2_filtered_y)
+            averaged_y = (overlap_y1 + overlap_y2) / 2  # Average the y values of the overlap
+
+            # Ensure the continuity by connecting the end of graph1 to the overlap
+            # Get the last point of graph1_non_overlap and first point of overlap to connect
+            if graph1_non_overlap_x:
+                last_x_graph1 = graph1_non_overlap_x[-1]
+                last_y_graph1 = graph1_non_overlap_y[-1]
+                first_x_overlap = overlap_x[0]
+                first_y_overlap = averaged_y[0]
+
+                # Ensure continuity by setting last x, y of graph1 to first of overlap if they differ
+                if last_x_graph1 != first_x_overlap or last_y_graph1 != first_y_overlap:
+                    graph1_non_overlap_x.append(first_x_overlap)
+                    graph1_non_overlap_y.append(first_y_overlap)
+
+            # Ensure the continuity by connecting the end of the overlap to graph2
+            # Get the last point of overlap and first point of graph2_non_overlap to connect
+            if graph2_non_overlap_x:
+                last_x_overlap = overlap_x[-1]
+                last_y_overlap = averaged_y[-1]
+                first_x_graph2 = graph2_non_overlap_x[0]
+                first_y_graph2 = graph2_non_overlap_y[0]
+
+                # Ensure continuity by setting last x, y of overlap to first of graph2 if they differ
+                if last_x_overlap != first_x_graph2 or last_y_overlap != first_y_graph2:
+                    graph2_non_overlap_x.insert(0, last_x_overlap)
+                    graph2_non_overlap_y.insert(0, last_y_overlap)
 
             # Combine all x and y values into a single list
-            self.whole_x_data = (
-                graph1_non_overlap_x + list(overlap_x) + graph2_non_overlap_x
-            )
+            self.whole_x_data = graph1_non_overlap_x + list(overlap_x) + graph2_non_overlap_x
+            self.whole_y_data = graph1_non_overlap_y + list(averaged_y) + graph2_non_overlap_y
 
-            self.whole_y_data = (
-                graph1_non_overlap_y + list(averaged_y) + graph2_non_overlap_y
-            )
+            # Sort the data based on x values
+            self.whole_x_data, self.whole_y_data = zip(*sorted(zip(self.whole_x_data, self.whole_y_data)))
 
+            # Remove duplicates by creating a dictionary
+            unique_data = {}
+            for x, y in zip(self.whole_x_data, self.whole_y_data):
+                if x not in unique_data:
+                    unique_data[x] = y
 
-            self.whole_x_data, self.whole_y_data= zip(*sorted(zip(self.whole_x_data, self.whole_y_data)))
+            # Convert the dictionary back to two lists
+            self.whole_x_data = list(unique_data.keys())
+            self.whole_y_data = list(unique_data.values())
 
-            
+            # Clear the previous plot
             self.ui.graph1Widget_3.graph.clear()
 
-            # Plot the combined non-overlapping and overlapping data together
-            self.ui.graph1Widget_3.graph.plot(self.whole_x_data, self.whole_y_data, pen=pg.mkPen('w', width=1))
+            # Plot the segments with different colors
+            self.ui.graph1Widget_3.graph.plot(graph1_non_overlap_x, graph1_non_overlap_y, pen=pg.mkPen(self.cutted_signal_color_graph1, width=1))
+            self.ui.graph1Widget_3.graph.plot(overlap_x, averaged_y, pen=pg.mkPen('w', width=1))  # Overlap in white
+            self.ui.graph1Widget_3.graph.plot(graph2_non_overlap_x, graph2_non_overlap_y, pen=pg.mkPen(self.cutted_signal_color_graph2, width=1))
 
             # Disconnect the slider signal to prevent further changes during glue operation
             self.ui.slider_glue.valueChanged.disconnect(self.on_slider_change)
+
 
 
 if __name__ == "__main__":
