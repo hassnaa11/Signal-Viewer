@@ -10,7 +10,7 @@ from PyQt5 import QtCore
 online_data_dict = {"Data_Y": [], "Time": []}
 
 class CollectOnlineData(QtCore.QThread):
-    data_fetched = QtCore.pyqtSignal(str, str)    
+    data_fetched = QtCore.pyqtSignal()    
     
     def __init__(self):
         super().__init__()
@@ -51,7 +51,7 @@ class CollectOnlineData(QtCore.QThread):
             print("error find element: ", e)
             return None, None
 
-        time= datetime.datetime.now()
+        time = datetime.datetime.now()
         time_register = "{H}:{M}:{S}".format(H=time.hour, M=time.minute, S=time.second)
 
         if data_y and time_register:
@@ -60,6 +60,6 @@ class CollectOnlineData(QtCore.QThread):
             with open("online_data.json", "w") as file:
                 json.dump(online_data_dict, file)
             print(online_data_dict)
-            self.data_fetched.emit(data_y,time_register)    
+            self.data_fetched.emit()    
         else:
             print("failed to add data")
