@@ -126,7 +126,7 @@ class Ui_MainWindow(object):
         self.signal_color_button_graph_1.setStyleSheet("font: italic 10pt \"Georgia\";\n"
 "font: 12pt \"Georgia\";\n"
 "\n"
-"color: rgb(255, 255, 255);\n"
+"color: rgb(34, 40, 62);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
 "border-radius: 10px;")
@@ -187,9 +187,9 @@ class Ui_MainWindow(object):
         border-radius: 4px;
     }
 """)
-        self.speed_slider_graph_1.setMinimum(5)  # Minimum speed interval (in ms)
-        self.speed_slider_graph_1.setMaximum(50)  # Maximum speed interval (in ms)
-        self.speed_slider_graph_1.setValue(22)  # Default speed interval (in ms)
+        self.speed_slider_graph_1.setMinimum(10)  # Minimum speed interval (in ms)
+        self.speed_slider_graph_1.setMaximum(60)  # Maximum speed interval (in ms)
+        self.speed_slider_graph_1.setValue(40)  # Default speed interval (in ms)
         
         self.gridLayout.addWidget(self.speed_slider_graph_1, 3, 1, 1, 1)
         self.gridLayout.addWidget(self.speed_label_graph_1, 3, 0, 1, 1)
@@ -266,7 +266,7 @@ class Ui_MainWindow(object):
         self.link_button.setStyleSheet("font: italic 10pt \"Georgia\";\n"
 "font: 12pt \"Georgia\";\n"
 "\n"
-"color: rgb(255, 255, 255);\n"
+"color: rgb(34, 40, 62);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
 "border-radius: 10px;")
@@ -283,7 +283,7 @@ class Ui_MainWindow(object):
 "border-radius: 15px;")
         self.link_play_button.setText("")
         self.icon = QtGui.QIcon()
-        self.icon.addPixmap(QtGui.QPixmap(".\images\icons8-play-32.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        self.icon.addPixmap(QtGui.QPixmap(".\images\icons8-play-100.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.link_play_button.setIcon(self.icon)
         self.link_play_button.setObjectName("link_play_button")
         self.horizontalLayout_3.addWidget(self.link_play_button)
@@ -300,7 +300,7 @@ class Ui_MainWindow(object):
 "border-radius: 15px;")
         self.link_rewind_button.setText("")
         self.icon_rewind = QtGui.QIcon()
-        self.icon_rewind.addPixmap(QtGui.QPixmap(".\images\icons8-rewind-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        self.icon_rewind.addPixmap(QtGui.QPixmap(".\images\icons8-rewind-100.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.link_rewind_button.setIcon(self.icon_rewind)
         self.link_rewind_button.setObjectName("link_rewind_button")
         self.horizontalLayout_3.addWidget(self.link_rewind_button)
@@ -327,7 +327,7 @@ class Ui_MainWindow(object):
 "border-radius: 15px;")
         self.select_button_graph2.setText("")
         snapshot_2 = QtGui.QIcon()
-        snapshot_2.addPixmap(QtGui.QPixmap("./images/icons8-camera-90.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        snapshot_2.addPixmap(QtGui.QPixmap("./images/icons8-camera-100.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         
         self.select_button_graph2.setObjectName("select_button_graph2")
         self.horizontalLayout_3.addWidget(self.select_button_graph2)
@@ -356,7 +356,7 @@ class Ui_MainWindow(object):
 "border-radius: 15px;")
         self.play_button_graph_2.setText("")
         self.icon = QtGui.QIcon()
-        self.icon.addPixmap(QtGui.QPixmap(".\images\icons8-play-32.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        self.icon.addPixmap(QtGui.QPixmap(".\images\icons8-play-100.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.play_button_graph_2.setIcon(self.icon)
         self.play_button_graph_2.setObjectName("play_button_graph_2")
         self.horizontalLayout_3.addWidget(self.play_button_graph_2)
@@ -370,9 +370,9 @@ class Ui_MainWindow(object):
 "border-radius: 15px;")
         self.select_button_graph_2.setText("")
         self.icon1 = QtGui.QIcon()
-        self.icon1.addPixmap(QtGui.QPixmap(".\images\icons8-audio-wave-90.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        self.icon1.addPixmap(QtGui.QPixmap(".\images\icons8-audio-wave-100.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.pause = QtGui.QIcon()
-        self.pause.addPixmap(QtGui.QPixmap(".\images\icons8-pause-90.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        self.pause.addPixmap(QtGui.QPixmap(".\images\icons8-pause-100.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         
         self.select_button_graph_2.setIcon(self.icon1)
         self.select_button_graph_2.setObjectName("select_button_graph_2")
@@ -387,10 +387,10 @@ class Ui_MainWindow(object):
 "border-radius: 15px;")
         self.reset_button_graph_2.setText("")
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("./images/icons8-pause-90.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        icon2.addPixmap(QtGui.QPixmap("./images/icons8-pause-100.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.reset_button_graph_2.setIcon(icon2)
         icon6 = QtGui.QIcon()
-        icon6.addPixmap(QtGui.QPixmap("./images/icons8-reset-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        icon6.addPixmap(QtGui.QPixmap("./images/icons8-rewind-100.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.reset_button_graph_2.setIcon(icon6)
         self.reset_button_graph_2.setObjectName("reset_button_graph_2")
         self.horizontalLayout_3.addWidget(self.reset_button_graph_2)
@@ -404,10 +404,10 @@ class Ui_MainWindow(object):
 "border-radius: 15px;")
         self.move_to_graph_1_button.setText("")
         icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap("./images/icons8-up-arrow-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        icon3.addPixmap(QtGui.QPixmap("./images/icons8-up-arrow-100.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.move_to_graph_1_button.setIcon(icon3)
         icon5 = QtGui.QIcon()
-        icon5.addPixmap(QtGui.QPixmap("./images/icons8-down-arrow-64.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        icon5.addPixmap(QtGui.QPixmap("./images/icons8-down-arrow-100.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         # self.move_to_graph_2_button.setIcon(icon5)
         self.move_to_graph_1_button.setObjectName("move_to_graph_1_button")
         self.horizontalLayout_3.addWidget(self.move_to_graph_1_button)
@@ -415,7 +415,7 @@ class Ui_MainWindow(object):
         self.connect_online_button_graph_2.setCursor(QtGui.QCursor(QtCore.Qt.SplitVCursor))
         self.connect_online_button_graph_2.setMouseTracking(True)
         self.connect_online_button_graph_2.setStyleSheet("font: italic 10pt \"Georgia\";\n"
-"color: rgb(255, 255, 255);\n"
+"color: rgb(34, 40, 62);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
 "border-radius: 10px;")
@@ -432,7 +432,7 @@ class Ui_MainWindow(object):
         self.open_button_graph_2.setStyleSheet("font: italic 10pt \"Georgia\";\n"
 "font: 12pt \"Georgia\";\n"
 "\n"
-"color: rgb(255, 255, 255);\n"
+"color: rgb(34, 40, 62);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
 "border-radius: 10px;")
@@ -512,7 +512,7 @@ class Ui_MainWindow(object):
         self.pushButton.setStyleSheet("font: italic 10pt \"Georgia\";\n"
 "font: 12pt \"Georgia\";\n"
 "\n"
-"color: rgb(255, 255, 255);\n"
+"color: rgb(34, 40, 62);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
 "border-radius: 10px;")
@@ -537,6 +537,18 @@ class Ui_MainWindow(object):
 "")
         self.visible_checkBox_graph_3.setObjectName("visible_checkBox_graph_3")
         self.gridLayout_3.addWidget(self.visible_checkBox_graph_3, 1, 0, 1, 1)
+        self.signal_color_button_graph_3 = QtWidgets.QPushButton(self.frame_3)
+        self.signal_color_button_graph_3.setCursor(QtGui.QCursor(QtCore.Qt.SplitVCursor))
+        self.signal_color_button_graph_3.setMouseTracking(True)
+        self.signal_color_button_graph_3.setStyleSheet("font: italic 10pt \"Georgia\";\n"
+"font: 12pt \"Georgia\";\n"
+"\n"
+"color: rgb(255, 255, 255);\n"
+"background-color: rgb(120, 207, 233);\n"
+"buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
+"border-radius: 10px;")
+        self.signal_color_button_graph_3.setObjectName("signal_color_button_graph_3")
+        self.gridLayout_3.addWidget(self.signal_color_button_graph_3, 1, 1, 1, 1)
         self.horizontalLayout_6.addWidget(self.frame_3)
         self.gridLayout_4.addLayout(self.horizontalLayout_6, 7, 0, 1, 1)
         self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
@@ -552,7 +564,7 @@ class Ui_MainWindow(object):
         spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_5.addItem(spacerItem3)
         self.snapshot3 = QtGui.QIcon()
-        self.snapshot3.addPixmap(QtGui.QPixmap(".\images\icons8-camera-90.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        self.snapshot3.addPixmap(QtGui.QPixmap(".\images\icons8-camera-100.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         
         self.snapshot_button_graph_3 = QtWidgets.QPushButton(self.centralwidget)
         self.snapshot_button_graph_3.setCursor(QtGui.QCursor(QtCore.Qt.SplitVCursor))
@@ -651,7 +663,7 @@ class Ui_MainWindow(object):
         self.signal_color_button_graph_2.setStyleSheet("font: italic 10pt \"Georgia\";\n"
 "font: 12pt \"Georgia\";\n"
 "\n"
-"color: rgb(255, 255, 255);\n"
+"color: rgb(34, 40, 62);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
 "border-radius: 10px;")
@@ -689,9 +701,9 @@ class Ui_MainWindow(object):
         border-radius: 4px;
     }
 """)
-        self.speed_slider_graph_2.setMinimum(5)  # Minimum speed interval (in ms)
-        self.speed_slider_graph_2.setMaximum(50)  # Maximum speed interval (in ms)
-        self.speed_slider_graph_2.setValue(22)  # Default speed interval (in ms)
+        self.speed_slider_graph_2.setMinimum(10)  # Minimum speed interval (in ms)
+        self.speed_slider_graph_2.setMaximum(60)  # Maximum speed interval (in ms)
+        self.speed_slider_graph_2.setValue(40)  # Default speed interval (in ms)
         
         self.gridLayout_2.addWidget(self.speed_slider_graph_2, 3, 1, 1, 1)
         self.gridLayout_2.addWidget(self.speed_label_graph_2, 3, 0, 1, 1)
@@ -789,7 +801,7 @@ class Ui_MainWindow(object):
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
 "border-radius: 15px;")
         snapshot = QtGui.QIcon()
-        snapshot.addPixmap(QtGui.QPixmap("./images/icons8-camera-90.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        snapshot.addPixmap(QtGui.QPixmap("./images/icons8-camera-100.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.snapshot_button.setText("")
         self.snapshot_button.setIcon(snapshot)
         self.snapshot_button.setObjectName("snapshot_button")
@@ -863,7 +875,7 @@ class Ui_MainWindow(object):
         self.connect_online_button_graph_1.setCursor(QtGui.QCursor(QtCore.Qt.SplitVCursor))
         self.connect_online_button_graph_1.setMouseTracking(True)
         self.connect_online_button_graph_1.setStyleSheet("font: italic 10pt \"Georgia\";\n"
-"color: rgb(255, 255, 255);\n"
+"color: rgb(34, 40, 62);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
 "border-radius: 10px;")
@@ -876,7 +888,7 @@ class Ui_MainWindow(object):
         self.open_button_graph_1.setStyleSheet("font: italic 10pt \"Georgia\";\n"
 "font: 12pt \"Georgia\";\n"
 "\n"
-"color: rgb(255, 255, 255);\n"
+"color: rgb(34, 40, 62);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
 "border-radius: 10px;")
@@ -948,7 +960,7 @@ class Ui_MainWindow(object):
         self.nonrectangle_graph_button.setStyleSheet("font: italic 10pt \"Georgia\";\n"
 "font: 12pt \"Georgia\";\n"
 "\n"
-"color: rgb(255, 255, 255);\n"
+"color: rgb(34, 40, 62);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
 "border-radius: 10px;")
@@ -960,7 +972,7 @@ class Ui_MainWindow(object):
         self.export_button.setStyleSheet("font: italic 10pt \"Georgia\";\n"
 "font: 12pt \"Georgia\";\n"
 "\n"
-"color: rgb(255, 255, 255);\n"
+"color: rgb(34, 40, 62);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
 "border-radius: 10px;")

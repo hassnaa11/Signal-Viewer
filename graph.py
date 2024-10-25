@@ -83,7 +83,7 @@ class Graph:
                 self.plot_widget.setXRange(0, window_width * 0.001)   
             else:
                 self.index += 1
-                self.plot_widget.setXRange((current_index - window_width) * 0.001, current_index * 0.001)
+                self.plot_widget.setXRange((min_index - window_width) * 0.001, min_index * 0.001)
 
     def remove_signal(self, name):
         if name in self.signals:

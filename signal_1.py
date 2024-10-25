@@ -38,13 +38,8 @@ class SignalProcessor:
         else:
             return None  
     def get_data(self):
-        """Returns all data of the current signal."""
         return self.data
     
 
     def rewind_graph(self):
-        """Rewind the signal to the beginning and restart plotting."""
-        self.current_index = 0  # Reset the index to the start
-        # Restart the plotting process
-        # self.plot_widget.clear()  # Clear current plot to restart from beginning
-        print("Signal rewound to the beginning.")
+        self.current_index = 0  
