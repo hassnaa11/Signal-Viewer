@@ -18,23 +18,20 @@ from fpdf import FPDF
 from signal_1 import SignalProcessor
 from graph import Graph
 
-class CustomAxis(pg.AxisItem):
-    def tickString(self, value, scale, sigDigits=3):
-        return "{:.3f}".format(value)
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-
-        # self.ui.graph1Widget.graph.plotItem.getAxis('left').setTickSpacing(100, 10)
+        
         self.ui.graph1Widget.graph.plotItem.setLabel("left", "Voltage")
         self.ui.graph1Widget.graph.plotItem.setLabel("bottom", "Time (s)")
         self.ui.graph2Widget.graph_2.plotItem.setLabel("left", "Voltage")
         self.ui.graph2Widget.graph_2.plotItem.setLabel("bottom", "Time (s)")
         self.ui.graph1Widget_3.graph.plotItem.setLabel("left", "Voltage")
         self.ui.graph1Widget_3.graph.plotItem.setLabel("bottom", "Time (s)")
+
 
         self.timer = QtCore.QTimer()
         self.timer2 = QtCore.QTimer()
@@ -50,7 +47,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.graph_1 = Graph(self.ui.graph1Widget.graph)
         self.graph_2 = Graph(self.ui.graph2Widget.graph_2)
-        # self.graph_3=BubbleChartApp(self.ui.graph1Widget_3.graph)
         self.graph1_color = "w"
         self.graph2_color = "w"
         self.signal_processor1 = []
@@ -109,7 +105,6 @@ class MainWindow(QtWidgets.QMainWindow):
         )
 
         self.timer_graph_1 = QtCore.QTimer()
-        # self.timer_graph_1.start(10)
         self.timer_graph_2 = QtCore.QTimer()
         self.speed_graph_1 = 25  # Default speed in ms
         self.speed_graph_2 = 25  # Default speed in ms
@@ -162,7 +157,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.play_button_graph_1.clicked.connect(self.stop_run_graph)
         self.ui.play_button_graph_2.clicked.connect(self.stop_run_graph)
         self.timer2.start(1000)
-        # self.timer2.timeout.connect(self.graph_3.update_graph)
         self.ui.nonrectangle_graph_button.clicked.connect(self.show_non_rectangle_plot)
         self.timer.start(1000)
         self.rect_roi = pg.RectROI([0.1, 0], [0.2, 0.2], pen="r")
@@ -175,27 +169,25 @@ class MainWindow(QtWidgets.QMainWindow):
         if (
             sender_button == self.ui.connect_online_button_graph_1
             and self.first_graph_online_connected
-        ):
-            self.ui.graph1Widget.graph.plotItem.setLabel("left", "Voltage")
+        ): # disconnect graph 1 
+            self.ui.graph1Widget.graph.plotItem.setAxisItems({'left': CustomAxis(orientation='left', format_ticks=False)})
+            self.ui.graph1Widget.graph.plotItem.setLabel("left", "Voltage (v)")
             self.disconnect_online(sender_button)
 
         elif (
             sender_button == self.ui.connect_online_button_graph_2
             and self.second_graph_online_connected
-        ):
-            self.ui.graph2Widget.graph_2.plotItem.setLabel("left", "Voltage")
+        ): # disconnect graph 2
+            self.ui.graph1Widget.graph.plotItem.setAxisItems({'left': CustomAxis(orientation='left', format_ticks=False)})
+            self.ui.graph2Widget.graph_2.plotItem.setLabel("left", "Voltage (v)")
             self.disconnect_online(sender_button)
 
         elif (
             sender_button == self.ui.connect_online_button_graph_1
-        ) and self.graph1_on:  # clicked on connect_online_button_graph_1
-            self.ui.graph1Widget.graph.plotItem.setLabel("left", "Distance (km)")
-            # self.ui.graph1Widget.graph.setAxisItems({'left': CustomAxis(orientation='left')})
-            # self.ui.graph1Widget.graph.plotItem.setAxisItems({'left': CustomAxis(orientation='left')})
-            # self.ui.graph1Widget.graph.setAxisItems({'left': CustomAxis(orientation='left')})
-            # self.ui.graph1Widget.graph.plotItem.getAxis('left').setTickSpacing(100, 10)
-# Set the label for the left axis after setting the custom axis
-            # self.ui.graph1Widget.graph.plotItem.setLabel("left", "Distance (km)")
+        ) and self.graph1_on:  # connect graph 1
+
+            self.ui.graph1Widget.graph.plotItem.setAxisItems({'left': CustomAxis(orientation='left', format_ticks=True)})
+            self.ui.graph1Widget.graph.plotItem.setLabel('left', 'Distance (km)')
             
             self.first_graph_online_connected = True
             self.ui.open_button_graph_1.setDisabled(True)
@@ -205,7 +197,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
             if self.collector_online.running == False:
                 self.collector_online.start()
-                self.collector_online.data_fetched.connect(self.update_online_plot)
 
             if not self.is_timer_graph1_connected:
                 self.is_timer_graph1_connected = True
@@ -216,8 +207,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         elif (
             sender_button == self.ui.connect_online_button_graph_2
-        ) and self.graph2_on:  # clicked on connect_online_button_graph_2
-            self.ui.graph2Widget.graph_2.plotItem.setLabel("left", "Distance (km)")
+        ) and self.graph2_on: # connect graph 2
+            self.ui.graph2Widget.graph_2.plotItem.setAxisItems({'left': CustomAxis(orientation='left', format_ticks=True)})
+            self.ui.graph2Widget.graph_2.plotItem.setLabel('left', 'Distance (km)')
             self.second_graph_online_connected = True
             self.ui.open_button_graph_2.setDisabled(True)
             self.ui.open_button_graph_2.setGraphicsEffect(
@@ -226,7 +218,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
             if self.collector_online.running == False:
                 self.collector_online.start()
-                self.collector_online.data_fetched.connect(self.update_online_plot)
 
             if not self.is_timer_graph2_connected:
                 self.is_timer_graph2_connected = True
@@ -288,15 +279,12 @@ class MainWindow(QtWidgets.QMainWindow):
             y_axis = []
             for item in self.data["Data_Y"]:
                 item = float(item.replace(",", ""))
-                # item = (f"{(item / (13377 * 10**9)):.6f}")
-                # y_axis.append(item / (133777 * 10**9))
                 y_axis.append(item)
                 
             # format time
             time_data = self.data["Time"]
             if len(time_data) > 0:
                 time_data = [self.format_time_string(t) for t in time_data]
-                # first time as the base
                 base_time = datetime.strptime(time_data[0], "%H:%M:%S") 
                 x_axis = [(
                         datetime.strptime(self.format_time_string(t), "%H:%M:%S")
@@ -437,8 +425,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timer_graph_1.timeout.connect(self.update_graph1)
             self.is_timer_graph1_connected = True
         self.timer_graph_1.setInterval(self.speed_graph_1)
-        # if not self.timer_graph_1.isActive():
-        #     self.timer_graph_1.start()
+        if not self.timer_graph_1.isActive():
+            self.timer_graph_1.start()
 
     def open_file_graph_2(self):
 
@@ -485,8 +473,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timer_graph_2.timeout.connect(self.update_graph2)
             self.is_timer_graph2_connected = True
         self.timer_graph_2.setInterval(self.speed_graph_2)
-        # if not self.timer_graph_2.isActive():
-        #     self.timer_graph_2.start()
+        if not self.timer_graph_2.isActive():
+            self.timer_graph_2.start()
 
     def update_graph1(self):
         window_width = 500
@@ -506,13 +494,22 @@ class MainWindow(QtWidgets.QMainWindow):
         visibility = self.ui.visible_checkBox_graph_1.isChecked()
         for graph in self.graphs_1:
             graph.toggle_signal_visibility(selected_name, visibility)
+        
+        min_index_graph1 = self.signal_processor1[0].current_index
+            
         for signal_processor_1, graph in zip(self.signal_processor1, self.graphs_1):
             data = signal_processor_1.get_next_data(self.window_width)
+            
+            # to make min x range with min x for min signal in the graph
+            if(signal_processor_1.current_index < min_index_graph1):
+                min_index_graph1 = signal_processor_1.current_index
+
             if data is not None:
                 self.is_file1_opened = True
                 graph.update_graph(
                     data,
-                    signal_processor_1.current_index,
+                    signal_processor_1.current_index, 
+                    min_index_graph1,
                     window_width,
                     self.graph1_color,
                 )
@@ -535,13 +532,22 @@ class MainWindow(QtWidgets.QMainWindow):
         visibility = self.ui.visible_checkBox_graph_2.isChecked()
         for graph in self.graphs_2:
             graph.toggle_signal_visibility(selected_name, visibility)
+            
+        min_index_graph2 = self.signal_processor2[0].current_index 
+            
         for signal_processor_2, graph in zip(self.signal_processor2, self.graphs_2):
             data = signal_processor_2.get_next_data(self.window_width)
+            
+            # to make min x range with min x for min signal in the graph
+            if(signal_processor_2.current_index < min_index_graph2): 
+                min_index_graph2 = signal_processor_2.current_index
+            
             if data is not None:
                 self.is_file2_opened = True
                 graph.update_graph(
                     data,
                     signal_processor_2.current_index,
+                    min_index_graph2,
                     window_width,
                     self.graph2_color,
                 )
@@ -592,8 +598,12 @@ class MainWindow(QtWidgets.QMainWindow):
         # for x limit
         if graph_number == 1:
             self.max_index_graph1 = 0
+            Graph.ymin = 0
+            Graph.ymax = 0 
         else:
             self.max_index_graph2 = 0
+            Graph.ymin = 0
+            Graph.ymax = 0 
 
         # rewind on link
         if self.isLinked:
@@ -628,25 +638,25 @@ class MainWindow(QtWidgets.QMainWindow):
         self.speed_graph_1 = value
         # set the speed
         self.timer_graph_1.setInterval(self.speed_graph_1)
-        if not self.timer_graph_1.isActive():
-            self.timer_graph_1.start()
+        # if not self.timer_graph_1.isActive():
+        #     self.timer_graph_1.start()
 
         if self.isLinked:
             self.timer_graph_2.setInterval(self.speed_graph_1)
-            if not self.timer_graph_2.isActive():
-                self.timer_graph_2.start()
+            # if not self.timer_graph_2.isActive():
+            #     self.timer_graph_2.start()
 
     def set_speed_graph_2(self, value):
         print("set speed graph 2")
         self.speed_graph_2 = value
         self.timer_graph_2.setInterval(self.speed_graph_2)
-        if not self.timer_graph_2.isActive():
-            self.timer_graph_2.start()
+        # if not self.timer_graph_2.isActive():
+        #     self.timer_graph_2.start()
 
         if self.isLinked:
             self.timer_graph_1.setInterval(self.speed_graph_2)
-            if not self.timer_graph_1.isActive():
-                self.timer_graph_1.start()
+            # if not self.timer_graph_1.isActive():
+            #     self.timer_graph_1.start()
 
     def move_signal_from_graph1_to_graph2(self):
         selected_name = self.ui.signals_name_combo_box_graph_1.currentText()
@@ -1434,7 +1444,18 @@ class MainWindow(QtWidgets.QMainWindow):
             # Disconnect the slider signal to prevent further changes during glue operation
             self.ui.slider_glue.valueChanged.disconnect(self.on_slider_change)
 
+class CustomAxis(pg.AxisItem):
+    def __init__(self, orientation, format_ticks):
+        super().__init__(orientation) 
+        self.format_ticks = format_ticks 
 
+    def tickStrings(self, values, scale, spacing):
+        if self.format_ticks:
+            return ["{:.2f}".format(value / 1e9) for value in values]  
+        else:
+            return ["{:.2f}".format(value) for value in values]
+
+    
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
     ui = MainWindow()
