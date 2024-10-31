@@ -134,8 +134,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.move_signal_from_graph1_to_graph2
         )
 
-        self.ui.reset_button_graph_1.clicked.connect(lambda: self.rewind_graph(1))
-        self.ui.reset_button_graph_2.clicked.connect(lambda: self.rewind_graph(2))
+        # self.ui.reset_button_graph_1.clicked.connect(lambda: self.rewind_graph(1))
+        # self.ui.reset_button_graph_2.clicked.connect(lambda: self.rewind_graph(2))
 
         self.ui.link_button.clicked.connect(self.link_graphs)
         self.ui.link_play_button.clicked.connect(self.stop_run_graph)
@@ -174,7 +174,46 @@ class MainWindow(QtWidgets.QMainWindow):
         self.timer.start(1000)
         self.rect_roi = pg.RectROI([0, -0.25], [0.2, 1.4], pen='r')
         self.rect_roi.addScaleHandle([1, 0.5], [0.5, 0.5]) 
-        self.selected_range = None        
+        self.selected_range = None 
+
+
+        # Assuming you have your QTableWidget and other elements setup here...
+        # self.resetButton = QPushButton("OFF", self)
+        # self.resetButton.setStyleSheet("background-color: red; color: white;")
+        self.ui.reset_button_graph_1.clicked.connect(self.toggle_reset_button)
+        self.ui.reset_button_graph_2.clicked.connect(self.toggle_reset_button)
+        self.is_reset_on = False
+
+    def toggle_reset_button(self):
+        """Toggle the reset button state between ON and OFF."""
+        self.is_reset_on = not self.is_reset_on
+        if self.is_reset_on:
+            self.ui.reset_button_graph_1.setText("ON")
+            self.ui.reset_button_graph_1.setStyleSheet("background-color: green; color: white;")
+        else:
+            self.ui.reset_button_graph_1.setText("OFF")
+            self.ui.reset_button_graph_1.setStyleSheet("background-color: red; color: white;")
+
+    def rewind_graph(self, graph_number):
+        if graph_number == 1:
+            self.max_index_graph1 = 0
+        else:
+            self.max_index_graph2 = 0
+
+        # Rewind on link
+        if self.isLinked:
+            for signal_processor in self.signal_processor1:
+                signal_processor.current_index = 0
+            for signal_processor in self.signal_processor2:
+                signal_processor.current_index = 0
+
+        # For individual graphs
+        elif graph_number == 1:
+            selected_name = self.ui.signals_name_combo_box_graph_1.currentText()
+            if selected_name:
+                signal_processor = self.signals_graph_1[selected_name][0]
+                signal_processor.rewind_graph()
+                print(f"Rewound signal '{selected_name}' on Graph 1")       
 
     def connect_online(self):
         sender_button = self.sender()
@@ -521,6 +560,11 @@ class MainWindow(QtWidgets.QMainWindow):
                     window_width,
                     self.graph1_color,
                 )
+            else:
+                # Check if rewind is ON and reset the signal to the beginning
+                if self.is_reset_on:
+                    signal_processor_1.rewind_graph()
+                    print(f"Auto rewinding signal '{selected_name}' on Graph 1")
 
     def update_graph2(self):
         window_width = 500
@@ -595,40 +639,40 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             print("No signal selected to change color.")
 
-    def rewind_graph(self, graph_number):
-        # for x limit
-        if graph_number == 1:
-            self.max_index_graph1 = 0
-        else:
-            self.max_index_graph2 = 0
+    # def rewind_graph(self, graph_number):
+    #     # for x limit
+    #     if graph_number == 1:
+    #         self.max_index_graph1 = 0
+    #     else:
+    #         self.max_index_graph2 = 0
 
-        # rewind on link
-        if self.isLinked:
-            for signal_processor in self.signal_processor1:
-                signal_processor.current_index = 0
-            for signal_processor in self.signal_processor2:
-                signal_processor.current_index = 0
-        # for graph1
-        elif graph_number == 1:
-            # take the selected name
-            selected_name = self.ui.signals_name_combo_box_graph_1.currentText()
-            if selected_name:
-                # take the signal processor of the selected signal
-                signal_processor = self.signals_graph_1[selected_name][0]
-                # rewind_graph() a method in signal_1.py
-                signal_processor.rewind_graph()
-                # udpate the signal afyer rewinding
-                # if not self.is_timer_graph1_connected:
-                #     self.timer_graph_1.timeout.connect(self.update_graph1)
-                print(f"Rewound signal '{selected_name}' on Graph 1")
+    #     # rewind on link
+    #     if self.isLinked:
+    #         for signal_processor in self.signal_processor1:
+    #             signal_processor.current_index = 0
+    #         for signal_processor in self.signal_processor2:
+    #             signal_processor.current_index = 0
+    #     # for graph1
+    #     elif graph_number == 1:
+    #         # take the selected name
+    #         selected_name = self.ui.signals_name_combo_box_graph_1.currentText()
+    #         if selected_name:
+    #             # take the signal processor of the selected signal
+    #             signal_processor = self.signals_graph_1[selected_name][0]
+    #             # rewind_graph() a method in signal_1.py
+    #             signal_processor.rewind_graph()
+    #             # udpate the signal afyer rewinding
+    #             # if not self.is_timer_graph1_connected:
+    #             #     self.timer_graph_1.timeout.connect(self.update_graph1)
+    #             print(f"Rewound signal '{selected_name}' on Graph 1")
 
-        elif graph_number == 2:
-            selected_name = self.ui.signals_name_combo_box_graph_2.currentText()
-            if selected_name:
-                signal_processor = self.signals_graph_2[selected_name][0]
-                signal_processor.rewind_graph()
-                # self.timer_graph_2.start()
-                print(f"Rewound signal '{selected_name}' on Graph 2")
+    #     elif graph_number == 2:
+    #         selected_name = self.ui.signals_name_combo_box_graph_2.currentText()
+    #         if selected_name:
+    #             signal_processor = self.signals_graph_2[selected_name][0]
+    #             signal_processor.rewind_graph()
+    #             # self.timer_graph_2.start()
+    #             print(f"Rewound signal '{selected_name}' on Graph 2")
 
     def set_speed_graph_1(self, value):
         print("set speed graph 1")
