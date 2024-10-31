@@ -5,7 +5,9 @@ class Graph:
     previous_signal_pointss = [] 
     previous_x_dataa = []
     index = 1
-    max_index = 0
+    ymax = 0
+    ymin = 0 
+    
     def __init__(self, graph_widget):
         self.plot_widget = graph_widget
         self.plot_widget.setBackground('#2D324D')
@@ -16,7 +18,7 @@ class Graph:
         self.legend = self.plot_widget.addLegend()
         self.signal_processor = None
         self.second_time = False
-
+        
 
     def add_signal(self, name, color):
         if name not in self.signals: 
@@ -39,12 +41,11 @@ class Graph:
             self.signals[name]['item'].setVisible(visible)
             self.signals[name]['visible'] = visible
 
-    def update_graph(self, data, current_index, window_width, graph1_color):
+    def update_graph(self, data, current_index,min_index, window_width, graph1_color):
         
         if data is not None:
             if self.zero_line not in self.plot_widget.items():
                 self.plot_widget.addItem(self.zero_line)   
-            
             
             new_x_data = np.arange(current_index, current_index + len(data)) * 0.001
             previous_x_data = np.arange(0, current_index) * 0.001
@@ -67,16 +68,20 @@ class Graph:
                     y_data = np.append(y_data, data)
 
                     signal_info['item'].setData(x=previous_x_data, y=data)
-
             
-            if current_index < 500 and self.index == 1:
+            # y range limit
+            if Graph.ymax < max(data):
+                Graph.ymax = max(data)
+            elif Graph.ymin > min(data):
+                Graph.ymin = min(data)    
+            self.plot_widget.setLimits( yMin=Graph.ymin, yMax=Graph.ymax)
+            
+            # x range that viewed
+            if min_index < 500 :
                 self.plot_widget.setXRange(0, window_width * 0.001)   
-                self.plot_widget.setLimits( yMin=min(data), yMax=max(data))              
-
             else:
                 self.index += 1
-                self.plot_widget.setXRange((current_index - window_width) * 0.001, current_index * 0.001)
-                self.plot_widget.setLimits( yMin=min(data), yMax=max(data))
+                self.plot_widget.setXRange((min_index - window_width) * 0.001, min_index * 0.001)
 
     def remove_signal(self, name):
         if name in self.signals:

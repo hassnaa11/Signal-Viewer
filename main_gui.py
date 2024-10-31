@@ -187,9 +187,9 @@ class Ui_MainWindow(object):
         border-radius: 4px;
     }
 """)
-        self.speed_slider_graph_1.setMinimum(5)  # Minimum speed interval (in ms)
-        self.speed_slider_graph_1.setMaximum(50)  # Maximum speed interval (in ms)
-        self.speed_slider_graph_1.setValue(22)  # Default speed interval (in ms)
+        self.speed_slider_graph_1.setMinimum(10)  # Minimum speed interval (in ms)
+        self.speed_slider_graph_1.setMaximum(60)  # Maximum speed interval (in ms)
+        self.speed_slider_graph_1.setValue(40)  # Default speed interval (in ms)
         
         self.gridLayout.addWidget(self.speed_slider_graph_1, 3, 1, 1, 1)
         self.gridLayout.addWidget(self.speed_label_graph_1, 3, 0, 1, 1)
@@ -381,11 +381,11 @@ class Ui_MainWindow(object):
         self.reset_button_graph_2.setCursor(QtGui.QCursor(QtCore.Qt.SplitVCursor))
         self.reset_button_graph_2.setMouseTracking(True)
         self.reset_button_graph_2.setStyleSheet("font: italic 10pt \"Georgia\";\n"
-"color: rgb(255, 255, 255);\n"
-"background-color: rgb(120, 207, 233);\n"
+"color: rgb(34, 40, 62);\n"
+"background-color:rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
 "border-radius: 15px;")
-        self.reset_button_graph_2.setText("")
+        self.reset_button_graph_2.setText("ON")
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap("./images/icons8-pause-100.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.reset_button_graph_2.setIcon(icon2)
@@ -523,32 +523,62 @@ class Ui_MainWindow(object):
         self.comboBox = QtWidgets.QComboBox(self.frame_3)
         self.comboBox.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.comboBox.setMouseTracking(True)
-        self.comboBox.setStyleSheet("background-color: rgb(120, 207, 233);\n"
-"buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 10px;")
+        self.comboBox.setStyleSheet("""
+            QComboBox {
+                background-color: #3c4a68;  /* Background color */
+                color: white;  /* Text color */
+                border: 1px solid #3c4a68;
+                border-radius: 10px;  /* Rounded corners */
+                padding: 5px;
+                font-size: 14px;
+                box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);  /* Shadow */
+            }
+            QComboBox::drop-down {
+                border: none;
+                border-radius: 10px;  /* Rounded corners for the arrow box */
+                background-color: #3c4a68;
+                width: 30px;
+            }
+            QComboBox::down-arrow {
+                # image: url(down_arrow.png);  /* You can replace this with a custom arrow icon */
+                width: 15px;
+                height: 15px;
+            }
+            QComboBox::down-arrow {
+                border: none;
+                color: white;  /* Arrow color */
+            }
+            QComboBox QAbstractItemView {
+                border: 1px solid #3c4a68;
+                selection-background-color: #5a6478;  /* Selected item background color */
+                background-color: #3c4a68;  /* Dropdown background color */
+                color: white;
+                border-radius: 10px;
+            }
+        """)
         self.comboBox.setObjectName("comboBox")
         self.gridLayout_3.addWidget(self.comboBox, 0, 1, 1, 1)
         self.comboBox.addItems(["linear", "cubic"])
         
-        self.visible_checkBox_graph_3 = QtWidgets.QCheckBox(self.frame_3)
-        self.visible_checkBox_graph_3.setStyleSheet("color: rgb(255, 255, 255);\n"
-"font: italic 10pt \"Georgia\";\n"
-"\n"
-"")
-        self.visible_checkBox_graph_3.setObjectName("visible_checkBox_graph_3")
-        self.gridLayout_3.addWidget(self.visible_checkBox_graph_3, 1, 0, 1, 1)
-        self.signal_color_button_graph_3 = QtWidgets.QPushButton(self.frame_3)
-        self.signal_color_button_graph_3.setCursor(QtGui.QCursor(QtCore.Qt.SplitVCursor))
-        self.signal_color_button_graph_3.setMouseTracking(True)
-        self.signal_color_button_graph_3.setStyleSheet("font: italic 10pt \"Georgia\";\n"
-"font: 12pt \"Georgia\";\n"
-"\n"
-"color: rgb(255, 255, 255);\n"
-"background-color: rgb(120, 207, 233);\n"
-"buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
-"border-radius: 10px;")
-        self.signal_color_button_graph_3.setObjectName("signal_color_button_graph_3")
-        self.gridLayout_3.addWidget(self.signal_color_button_graph_3, 1, 1, 1, 1)
+#         self.visible_checkBox_graph_3 = QtWidgets.QCheckBox(self.frame_3)
+#         self.visible_checkBox_graph_3.setStyleSheet("color: rgb(255, 255, 255);\n"
+# "font: italic 10pt \"Georgia\";\n"
+# "\n"
+# "")
+#         self.visible_checkBox_graph_3.setObjectName("visible_checkBox_graph_3")
+#         self.gridLayout_3.addWidget(self.visible_checkBox_graph_3, 1, 0, 1, 1)
+#         self.signal_color_button_graph_3 = QtWidgets.QPushButton(self.frame_3)
+#         self.signal_color_button_graph_3.setCursor(QtGui.QCursor(QtCore.Qt.SplitVCursor))
+#         self.signal_color_button_graph_3.setMouseTracking(True)
+#         self.signal_color_button_graph_3.setStyleSheet("font: italic 10pt \"Georgia\";\n"
+# "font: 12pt \"Georgia\";\n"
+# "\n"
+# "color: rgb(255, 255, 255);\n"
+# "background-color: rgb(120, 207, 233);\n"
+# "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
+# "border-radius: 10px;")
+#         self.signal_color_button_graph_3.setObjectName("signal_color_button_graph_3")
+#         self.gridLayout_3.addWidget(self.signal_color_button_graph_3, 1, 1, 1, 1)
         self.horizontalLayout_6.addWidget(self.frame_3)
         self.gridLayout_4.addLayout(self.horizontalLayout_6, 7, 0, 1, 1)
         self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
@@ -701,9 +731,9 @@ class Ui_MainWindow(object):
         border-radius: 4px;
     }
 """)
-        self.speed_slider_graph_2.setMinimum(5)  # Minimum speed interval (in ms)
-        self.speed_slider_graph_2.setMaximum(50)  # Maximum speed interval (in ms)
-        self.speed_slider_graph_2.setValue(22)  # Default speed interval (in ms)
+        self.speed_slider_graph_2.setMinimum(10)  # Minimum speed interval (in ms)
+        self.speed_slider_graph_2.setMaximum(60)  # Maximum speed interval (in ms)
+        self.speed_slider_graph_2.setValue(40)  # Default speed interval (in ms)
         
         self.gridLayout_2.addWidget(self.speed_slider_graph_2, 3, 1, 1, 1)
         self.gridLayout_2.addWidget(self.speed_label_graph_2, 3, 0, 1, 1)
@@ -850,11 +880,11 @@ class Ui_MainWindow(object):
         self.reset_button_graph_1.setCursor(QtGui.QCursor(QtCore.Qt.SplitVCursor))
         self.reset_button_graph_1.setMouseTracking(True)
         self.reset_button_graph_1.setStyleSheet("font: italic 10pt \"Georgia\";\n"
-"color: rgb(255, 255, 255);\n"
+"color: rgb(34, 40, 62);\n"
 "background-color: rgb(120, 207, 233);\n"
 "buttoon-shadow: 2px 2px 5px rgb(0, 0, 0);\n"
 "border-radius: 15px;")
-        self.reset_button_graph_1.setText("")
+        self.reset_button_graph_1.setText("ON")
         self.reset_button_graph_1.setIcon(icon6)
         self.reset_button_graph_1.setObjectName("reset_button_graph_1")
         self.horizontalLayout.addWidget(self.reset_button_graph_1)
@@ -912,9 +942,9 @@ class Ui_MainWindow(object):
         self.play_button_graph_2.setMinimumSize(30, 30)
         
         self.reset_button_graph_1.setSizePolicy(sizePolicy_button)
-        self.reset_button_graph_1.setMinimumSize(30, 30)
+        self.reset_button_graph_1.setMinimumSize(80, 30)
         self.reset_button_graph_2.setSizePolicy(sizePolicy_button)
-        self.reset_button_graph_2.setMinimumSize(30, 30)
+        self.reset_button_graph_2.setMinimumSize(80, 30)
        
         self.move_to_graph_2_button.setSizePolicy(sizePolicy_button)
         self.move_to_graph_2_button.setMinimumSize(30, 30)
@@ -1074,7 +1104,7 @@ class Ui_MainWindow(object):
         self.open_button_graph_2.setWhatsThis(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#ffffff;\">)pen</span></p></body></html>"))
         self.open_button_graph_2.setText(_translate("MainWindow", "Open"))
         self.signal_name_label_graph_3.setText(_translate("MainWindow", "Signal\'s Name"))
-        self.visible_checkBox_graph_3.setText(_translate("MainWindow", "Visible"))
+        # self.visible_checkBox_graph_3.setText(_translate("MainWindow", "Visible"))
         self.graph_Label_3.setText(_translate("MainWindow", "Graph 3"))
         self.snapshot_button_graph_3.setToolTip("")
         self.snapshot_button_graph_3.setWhatsThis(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#ffffff;\">)pen</span></p></body></html>"))

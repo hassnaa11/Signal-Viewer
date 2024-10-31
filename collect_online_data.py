@@ -10,8 +10,6 @@ from PyQt5 import QtCore
 online_data_dict = {"Data_Y": [], "Time": []}
 
 class CollectOnlineData(QtCore.QThread):
-    data_fetched = QtCore.pyqtSignal()    
-    
     def __init__(self):
         super().__init__()
         self.driver = None
@@ -60,6 +58,5 @@ class CollectOnlineData(QtCore.QThread):
             with open("online_data.json", "w") as file:
                 json.dump(online_data_dict, file)
             print(online_data_dict)
-            self.data_fetched.emit()    
         else:
             print("failed to add data")
