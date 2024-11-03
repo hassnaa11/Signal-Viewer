@@ -77,8 +77,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.graph2_end_x=None
         self.graph2_start_y =None
         self.graph2_end_y=None
-        self.cutted_signal_color_graph1='w'
-        self.cutted_signal_color_graph2='w'
+        # self.cutted_signal_color_graph1='w'
+        # self.cutted_signal_color_graph2='w'
      
         # Connect buttons to their respective functions
         self.ui.open_button_graph_1.clicked.connect(self.open_file_graph_1)
@@ -164,6 +164,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.reset_button_graph_2.clicked.connect(lambda: self.toggle_reset_button(2))
         self.is_reset_on = True
         self.is_reset_on2 = True
+        
+        self.ui.visible_checkBox_graph_1.clicked.connect(self.update_graph1)
+        self.ui.visible_checkBox_graph_2.clicked.connect(self.update_graph2)
 
     def toggle_reset_button(self, graph_number):
         if graph_number == 1:
@@ -990,12 +993,22 @@ class MainWindow(QtWidgets.QMainWindow):
         self.non_rectangle_plot.show()
 
     def select_graph_to_cut_2(self):
+        selected_name = self.ui.signals_name_combo_box_graph_2.currentText()
+        if selected_name in self.signals_graph_2:
+            signal_processor, graph2, plot_item2 = self.signals_graph_2[selected_name]
+
         if self.is_file2_opened == True:
+            self.rect_roi = pg.RectROI([graph2.start, -0.25], [0.3, 1.4], pen='r')
             self.ui.graph2Widget.graph_2.addItem(self.rect_roi)
             self.ui.select_button_graph_2.clicked.connect(self.on_select_2)
 
     def select_graph_to_cut(self):
+        selected_name = self.ui.signals_name_combo_box_graph_1.currentText()
+        if selected_name in self.signals_graph_1:
+            signal_processor, graph1, plot_item2 = self.signals_graph_1[selected_name]
+
         if self.is_file1_opened == True:
+            self.rect_roi = pg.RectROI([graph1.start, -0.25], [0.3, 1.4], pen='r')
             self.ui.graph1Widget.graph.addItem(self.rect_roi)
             self.ui.select_button_graph_1.clicked.connect(self.on_select)
             
@@ -1010,8 +1023,14 @@ class MainWindow(QtWidgets.QMainWindow):
         top = pos.y() 
         bottom = pos.y() + size[1]  
         print(f"Rectangle bounds - Left: {left}, Right: {right}, Top: {top}, Bottom: {bottom}")
-        x_data = self.graph_1.previous_x_dataa  
-        y_data = self.graph_1.previous_signal_pointss  
+        
+        selected_name = self.ui.signals_name_combo_box_graph_1.currentText()
+        if selected_name in self.signals_graph_1:
+            signal_processor, graph1, plot_item2 = self.signals_graph_1[selected_name]
+
+        
+        x_data = graph1.previous_x_dataa  
+        y_data = graph1.previous_signal_pointss  
         left_idx = 0
         right_idx = 0
 
@@ -1063,8 +1082,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.zero_line = pg.InfiniteLine(angle=0, pos=0, pen=pg.mkPen('r', width=1, style=pg.QtCore.Qt.DashLine))
         self.ui.graph1Widget_3.graph.addItem(self.zero_line)
-
-        self.graph1_plot= self.ui.graph1Widget_3.graph.plot(self.graph1_filtered_x, self.graph1_filtered_y, pen=pg.mkPen(self.cutted_signal_color_graph1, width=1))
+        
+        self.cutted_color1 = graph1.signals[selected_name]['item'].opts['pen'].color()
+        self.graph1_plot= self.ui.graph1Widget_3.graph.plot(self.graph1_filtered_x, self.graph1_filtered_y, pen=pg.mkPen(self.cutted_color1, width=1))
 
         self.selected_range = (left, right, top, bottom)
         print(f"Selected range: {self.selected_range}")
@@ -1078,9 +1098,14 @@ class MainWindow(QtWidgets.QMainWindow):
         bottom = pos.y() + size[1] 
 
         print(f"Rectangle bounds - Left: {left}, Right: {right}, Top: {top}, Bottom: {bottom}")
+        selected_name = self.ui.signals_name_combo_box_graph_2.currentText()
+        if selected_name in self.signals_graph_2:
+            signal_processor, graph2, plot_item2 = self.signals_graph_2[selected_name]
 
-        x_data = self.graph_2.previous_x_dataa 
-        y_data = self.graph_2.previous_signal_pointss
+        
+        x_data = graph2.previous_x_dataa  
+        y_data = graph2.previous_signal_pointss  
+
         left_idx = 0
         right_idx = 0
         for i, x in enumerate(x_data):
@@ -1122,9 +1147,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.zero_line = pg.InfiniteLine(angle=0, pos=0, pen=pg.mkPen('r', width=1, style=pg.QtCore.Qt.DashLine))
         self.ui.graph1Widget_3.graph.addItem(self.zero_line)
+        self.cutted_color2 = graph2.signals[selected_name]['item'].opts['pen'].color()
 
-
-        self.graph2_plot=self.ui.graph1Widget_3.graph.plot(self.graph2_filtered_x, self.graph2_filtered_y, pen=pg.mkPen(self.cutted_signal_color_graph2, width=1))
+        self.graph2_plot=self.ui.graph1Widget_3.graph.plot(self.graph2_filtered_x, self.graph2_filtered_y, pen=pg.mkPen(self.cutted_color2, width=1))
         
 
     def on_slider_change(self, value):
@@ -1136,7 +1161,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.x_shifted = [x + self.total_shifed_glue_slider for x in self.graph1_filtered_x]
         # Clear the previous plot before re-plotting
         self.graph1_plot.clear()  # Clear the previous plot
-        self.graph1_plot = self.ui.graph1Widget_3.graph.plot(self.x_shifted, self.graph1_filtered_y, pen=pg.mkPen(self.cutted_signal_color_graph1, width=1))
+        self.graph1_plot = self.ui.graph1Widget_3.graph.plot(self.x_shifted, self.graph1_filtered_y, pen=pg.mkPen(self.cutted_color1, width=1))
 
         self.graph1_end_x = self.x_shifted[-1]
         self.graph1_start_x = self.x_shifted[0]
@@ -1240,9 +1265,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.ui.graph1Widget_3.graph.clear()
 
-            self.ui.graph1Widget_3.graph.plot(graph1_non_overlap_x, graph1_non_overlap_y, pen=pg.mkPen(self.cutted_signal_color_graph1, width=1))
+            self.ui.graph1Widget_3.graph.plot(graph1_non_overlap_x, graph1_non_overlap_y, pen=pg.mkPen(self.cutted_color1, width=1))
             self.ui.graph1Widget_3.graph.plot(overlap_x, averaged_y, pen=pg.mkPen('w', width=1))  # Overlap in white
-            self.ui.graph1Widget_3.graph.plot(graph2_non_overlap_x, graph2_non_overlap_y, pen=pg.mkPen(self.cutted_signal_color_graph2, width=1))
+            self.ui.graph1Widget_3.graph.plot(graph2_non_overlap_x, graph2_non_overlap_y, pen=pg.mkPen(self.cutted_color2, width=1))
             self.ui.slider_glue.valueChanged.disconnect(self.on_slider_change)
 
 class CustomAxis(pg.AxisItem):

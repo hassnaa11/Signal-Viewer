@@ -2,8 +2,8 @@ import pyqtgraph as pg
 import numpy as np
 
 class Graph:
-    previous_signal_pointss = [] 
-    previous_x_dataa = []
+     
+    
     index = 1
     ymax = 0
     ymin = 0 
@@ -18,6 +18,10 @@ class Graph:
         self.legend = self.plot_widget.addLegend()
         self.signal_processor = None
         self.second_time = False
+        self.previous_x_dataa = []
+        self.previous_signal_pointss = []
+        self.start = 0
+        self.end = 1
         
 
     def add_signal(self, name, color):
@@ -78,9 +82,11 @@ class Graph:
             
             # x range that viewed
             if min_index < 500 :
+                self.start = 0
                 self.plot_widget.setXRange(0, window_width * 0.001)   
             else:
                 self.index += 1
+                self.start = (min_index - window_width) * 0.001
                 self.plot_widget.setXRange((min_index - window_width) * 0.001, min_index * 0.001)
 
     def remove_signal(self, name):
