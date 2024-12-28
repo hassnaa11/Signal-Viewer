@@ -1,0 +1,9 @@
+PyQt5
+pyqtgraph
+scipy
+numpy
+matplotlib
+pandas
+fpdf
+selenium
+webdriver-manager
