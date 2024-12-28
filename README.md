@@ -46,14 +46,16 @@ https://github.com/user-attachments/assets/88527858-7eb5-452d-8d95-401ef17a8f44
   - Zoom in/out for detailed or overview visualization.
   - Pause, play, or rewind signals.
 
-- **Drag and Drop**: Move signals between graphs seamlessly.
-
 ---
 
 ### 3. Signal Glue
 
 - Combine parts of two signals using interpolation into a third graph.
 - Customize parameters such as window size and gap/overlap.
+
+
+https://github.com/user-attachments/assets/85b74bab-7972-4fc0-bcdc-b76c3b8f50cd
+
 
 ---
 
@@ -81,5 +83,35 @@ git clone https://github.com/hassnaa11/Signal-Viewer.git
 4. Run the program:
 ```bash
 python program.py
-``` 
+```
+
+---
+
+## Contributors
+
+<table align="center" width="100%">
+  <tr>
+    <td align="center" width="33%">
+      <a href="https://github.com/Emaaanabdelazeemm">
+        <img src="https://github.com/Emaaanabdelazeemm.png?size=100" style="width:80%;" alt="Emaaanabdelazeemm"/>
+      </a>
+      <br />
+      <a href="https://github.com/Emaaanabdelazeemm">Emaaanabdelazeemm</a>
+    </td>
+    <td align="center" width="33%">
+      <a href="https://github.com/hassnaa11">
+        <img src="https://github.com/hassnaa11.png?size=100" style="width:80%;" alt="hassnaa11"/>
+      </a>
+      <br />
+      <a href="https://github.com/hassnaa11">hassnaa11</a>
+    </td>
+    <td align="center" width="33%">
+      <a href="https://github.com/shahdragab89">
+        <img src="https://github.com/shahdragab89.png?size=100" style="width:80%;" alt="shahdragab89"/>
+      </a>
+      <br />
+      <a href="https://github.com/shahdragab89">shahdragab89</a>
+    </td>
+  </tr>
+</table>
 
