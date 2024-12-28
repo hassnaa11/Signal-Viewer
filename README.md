@@ -1,7 +1,10 @@
 # Multi-Channel Signal Viewer
 
-This project involves developing a **desktop application** using Python and Qt to visualize and manipulate multi-port, multi-channel medical signals. The application is tailored for ICU environments, offering real-time interaction, advanced signal manipulation, and reporting features.
+## Overview
 
+The **Multi-Channel Signal Viewer** is a desktop application developed using **Python** and **Qt**. The application is designed for **real-time visualization** and manipulation of medical signals such as **ECG**, **EMG**, and **EEG**. This project is particularly targeted at environments like **ICUs** where healthcare professionals need to continuously monitor and analyze multiple medical signals from various sources.
+
+The tool provides **multi-port** functionality, allowing multiple signals to be viewed and manipulated simultaneously. It also supports advanced features such as **signal linking**, **real-time playback**, **signal glueing**, and **report generation**.
 
 https://github.com/user-attachments/assets/37e83417-947d-4947-868d-e2aa1467ed8d
 
@@ -14,7 +17,6 @@ https://github.com/user-attachments/assets/37e83417-947d-4947-868d-e2aa1467ed8d
 
 - **Load and Display Signals**:
   - Browse and open any signal file from the PC.
-  - Support for various signal types (e.g., ECG, EMG, EEG) with examples of normal and abnormal signals.
   - Ability to connect to a website that streams real-time signals for plotting.
   
 
@@ -39,8 +41,7 @@ https://github.com/user-attachments/assets/88527858-7eb5-452d-8d95-401ef17a8f44
 
 - **Cine Mode**: Real-time signal playback similar to ICU monitors.
 - **User Controls**:
-  - Change signal color.
-  - Add labels or titles.
+  - Change signal color and label.
   - Show/hide specific signals.
   - Scroll/Pan in any direction.
   - Zoom in/out for detailed or overview visualization.
