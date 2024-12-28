@@ -2,3 +2,5 @@
 __pycache__
 .venv
 backup
+collect_data_website.py
+*.ui
